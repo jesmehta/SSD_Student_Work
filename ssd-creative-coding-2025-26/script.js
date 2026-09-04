@@ -105,7 +105,7 @@ const projects = [
   },
       {
     "order": 13,
-    "folder": "Video_Filters",
+    "folder": "Video_filters",
     "student": "VideoFilters",
     "project": "Magic Mirror",
     "thumb": "VideoFilter.png",
