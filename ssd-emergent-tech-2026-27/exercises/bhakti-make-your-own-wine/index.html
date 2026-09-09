@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make Your Own Wine</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    background: #1e1712;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  #page-wrap {
+    width: 100%;
+    max-width: 1180px;
+    padding: 24px 16px;
+    box-sizing: border-box;
+  }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+.mw-root {
+  --cream: #F5EFE2;
+  --cream-2: #EFE7D6;
+  --paper: #FBF7ED;
+  --ink: #2A2118;
+  --ink-soft: #5B5040;
+  --burgundy: #6B1E2B;
+  --burgundy-light: #8C2F3F;
+  --burgundy-dark: #4A121C;
+  --green: #37402E;
+  --green-light: #4F5C3E;
+  --gold: #B8935A;
+  --line: rgba(42,33,24,0.14);
+  font-family: 'Karla', sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(107,30,43,0.05), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(55,64,46,0.06), transparent 45%);
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  min-height: 640px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mw-root * { box-sizing: border-box; }
+
+.mw-loading { align-items: center; justify-content: center; min-height: 300px; }
+.mw-loading-inner { text-align: center; }
+.mw-loading-glass { font-size: 36px; display: inline-block; animation: mw-spin 1.6s ease-in-out infinite; }
+.mw-loading-inner p { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--ink-soft); margin-top: 8px; }
+@keyframes mw-spin { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+.mw-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--line);
+}
+.mw-header-left { display: flex; align-items: center; gap: 12px; }
+.mw-logo { font-size: 28px; }
+.mw-header h1 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: 0.2px; }
+.mw-tagline { font-size: 12px; color: var(--ink-soft); margin: 2px 0 0; font-style: italic; }
+.mw-header-right { display: flex; align-items: center; gap: 18px; }
+.mw-stat { display: flex; flex-direction: column; align-items: flex-end; }
+.mw-stat-num { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--burgundy); line-height: 1; }
+.mw-stat-crime .mw-stat-num { color: var(--green); }
+.mw-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--ink-soft); margin-top: 2px; }
+.mw-icon-btn {
+  background: transparent; border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px; cursor: pointer; color: var(--ink-soft); display: flex;
+}
+.mw-icon-btn:hover { background: var(--cream-2); color: var(--burgundy); }
+
+.mw-personality-strip {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 22px; background: var(--cream-2); border-bottom: 1px solid var(--line);
+  font-size: 12.5px; color: var(--green);
+}
+.mw-personality-strip strong { color: var(--burgundy); font-family: 'Space Mono', monospace; letter-spacing: 0.4px; }
+.mw-personality-desc { color: var(--ink-soft); font-style: italic; }
+
+.mw-mobile-tabs { display: none; }
+
+.mw-main {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+.mw-panel {
+  padding: 16px 18px;
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  max-height: 620px;
+}
+.mw-panel.mw-journal { border-right: none; }
+.mw-panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--burgundy); }
+.mw-panel-head h2 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; margin: 0; }
+
+.mw-search {
+  display: flex; align-items: center; gap: 6px; background: var(--paper);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; margin-bottom: 10px;
+  color: var(--ink-soft);
+}
+.mw-search input { border: none; outline: none; background: transparent; font-size: 13px; width: 100%; color: var(--ink); font-family: 'Karla', sans-serif; }
+
+.mw-cat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.mw-chip {
+  font-size: 11px; padding: 5px 9px; border-radius: 20px; border: 1px solid var(--line);
+  background: var(--paper); cursor: pointer; color: var(--ink-soft); font-family: 'Karla', sans-serif;
+}
+.mw-chip.active { background: var(--burgundy); border-color: var(--burgundy); color: var(--paper); }
+
+.mw-ingredient-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mw-ingredient {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  cursor: grab; text-align: left; font-family: 'Karla', sans-serif;
+}
+.mw-ingredient:hover { border-color: var(--gold); }
+.mw-ingredient.selected { border-color: var(--burgundy); background: var(--cream-2); }
+.mw-ingredient-emoji { font-size: 17px; }
+.mw-ingredient-name { font-size: 12.5px; color: var(--ink); }
+.mw-hint { font-size: 11px; color: var(--ink-soft); margin-top: 12px; font-style: italic; }
+.mw-empty { font-size: 12.5px; color: var(--ink-soft); font-style: italic; padding: 10px 0; }
+
+.mw-winery { display: flex; flex-direction: column; align-items: center; }
+.mw-slots { display: flex; align-items: center; gap: 14px; margin: 6px 0 14px; width: 100%; justify-content: center; }
+.mw-slot {
+  width: 130px; height: 92px; border: 2px dashed var(--line); border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--paper); cursor: pointer; position: relative; padding: 6px;
+}
+.mw-slot.filled { border-style: solid; border-color: var(--burgundy); background: var(--cream-2); }
+.mw-slot-placeholder { font-size: 11.5px; color: var(--ink-soft); text-align: center; }
+.mw-slot-emoji { font-size: 26px; }
+.mw-slot-name { font-size: 11px; margin-top: 4px; text-align: center; color: var(--ink); font-weight: 500; }
+.mw-slot-x { position: absolute; top: 6px; right: 6px; color: var(--ink-soft); }
+.mw-plus { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); }
+
+.mw-ferment-btn {
+  background: var(--burgundy); color: var(--paper); border: none; border-radius: 24px;
+  padding: 11px 26px; font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.4px; display: flex; align-items: center; gap: 6px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.mw-ferment-btn:hover:not(:disabled) { background: var(--burgundy-light); transform: translateY(-1px); }
+.mw-ferment-btn:disabled { background: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+
+.mw-chamber { width: 100%; flex: 1; margin-top: 18px; display: flex; align-items: flex-start; justify-content: center; }
+.mw-swirl { text-align: center; padding-top: 30px; }
+.mw-swirl-glass { font-size: 44px; display: inline-block; animation: mw-swirl-anim 0.9s ease-in-out infinite; }
+@keyframes mw-swirl-anim { 0% { transform: rotate(-10deg) scale(1); } 50% { transform: rotate(10deg) scale(1.08); } 100% { transform: rotate(-10deg) scale(1); } }
+.mw-swirl p { font-size: 12px; color: var(--ink-soft); font-style: italic; margin-top: 10px; }
+.mw-chamber-empty { text-align: center; padding-top: 30px; color: var(--ink-soft); }
+.mw-chamber-empty span { font-size: 34px; display: block; margin-bottom: 8px; opacity: 0.6; }
+.mw-chamber-empty p { font-size: 12.5px; font-style: italic; }
+
+.mw-footer-stats {
+  display: flex; gap: 18px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line);
+  width: 100%; justify-content: center; flex-wrap: wrap;
+}
+.mw-footer-stats div { font-size: 10.5px; color: var(--ink-soft); text-align: center; text-transform: uppercase; letter-spacing: 0.4px; }
+.mw-footer-stats span { display: block; font-family: 'Space Mono', monospace; font-size: 16px; color: var(--burgundy); font-weight: 700; }
+
+.mw-journal-list { display: flex; flex-direction: column; gap: 8px; }
+.mw-journal-card {
+  display: flex; align-items: center; gap: 10px; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 10px; cursor: pointer; text-align: left; width: 100%;
+  font-family: 'Karla', sans-serif;
+}
+.mw-journal-card:hover { border-color: var(--gold); }
+.mw-journal-emoji { font-size: 20px; }
+.mw-journal-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.mw-journal-name { font-size: 12.5px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mw-journal-order { font-family: 'Space Mono', monospace; font-size: 10.5px; color: var(--ink-soft); }
+
+.mw-rarity-tag {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 7px;
+  border-radius: 10px; display: inline-block; margin-top: 3px; width: fit-content;
+  font-family: 'Space Mono', monospace; font-weight: 700;
+}
+.mw-rarity-common { background: #E7E2D3; color: var(--ink-soft); }
+.mw-rarity-uncommon { background: #DCE6D2; color: var(--green); }
+.mw-rarity-rare { background: #F0D9DC; color: var(--burgundy); }
+.mw-rarity-absurd { background: #E7DCF0; color: #5B3585; }
+.mw-rarity-legendary { background: #F5E6C8; color: #8A6612; }
+.mw-rarity-illegal { background: #2A2118; color: #F0D9DC; }
+.mw-rarity-whyexist { background: repeating-linear-gradient(45deg, #F0D9DC, #F0D9DC 4px, #E7DCF0 4px, #E7DCF0 8px); color: var(--burgundy); }
+
+.mw-label {
+  background: var(--paper); border: 1px solid var(--gold); border-radius: 4px;
+  padding: 18px 20px; width: 100%; max-width: 380px; position: relative;
+  box-shadow: 0 2px 0 var(--line);
+}
+.mw-label:before, .mw-label:after {
+  content: ""; position: absolute; top: -1px; bottom: -1px; width: 6px; background: var(--cream);
+}
+.mw-label:before { left: -1px; border-radius: 4px 0 0 4px; }
+.mw-label:after { right: -1px; border-radius: 0 4px 4px 0; }
+.mw-label-standalone { max-width: 460px; }
+
+.mw-first-banner {
+  display: inline-flex; align-items: center; gap: 5px; background: var(--burgundy); color: var(--paper);
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 9px; border-radius: 12px;
+  margin-bottom: 10px; font-family: 'Space Mono', monospace; font-weight: 700;
+}
+.mw-label-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.mw-label-emoji { font-size: 34px; line-height: 1; }
+.mw-label-name { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; margin: 0; }
+.mw-label-from { font-size: 11px; color: var(--ink-soft); margin: 3px 0 0; font-style: italic; }
+.mw-label-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.mw-crime-tag, .mw-hidden-tag {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 7px; border-radius: 10px;
+  font-family: 'Space Mono', monospace; font-weight: 700;
+}
+.mw-crime-tag { background: var(--burgundy-dark); color: #F0D9DC; }
+.mw-hidden-tag { background: var(--green); color: #DCE6D2; }
+.mw-label-taste { font-size: 13.5px; line-height: 1.5; margin: 0 0 6px; color: var(--ink); }
+.mw-label-note { font-size: 12px; color: var(--ink-soft); font-style: italic; margin: 0 0 12px; border-top: 1px dashed var(--line); padding-top: 8px; }
+
+.mw-npc-list { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 10px; margin-bottom: 12px; }
+.mw-npc { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--ink-soft); }
+.mw-npc strong { color: var(--ink); }
+.mw-npc-emoji { font-size: 14px; }
+
+.mw-label-dismiss {
+  width: 100%; background: transparent; border: 1px solid var(--burgundy); color: var(--burgundy);
+  border-radius: 20px; padding: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  font-family: 'Karla', sans-serif;
+}
+.mw-label-dismiss:hover { background: var(--burgundy); color: var(--paper); }
+
+.mw-modal-overlay {
+  position: absolute; inset: 0; background: rgba(42,33,24,0.55); display: flex;
+  align-items: center; justify-content: center; z-index: 10; padding: 20px;
+}
+.mw-modal { position: relative; }
+.mw-modal-close {
+  position: absolute; top: -12px; right: -12px; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 1;
+}
+
+.mw-onboard {
+  background: var(--paper); border-radius: 16px; padding: 34px 30px; max-width: 340px; text-align: center;
+  border: 1px solid var(--line);
+}
+.mw-onboard-glass { font-size: 40px; display: block; margin-bottom: 10px; }
+.mw-onboard h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin: 0 0 16px; }
+.mw-onboard-line { font-size: 14px; margin: 4px 0; color: var(--ink); }
+.mw-onboard-emph { font-family: 'Playfair Display', serif; font-style: italic; color: var(--burgundy); font-size: 16px; }
+.mw-onboard-small { font-size: 12px; color: var(--ink-soft); margin: 16px 0 20px; line-height: 1.5; }
+.mw-onboard .mw-ferment-btn { margin: 0 auto; }
+
+.mw-save-warning {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 20px;
+  padding: 6px 12px; font-size: 11px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px;
+}
+
+@media (max-width: 860px) {
+  .mw-main { grid-template-columns: 1fr; }
+  .mw-panel { border-right: none; border-bottom: 1px solid var(--line); display: none; max-height: none; }
+  .mw-panel.mw-show-mobile { display: block; }
+  .mw-mobile-tabs { display: flex; border-bottom: 1px solid var(--line); }
+  .mw-tab-btn {
+    flex: 1; padding: 10px; background: var(--cream-2); border: none; font-size: 12px;
+    text-transform: capitalize; display: flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--ink-soft); cursor: pointer; font-family: 'Karla', sans-serif;
+  }
+  .mw-tab-btn.active { background: var(--paper); color: var(--burgundy); font-weight: 700; }
+  .mw-header { padding: 14px; flex-wrap: wrap; gap: 10px; }
+  .mw-header h1 { font-size: 18px; }
+  .mw-ingredient-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.exhibition-back{position:fixed;left:14px;bottom:14px;z-index:9999;padding:9px 12px;border:1px solid rgba(245,239,226,.35);border-radius:999px;background:rgba(42,33,24,.88);color:#f5efe2;font:700 11px/1 'Karla',sans-serif;letter-spacing:.07em;text-decoration:none;text-transform:uppercase;backdrop-filter:blur(10px)}
+</style>
+</head>
+<body>
+<a class="exhibition-back" href="../../index.html">← Exhibition</a>
+<div id="page-wrap">
+  <div class="mw-root" id="app">
+
+    <header class="mw-header">
+      <div class="mw-header-left">
+        <span class="mw-logo">🍷</span>
+        <div>
+          <h1>Make Your Own Wine</h1>
+          <p class="mw-tagline">an unqualified winemaking experiment</p>
+        </div>
+      </div>
+      <div class="mw-header-right">
+        <div class="mw-stat">
+          <span class="mw-stat-num" id="stat-total">0</span>
+          <span class="mw-stat-label">wines made</span>
+        </div>
+        <div class="mw-stat mw-stat-crime">
+          <span class="mw-stat-num" id="stat-crimes">0</span>
+          <span class="mw-stat-label">wine crimes</span>
+        </div>
+        <button class="mw-icon-btn" id="reset-btn" title="Reset collection" aria-label="Reset collection">🗑️</button>
+      </div>
+    </header>
+
+    <div class="mw-personality-strip">
+      <span>✨</span>
+      <span>Your winemaking style: <strong id="personality-title"></strong></span>
+      <span class="mw-personality-desc" id="personality-desc"></span>
+    </div>
+
+    <div class="mw-mobile-tabs">
+      <button class="mw-tab-btn" data-action="mobile-tab" data-tab="ingredients">🍇 ingredients</button>
+      <button class="mw-tab-btn" data-action="mobile-tab" data-tab="winery">🧪 winery</button>
+      <button class="mw-tab-btn" data-action="mobile-tab" data-tab="journal">📖 journal</button>
+    </div>
+
+    <main class="mw-main">
+      <section class="mw-panel mw-ingredients" id="panel-ingredients">
+        <div class="mw-panel-head">🍇<h2>Your ingredients</h2></div>
+        <div class="mw-search">
+          🔍
+          <input type="text" id="search-input" placeholder="Search ingredients…">
+        </div>
+        <div class="mw-cat-chips" id="cat-chips"></div>
+        <div class="mw-ingredient-grid" id="ingredient-grid"></div>
+        <p class="mw-hint">Tap two ingredients, or drag them into the winery.</p>
+      </section>
+
+      <section class="mw-panel mw-winery" id="panel-winery">
+        <div class="mw-panel-head">🧪<h2>The winery</h2></div>
+
+        <div class="mw-slots">
+          <div class="mw-slot" id="slot-a" data-action="clear-slot-a"></div>
+          <span class="mw-plus">+</span>
+          <div class="mw-slot" id="slot-b" data-action="clear-slot-b"></div>
+        </div>
+
+        <button class="mw-ferment-btn" id="ferment-btn" disabled>Ferment</button>
+
+        <div class="mw-chamber" id="chamber"></div>
+
+        <div class="mw-footer-stats">
+          <div><span id="footer-total">0</span>wines created</div>
+          <div><span id="footer-crimes">0</span>wine crimes</div>
+          <div><span id="footer-rare">0</span>questionable decisions</div>
+          <div><span id="footer-cats">0</span>categories unlocked</div>
+        </div>
+      </section>
+
+      <section class="mw-panel mw-journal" id="panel-journal">
+        <div class="mw-panel-head">📖<h2>Wine journal</h2></div>
+        <p class="mw-empty" id="journal-empty">Nothing in the cellar yet. Go make something questionable.</p>
+        <div class="mw-journal-list" id="journal-list"></div>
+      </section>
+    </main>
+
+    <div class="mw-modal-overlay" id="modal-overlay" style="display:none;"></div>
+    <div class="mw-save-warning" id="save-warning" style="display:none;">ℹ️ Your collection couldn't be saved this time. It will keep trying.</div>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  wine:     { label: "Wine & the Craft",     emoji: "🍇" },
+  food:     { label: "Food & Flavor",        emoji: "🧄" },
+  emotion:  { label: "Feelings",             emoji: "🧠" },
+  place:    { label: "Places",               emoji: "🏙️" },
+  job:      { label: "Jobs & Institutions",  emoji: "💼" },
+  tech:     { label: "Technology",           emoji: "📱" },
+  culture:  { label: "Internet & Culture",   emoji: "🌐" },
+  science:  { label: "Science",              emoji: "🔬" },
+  animal:   { label: "Animals",              emoji: "🐀" },
+  money:    { label: "Money",                emoji: "💰" },
+  satire:   { label: "Chaos & Society",      emoji: "🔥" },
+  meta:     { label: "???",                  emoji: "🪤" },
+};
+
+// tier 0 = starting items, always available
+// tier 1-4 = unlock progressively as totalDiscoveries grows
+// tier 'output' = only appears once produced by a combination
+const ING = {
+  // --- tier 0: starting kit ---
+  grape:   { name: "Grape",    emoji: "🍇", cat: "wine", tier: 0 },
+  oak:     { name: "Oak",      emoji: "🌳", cat: "wine", tier: 0 },
+  yeast:   { name: "Yeast",    emoji: "🦠", cat: "wine", tier: 0 },
+  water:   { name: "Water",    emoji: "💧", cat: "wine", tier: 0 },
+  time:    { name: "Time",     emoji: "⏳", cat: "wine", tier: 0 },
+
+  // --- tier 1: unlocks after 1st discovery ---
+  monday:    { name: "Monday",    emoji: "😩", cat: "emotion", tier: 1 },
+  garlic:    { name: "Garlic",    emoji: "🧄", cat: "food",    tier: 1 },
+  coffee:    { name: "Coffee",    emoji: "☕", cat: "food",    tier: 1 },
+  cat:       { name: "Cat",       emoji: "🐈", cat: "animal",  tier: 1 },
+  dog:       { name: "Dog",       emoji: "🐕", cat: "animal",  tier: 1 },
+  money:     { name: "Money",     emoji: "💵", cat: "money",   tier: 1 },
+  deadline:  { name: "Deadline",  emoji: "⏰", cat: "emotion", tier: 1 },
+  traffic:   { name: "Traffic",   emoji: "🚗", cat: "place",   tier: 1 },
+  rent:      { name: "Rent",      emoji: "🏠", cat: "money",   tier: 1 },
+  office:    { name: "Office",    emoji: "🏢", cat: "job",     tier: 1 },
+  wifi:      { name: "Wi-Fi",     emoji: "📶", cat: "tech",    tier: 1 },
+  ai:        { name: "AI",        emoji: "🤖", cat: "tech",    tier: 1 },
+  meme:      { name: "Meme",      emoji: "🐸", cat: "culture", tier: 1 },
+
+  // --- tier 2: unlocks after 5 discoveries ---
+  jealousy:      { name: "Jealousy",       emoji: "😒", cat: "emotion", tier: 2 },
+  ex:            { name: "The Ex",         emoji: "💔", cat: "emotion", tier: 2 },
+  corporate:     { name: "Corporate",      emoji: "🏙️", cat: "job",     tier: 2 },
+  ceo:           { name: "CEO",            emoji: "🤵", cat: "job",     tier: 2 },
+  college:       { name: "College",        emoji: "🎓", cat: "job",     tier: 2 },
+  group_project: { name: "Group Project",  emoji: "📋", cat: "job",     tier: 2 },
+  dating_app:    { name: "Dating App",     emoji: "📱", cat: "culture", tier: 2 },
+  crypto:        { name: "Crypto",         emoji: "🪙", cat: "money",   tier: 2 },
+  printer:       { name: "Printer",        emoji: "🖨️", cat: "tech",    tier: 2 },
+  capitalism:    { name: "Capitalism",     emoji: "🏦", cat: "satire",  tier: 2 },
+  nepotism:      { name: "Nepotism",       emoji: "👨‍👩‍👧", cat: "satire", tier: 2 },
+  gravity:       { name: "Gravity",        emoji: "🍎", cat: "science", tier: 2 },
+  dna:           { name: "DNA",            emoji: "🧬", cat: "science", tier: 2 },
+  superhero:     { name: "Superhero",      emoji: "🦸", cat: "culture", tier: 2 },
+  sandbox_game:  { name: "Sandbox Game",   emoji: "🎮", cat: "culture", tier: 2 },
+  anime:         { name: "Anime",          emoji: "🎴", cat: "culture", tier: 2 },
+  k_drama:       { name: "Slow-Burn Drama",emoji: "📺", cat: "culture", tier: 2 },
+  cheese:        { name: "Cheese",         emoji: "🧀", cat: "food",    tier: 2 },
+  chocolate:     { name: "Chocolate",      emoji: "🍫", cat: "food",    tier: 2 },
+  noodles:       { name: "Instant Noodles",emoji: "🍜", cat: "food",    tier: 2 },
+  pizza:         { name: "Pizza",          emoji: "🍕", cat: "food",    tier: 2 },
+  honey:         { name: "Honey",          emoji: "🍯", cat: "food",    tier: 2 },
+  mumbai:        { name: "Mumbai",         emoji: "🚆", cat: "place",   tier: 2 },
+  luxury:        { name: "Luxury",         emoji: "💎", cat: "money",   tier: 2 },
+  tax:           { name: "Tax",            emoji: "🧾", cat: "money",   tier: 2 },
+  hr:            { name: "HR",             emoji: "📎", cat: "job",     tier: 2 },
+  government:    { name: "Government",     emoji: "🏛️", cat: "job",     tier: 2 },
+  bank:          { name: "Bank",           emoji: "🏦", cat: "money",   tier: 2 },
+
+  // --- tier 3: unlocks after 12 discoveries ---
+  dinosaur:          { name: "Dinosaur",           emoji: "🦖", cat: "animal",  tier: 3 },
+  rat:               { name: "Rat",                emoji: "🐀", cat: "animal",  tier: 3 },
+  quantum:           { name: "Quantum Physics",    emoji: "⚛️", cat: "science", tier: 3 },
+  time_travel:       { name: "Time Travel",        emoji: "🌀", cat: "science", tier: 3 },
+  black_hole:        { name: "Black Hole",         emoji: "🕳️", cat: "science", tier: 3 },
+  situationship:     { name: "Situationship",      emoji: "🫥", cat: "emotion", tier: 3 },
+  ghosting:          { name: "Ghosting",           emoji: "👻", cat: "emotion", tier: 3 },
+  red_flag:          { name: "Red Flag",           emoji: "🚩", cat: "satire",  tier: 3 },
+  cancel_culture:    { name: "Cancel Culture",     emoji: "🚫", cat: "satire",  tier: 3 },
+  conspiracy:        { name: "Conspiracy Theory",  emoji: "🕵️", cat: "satire",  tier: 3 },
+  fake_news:         { name: "Fake News",          emoji: "📰", cat: "satire",  tier: 3 },
+  clout:             { name: "Clout",              emoji: "📈", cat: "culture", tier: 3 },
+  scandal:           { name: "Scandal",            emoji: "😱", cat: "satire",  tier: 3 },
+  tax_evasion:       { name: "Tax Evasion",        emoji: "🕳️", cat: "satire",  tier: 3 },
+  pop_star:          { name: "Pop Star",           emoji: "🎤", cat: "culture", tier: 3 },
+  supervillain:      { name: "Supervillain",       emoji: "🦹", cat: "culture", tier: 3 },
+  reality_tv:        { name: "Reality TV",         emoji: "📺", cat: "culture", tier: 3 },
+  battle_royale:     { name: "Battle Royale Game", emoji: "🪂", cat: "culture", tier: 3 },
+  rom_com:           { name: "Rom-Com",            emoji: "🎬", cat: "culture", tier: 3 },
+  existential_crisis:{ name: "Existential Crisis", emoji: "🌌", cat: "emotion", tier: 3 },
+  fomo:              { name: "FOMO",               emoji: "😰", cat: "emotion", tier: 3 },
+  nostalgia:         { name: "Nostalgia",          emoji: "🎞️", cat: "emotion", tier: 3 },
+  boredom:           { name: "Boredom",            emoji: "🥱", cat: "emotion", tier: 3 },
+  heartbreak:        { name: "Heartbreak",         emoji: "💔", cat: "emotion", tier: 3 },
+  chaos:             { name: "Chaos",              emoji: "🌪️", cat: "emotion", tier: 3 },
+  luck:              { name: "Luck",               emoji: "🍀", cat: "emotion", tier: 3 },
+  nothing:           { name: "Nothing",            emoji: "⬜", cat: "emotion", tier: 3 },
+  chili:             { name: "Chili",              emoji: "🌶️", cat: "food",    tier: 3 },
+  mint:              { name: "Mint",                emoji: "🌿", cat: "food",    tier: 3 },
+
+  // --- tier 4: meta, unlocks after 20 discoveries ---
+  this_game:      { name: "This Game",           emoji: "🕹️", cat: "meta", tier: 4 },
+  developer:      { name: "The Developer",       emoji: "🧑‍💻", cat: "meta", tier: 4 },
+  player:         { name: "The Player",          emoji: "🫵", cat: "meta", tier: 4 },
+  copyright:      { name: "Copyright",           emoji: "©️", cat: "meta", tier: 4 },
+  terms:          { name: "Terms & Conditions",  emoji: "📄", cat: "meta", tier: 4 },
+  touch_grass:    { name: "Touch Grass",         emoji: "🌱", cat: "meta", tier: 4 },
+  infinite:       { name: "Infinity",            emoji: "♾️", cat: "meta", tier: 4 },
+  loading_screen: { name: "Loading Screen",      emoji: "⏳", cat: "meta", tier: 4 },
+  ad:             { name: "Advertisement",       emoji: "📢", cat: "meta", tier: 4 },
+  bug:            { name: "Bug",                 emoji: "🐛", cat: "meta", tier: 4 },
+  glitch:         { name: "Glitch",              emoji: "📉", cat: "meta", tier: 4 },
+  error_404:      { name: "Error 404",           emoji: "❓", cat: "meta", tier: 4 },
+  algorithm:      { name: "The Algorithm",       emoji: "🧮", cat: "meta", tier: 4 },
+};
+
+const TIER_THRESHOLDS = { 1: 1, 2: 5, 3: 12, 4: 20 };
+const BASE_IDS = Object.keys(ING).filter((id) => ING[id].tier === 0);
+
+/* ============================================================
+   DATA: COMBINATIONS
+   a, b: input ingredient ids (order-independent)
+   id: output id (also usable as an ingredient once discovered)
+   type: wine | personality | situation | character | place | concept | stupid | crime | meta
+   ============================================================ */
+
+const RAW_COMBOS = [
+  // --- the wine-making chain ---
+  { a:"grape", b:"water", id:"juice", name:"Grape Juice", emoji:"🧃", type:"wine", rarity:"common", cat:"wine",
+    taste:"Innocent. Non-alcoholic. Confused about why it's here.", note:"Pairs well with: being a responsible adult." },
+  { a:"grape", b:"yeast", id:"ferment", name:"Fermenting Grape", emoji:"🫧", type:"wine", rarity:"common", cat:"wine",
+    taste:"Bubbling with quiet ambition.", note:"Give it time." },
+  { a:"ferment", b:"time", id:"wine", name:"Wine", emoji:"🍷", type:"wine", rarity:"common", cat:"wine",
+    taste:"The beginning of every bad decision.", note:"Pairs well with: everything, eventually." },
+  { a:"grape", b:"oak", id:"cabernet", name:"Cabernet (Technically)", emoji:"🍇", type:"wine", rarity:"common", cat:"wine",
+    taste:"You skipped several steps. It shows.", note:"Pairs well with: overconfidence." },
+  { a:"wine", b:"oak", id:"barrel", name:"Barrel Aged", emoji:"🛢️", type:"wine", rarity:"uncommon", cat:"wine",
+    taste:"Woody, confident, slightly pretentious.", note:"Pairs well with: name-dropping the vineyard." },
+  { a:"wine", b:"time", id:"vintage", name:"Vintage", emoji:"📜", type:"wine", rarity:"uncommon", cat:"wine",
+    taste:"Older than your relationship track record.", note:"Pairs well with: nostalgia you didn't earn." },
+  { a:"wine", b:"water", id:"diluted", name:"Sunday Brunch Wine", emoji:"🥂", type:"wine", rarity:"common", cat:"wine",
+    taste:"Barely counts. Socially acceptable at 11am.", note:"Pairs well with: pretending it's still classy." },
+  { a:"honey", b:"water", id:"mead_base", name:"Mead Starter", emoji:"🍯", type:"wine", rarity:"common", cat:"wine",
+    taste:"Sweeter cousin, fewer life choices questioned.", note:"Bees were involved. Bees are not credited." },
+  { a:"wine", b:"wine", id:"wine2", name:"Wine²", emoji:"🍷", type:"meta", rarity:"absurd", cat:"meta", hidden:true,
+    taste:"Mathematically excessive. Emotionally accurate.", note:"Pairs well with: not driving anywhere." },
+
+  // --- wine + everyday life ---
+  { a:"wine", b:"monday", id:"depression", name:"Depression", emoji:"😩", type:"personality", rarity:"uncommon", cat:"emotion",
+    taste:"Heavy. Familiar. Comes back every seven days.", note:"Pairs well with: the couch." },
+  { a:"wine", b:"garlic", id:"why", name:"Why", emoji:"🧄", type:"stupid", rarity:"absurd", cat:"food",
+    taste:"Garlic. Just garlic.", note:"Winemaker's note: we have made a mistake." },
+  { a:"wine", b:"coffee", id:"sommelier_nightmare", name:"Sommelier's Nightmare", emoji:"☕", type:"stupid", rarity:"absurd", cat:"food",
+    taste:"Keeps you awake for the regret.", note:"Best enjoyed at 2am, against your own advice." },
+  { a:"wine", b:"cat", id:"nine_lives", name:"Nine Lives Reserve", emoji:"🐈", type:"character", rarity:"uncommon", cat:"animal",
+    taste:"Judgmental. Knocks things off tables.", note:"Ignores you unless the bottle is empty." },
+  { a:"wine", b:"dog", id:"loyalty_blend", name:"Loyalty Blend", emoji:"🐕", type:"personality", rarity:"common", cat:"animal",
+    taste:"Enthusiastic about everything, discerning about nothing.", note:"Would drink it again immediately." },
+  { a:"wine", b:"money", id:"liquid_asset", name:"Liquid Asset", emoji:"💵", type:"concept", rarity:"uncommon", cat:"money",
+    taste:"Appreciates in value if you never open it.", note:"Financial advisor not included." },
+  { a:"wine", b:"deadline", id:"panic", name:"Panic", emoji:"⏰", type:"situation", rarity:"uncommon", cat:"emotion",
+    taste:"Sharp, urgent, poured too fast.", note:"Pairs well with: a task due in nine minutes." },
+  { a:"wine", b:"traffic", id:"road_rage", name:"Road Rage Reserve", emoji:"🚗", type:"situation", rarity:"rare", cat:"place",
+    taste:"Stuck. Idling. Furious.", note:"Do not pair with driving. Obviously." },
+  { a:"wine", b:"rent", id:"why_bother", name:"Why Bother", emoji:"🏠", type:"situation", rarity:"rare", cat:"money",
+    taste:"Every sip is 30% of your income.", note:"Landlord not included, unfortunately." },
+  { a:"wine", b:"office", id:"water_cooler", name:"Water Cooler Talk", emoji:"🏢", type:"situation", rarity:"common", cat:"job",
+    taste:"Small, repetitive, oddly comforting.", note:"Overheard by everyone, owned by no one." },
+  { a:"wine", b:"wifi", id:"buffering", name:"Buffering", emoji:"📶", type:"stupid", rarity:"common", cat:"tech",
+    taste:"Almost there. Still not there.", note:"Please wait while your evening loads." },
+  { a:"wine", b:"ai", id:"algorithmic_fermentation", name:"Algorithmic Fermentation", emoji:"🤖", type:"concept", rarity:"rare", cat:"tech",
+    taste:"Human involvement: 12%. Confidence: 98%.", note:"Nobody knows what the remaining 2% is doing." },
+  { a:"wine", b:"meme", id:"viral_vintage", name:"Viral Vintage", emoji:"🐸", type:"concept", rarity:"uncommon", cat:"culture",
+    taste:"Popular for nineteen hours, then forgotten.", note:"Already being reposted without credit." },
+  { a:"wine", b:"jealousy", id:"toxic", name:"Toxic", emoji:"😒", type:"personality", rarity:"rare", cat:"emotion",
+    taste:"Bitter, possessive, keeps checking your other bottles.", note:"Please drink responsibly. Please leave responsibly too." },
+  { a:"wine", b:"ex", id:"closure", name:"Closure", emoji:"💔", type:"concept", rarity:"rare", cat:"emotion",
+    taste:"Status: unavailable.", note:"Vintage: you should probably move on." },
+  { a:"wine", b:"corporate", id:"synergy", name:"Synergy™", emoji:"🏙️", type:"concept", rarity:"uncommon", cat:"satire",
+    taste:"Notes of quarterly targets, burnout, and mandatory fun.", note:"Pairs well with: a meeting that could have been an email." },
+  { a:"wine", b:"ceo", id:"golden_parachute", name:"Golden Parachute", emoji:"🤵", type:"concept", rarity:"rare", cat:"satire",
+    taste:"Smooth going down, softer landing than you deserve.", note:"The board approved this unanimously." },
+  { a:"wine", b:"college", id:"all_nighter", name:"All-Nighter Reserve", emoji:"🎓", type:"situation", rarity:"common", cat:"job",
+    taste:"Bitter. Anxious. Somehow still standing at 6am.", note:"Pairs well with: an assignment due in four hours." },
+  { a:"wine", b:"group_project", id:"one_person", name:"One Person Did All The Work", emoji:"📋", type:"situation", rarity:"rare", cat:"job",
+    taste:"Carries the whole bottle by itself.", note:"Everyone else's name is still on the label." },
+  { a:"wine", b:"dating_app", id:"swipe_right", name:"Swipe Right", emoji:"📱", type:"concept", rarity:"uncommon", cat:"culture",
+    taste:"Looks great in photos. Disappointing in person.", note:"Match expires in 24 hours." },
+  { a:"wine", b:"crypto", id:"rug_pull", name:"Rug Pull Reserve", emoji:"🪙", type:"concept", rarity:"rare", cat:"satire", crime:true,
+    taste:"Worth everything, then nothing, in the same sip.", note:"The founder has left the vineyard." },
+  { a:"wine", b:"printer", id:"out_of_cyan", name:"Out of Cyan", emoji:"🖨️", type:"stupid", rarity:"absurd", cat:"tech",
+    taste:"Only pours in black and white.", note:"Please replace the cartridge to continue drinking." },
+  { a:"wine", b:"capitalism", id:"luxury_wine", name:"Luxury", emoji:"💎", type:"concept", rarity:"uncommon", cat:"satire",
+    taste:"Same grapes, better marketing.", note:"You're not just buying wine. You're buying a lifestyle." },
+  { a:"wine", b:"gravity", id:"bottoms_up", name:"Bottoms Up", emoji:"🍎", type:"stupid", rarity:"absurd", cat:"science",
+    taste:"What goes up must come down. So must this glass.", note:"An apple fell into it once. Historic." },
+  { a:"wine", b:"black_hole", id:"everything_eventually", name:"Everything, Eventually", emoji:"🕳️", type:"concept", rarity:"legendary", cat:"science",
+    taste:"Contains all other wines, and also light.", note:"Cannot be un-poured." },
+  { a:"wine", b:"dna", id:"terroir_literally", name:"Terroir (Literally)", emoji:"🧬", type:"concept", rarity:"rare", cat:"science",
+    taste:"The soil, the sun, and now, apparently, genetics.", note:"Ancestry.com is very confused." },
+  { a:"wine", b:"superhero", id:"secret_identity", name:"Secret Identity", emoji:"🦸", type:"character", rarity:"uncommon", cat:"culture",
+    taste:"Regular by day. Bold by night.", note:"Nobody suspects the cape is in the cellar." },
+  { a:"wine", b:"sandbox_game", id:"open_world", name:"Open World Reserve", emoji:"🎮", type:"concept", rarity:"uncommon", cat:"culture",
+    taste:"Technically has a main quest. Nobody's finished it.", note:"You can pour it, but should you?" },
+  { a:"wine", b:"anime", id:"filler_arc", name:"Filler Arc", emoji:"🎴", type:"concept", rarity:"uncommon", cat:"culture",
+    taste:"Twelve episodes. Nothing happens. You finish the bottle anyway.", note:"The real story resumes next season." },
+  { a:"wine", b:"k_drama", id:"slow_burn", name:"Slow Burn", emoji:"📺", type:"situation", rarity:"common", cat:"culture",
+    taste:"Sixteen episodes to admit it's good.", note:"Worth the wait. Mostly." },
+  { a:"wine", b:"cheese", id:"questionable_pairing", name:"Questionable Pairing", emoji:"🧀", type:"stupid", rarity:"absurd", cat:"food",
+    taste:"Technically food. Technically drink. Debatably a decision.", note:"The sommelier has left the building." },
+  { a:"wine", b:"chocolate", id:"dessert_wine", name:"Dessert Wine (Sort Of)", emoji:"🍫", type:"wine", rarity:"common", cat:"food",
+    taste:"Sweet enough to justify a second glass as 'dinner'.", note:"Pairs well with: skipping the main course." },
+  { a:"wine", b:"noodles", id:"three_am_reserve", name:"3 A.M. Reserve", emoji:"🍜", type:"situation", rarity:"common", cat:"food",
+    taste:"Salty, urgent, deeply regretted by morning.", note:"Best enjoyed standing over the sink." },
+  { a:"wine", b:"pizza", id:"friday_night", name:"Friday Night", emoji:"🍕", type:"situation", rarity:"common", cat:"food",
+    taste:"Greasy, warm, exactly what the week needed.", note:"No judgment. It's Friday." },
+  { a:"wine", b:"mumbai", id:"local_train", name:"Local Train Reserve", emoji:"🚆", type:"place", rarity:"uncommon", cat:"place",
+    taste:"Rush hour. Sweat. Determination.", note:"Pairs well with: standing for 47 minutes." },
+  { a:"wine", b:"luxury", id:"because_you_deserve", name:"Because You Deserve It", emoji:"💎", type:"concept", rarity:"uncommon", cat:"money",
+    taste:"You don't. But here we are.", note:"The bottle cost more than the wine inside it." },
+  { a:"wine", b:"tax", id:"withholding", name:"Withholding", emoji:"🧾", type:"stupid", rarity:"rare", cat:"money",
+    taste:"Some of it is missing and nobody will explain why.", note:"File an appeal with the vineyard." },
+  { a:"wine", b:"hr", id:"has_been_noted", name:"This Has Been Noted", emoji:"📎", type:"situation", rarity:"rare", cat:"job",
+    taste:"Calm on the surface. A file is being opened.", note:"Please direct further complaints to the form." },
+  { a:"wine", b:"government", id:"bureaucratic_reserve", name:"Bureaucratic Reserve", emoji:"🏛️", type:"concept", rarity:"rare", cat:"job",
+    taste:"Requires three forms of ID to open.", note:"Approved in triplicate. Delivered in 6-8 weeks." },
+  { a:"wine", b:"bank", id:"overdraft", name:"Overdraft", emoji:"🏦", type:"concept", rarity:"common", cat:"money",
+    taste:"You didn't have enough for this bottle either.", note:"A fee has been applied to this tasting." },
+  { a:"wine", b:"dinosaur", id:"jurassic_reserve", name:"Jurassic Reserve", emoji:"🦖", type:"concept", rarity:"rare", cat:"animal",
+    taste:"Aged for 66 million years. Slightly extinct.", note:"Ask before you clone the next bottle." },
+  { a:"wine", b:"rat", id:"subway_reserve", name:"Subway Reserve", emoji:"🐀", type:"place", rarity:"uncommon", cat:"animal",
+    taste:"Resilient. Unbothered. Somehow thriving.", note:"Found its way in regardless of the lid." },
+  { a:"wine", b:"quantum", id:"superposition", name:"Superposition", emoji:"⚛️", type:"concept", rarity:"legendary", cat:"science",
+    taste:"Simultaneously excellent and undrinkable until observed.", note:"Opening the bottle changes the result." },
+  { a:"wine", b:"time_travel", id:"already_drank_this", name:"Already Drank This", emoji:"🌀", type:"concept", rarity:"rare", cat:"science",
+    taste:"Familiar in a way that shouldn't be possible.", note:"You will order it again next Tuesday." },
+  { a:"wine", b:"situationship", id:"its_complicated", name:"It's Complicated", emoji:"🫥", type:"personality", rarity:"uncommon", cat:"emotion",
+    taste:"Undefined. Exclusive to nobody. Ends without warning.", note:"Neither of you will call it a relationship." },
+  { a:"wine", b:"ghosting", id:"read_no_reply", name:"Read, No Reply", emoji:"👻", type:"situation", rarity:"uncommon", cat:"emotion",
+    taste:"Opened, then never finished.", note:"Left on the counter. Indefinitely." },
+  { a:"wine", b:"red_flag", id:"ignored_warning", name:"Ignored Warning", emoji:"🚩", type:"personality", rarity:"rare", cat:"satire",
+    taste:"The label said 'proceed with caution'. You didn't.", note:"Your friends saw this coming." },
+  { a:"wine", b:"cancel_culture", id:"public_apology", name:"Public Apology", emoji:"🚫", type:"situation", rarity:"rare", cat:"satire",
+    taste:"Insincere, over-produced, posted at 2am.", note:"A follow-up statement is expected within 48 hours." },
+  { a:"wine", b:"conspiracy", id:"the_grapes_knew", name:"The Grapes Knew", emoji:"🕵️", type:"concept", rarity:"rare", cat:"satire",
+    taste:"Nothing is a coincidence. Especially not this vintage.", note:"Wake up, sheeple. It's just fermentation." },
+  { a:"wine", b:"fake_news", id:"unverified_vintage", name:"Unverified Vintage", emoji:"📰", type:"concept", rarity:"uncommon", cat:"satire",
+    taste:"Sources say it's good. Sources are anonymous.", note:"This tasting note has not been fact-checked." },
+  { a:"wine", b:"clout", id:"engagement_farming", name:"Engagement Farming", emoji:"📈", type:"concept", rarity:"uncommon", cat:"culture",
+    taste:"Exists mainly to be photographed.", note:"Tag three friends to unlock the second glass." },
+  { a:"wine", b:"scandal", id:"front_page", name:"Front Page", emoji:"😱", type:"situation", rarity:"rare", cat:"satire",
+    taste:"Explosive. Overexposed. Gone by next week's news cycle.", note:"Sources close to the vineyard declined to comment." },
+  { a:"wine", b:"tax_evasion", id:"offshore_reserve", name:"Offshore Reserve", emoji:"🕳️", type:"crime", rarity:"illegal", cat:"satire", crime:true,
+    taste:"Stored somewhere nobody can find it.", note:"This bottle does not officially exist." },
+  { a:"wine", b:"pop_star", id:"stan_twitter_reserve", name:"Stan Twitter Reserve", emoji:"🎤", type:"character", rarity:"uncommon", cat:"culture",
+    taste:"Passionate defenders. Occasionally unhinged in the replies.", note:"Streaming numbers pending." },
+  { a:"wine", b:"supervillain", id:"morally_grey", name:"Morally Grey", emoji:"🦹", type:"character", rarity:"uncommon", cat:"culture",
+    taste:"Has a tragic backstory and a great cellar.", note:"You kind of understand where it's coming from." },
+  { a:"wine", b:"reality_tv", id:"unscripted", name:"Unscripted", emoji:"📺", type:"concept", rarity:"common", cat:"culture",
+    taste:"Dramatic. Edited for time. Definitely staged.", note:"There will be a reunion tasting." },
+  { a:"wine", b:"battle_royale", id:"last_one_standing", name:"Last One Standing", emoji:"🪂", type:"concept", rarity:"uncommon", cat:"culture",
+    taste:"99 other bottles didn't make it.", note:"Victory tastes surprisingly ordinary." },
+  { a:"wine", b:"rom_com", id:"meet_cute", name:"Meet Cute", emoji:"🎬", type:"situation", rarity:"common", cat:"culture",
+    taste:"Sweet, predictable, weirdly satisfying anyway.", note:"You already know how this ends. Pour it anyway." },
+  { a:"wine", b:"existential_crisis", id:"what_am_i_doing", name:"What Am I Doing", emoji:"🌌", type:"personality", rarity:"rare", cat:"emotion",
+    taste:"Deep, unsettling, best enjoyed alone at 1am.", note:"Raises more questions than it answers." },
+  { a:"wine", b:"fomo", id:"one_more_glass", name:"One More Glass", emoji:"😰", type:"personality", rarity:"common", cat:"emotion",
+    taste:"You weren't going to have another. And yet.", note:"Everyone else is still drinking, apparently." },
+  { a:"wine", b:"nostalgia", id:"remember_when", name:"Remember When", emoji:"🎞️", type:"concept", rarity:"common", cat:"emotion",
+    taste:"Tastes better in memory than it probably did.", note:"Pairs well with: an old photo album." },
+  { a:"wine", b:"boredom", id:"tuesday", name:"Tuesday", emoji:"🥱", type:"stupid", rarity:"absurd", cat:"emotion",
+    taste:"Nothing is happening and this felt like something.", note:"Please find a hobby." },
+  { a:"wine", b:"heartbreak", id:"ugly_cry", name:"Ugly Cry Reserve", emoji:"💔", type:"personality", rarity:"uncommon", cat:"emotion",
+    taste:"Salty. Unfiltered. Comes with a playlist.", note:"Pairs well with: calling someone at midnight. Don't." },
+  { a:"wine", b:"chaos", id:"no_notes_vibes", name:"No Notes, Just Vibes", emoji:"🌪️", type:"personality", rarity:"rare", cat:"emotion",
+    taste:"Unpredictable. Nobody can explain the finish.", note:"The tasting notes were also chaos." },
+  { a:"wine", b:"luck", id:"somehow_still_standing", name:"Somehow Still Standing", emoji:"🍀", type:"concept", rarity:"rare", cat:"emotion",
+    taste:"By all accounts, this should not have worked.", note:"Don't question it. Pour another." },
+  { a:"wine", b:"nothing", id:"something", name:"Something", emoji:"⬜", type:"concept", rarity:"absurd", cat:"emotion", hidden:true,
+    taste:"Undefined, and yet unmistakably present.", note:"We checked. It's definitely something." },
+  { a:"wine", b:"chili", id:"regret_spicy", name:"Regret (Spicy)", emoji:"🌶️", type:"crime", rarity:"absurd", cat:"food", crime:true,
+    taste:"Burns twice. Once now, once tomorrow.", note:"The sommelier has requested a transfer." },
+  { a:"wine", b:"mint", id:"toothpaste_adjacent", name:"Toothpaste Adjacent", emoji:"🌿", type:"crime", rarity:"absurd", cat:"food", crime:true,
+    taste:"Fresh breath. Terrible decisions.", note:"Do not follow with orange juice." },
+
+  // --- meta / hidden ---
+  { a:"wine", b:"this_game", id:"still_playing", name:"You Are Still Playing", emoji:"🕹️", type:"meta", rarity:"absurd", cat:"meta", hidden:true,
+    taste:"It's been a while. No judgment.", note:"One more combination won't hurt." },
+  { a:"wine", b:"developer", id:"unreleased_wine", name:"Unreleased Wine", emoji:"🧑‍💻", type:"meta", rarity:"legendary", cat:"meta", hidden:true,
+    taste:"Was supposed to ship two patches ago.", note:"Currently blocked on a merge conflict." },
+  { a:"wine", b:"player", id:"fourth_wall", name:"Fourth Wall", emoji:"🫵", type:"meta", rarity:"rare", cat:"meta", hidden:true,
+    taste:"Yes, you. Reading this. Pour responsibly.", note:"It knows you're there." },
+  { a:"wine", b:"copyright", id:"lawsuit", name:"Lawsuit", emoji:"©️", type:"crime", rarity:"illegal", cat:"meta", hidden:true, crime:true,
+    taste:"Cease. Desist. Then finish the glass.", note:"This bottle is pending litigation." },
+  { a:"wine", b:"terms", id:"nobody_read_this", name:"Nobody Read This", emoji:"📄", type:"meta", rarity:"rare", cat:"meta", hidden:true,
+    taste:"You agreed to something. Nobody knows what.", note:"Scroll to the bottom to accept the finish." },
+  { a:"wine", b:"touch_grass", id:"vine", name:"Vine", emoji:"🌱", type:"meta", rarity:"absurd", cat:"meta", hidden:true,
+    taste:"Green. Alive. Genuinely outdoors.", note:"Six seconds of screen time, max." },
+  { a:"wine", b:"infinite", id:"infinite_wine", name:"Infinite Wine", emoji:"♾️", type:"meta", rarity:"legendary", cat:"meta", hidden:true,
+    taste:"There is always more in the glass than you poured.", note:"The bottle has not gotten lighter." },
+  { a:"wine", b:"loading_screen", id:"please_wait", name:"Please Wait", emoji:"⏳", type:"meta", rarity:"uncommon", cat:"meta",
+    taste:"Almost ready. Definitely almost ready.", note:"87% complete for the last several minutes." },
+  { a:"wine", b:"ad", id:"sponsored_content", name:"Sponsored Content", emoji:"📢", type:"crime", rarity:"uncommon", cat:"satire", crime:true,
+    taste:"Tastes suspiciously like a paid partnership.", note:"#ad #notreallywine #linkinbio" },
+  { a:"wine", b:"bug", id:"wine_exe", name:"Wine.exe", emoji:"🐛", type:"meta", rarity:"rare", cat:"meta", hidden:true,
+    taste:"Has stopped responding. Try pouring again.", note:"A fix is scheduled for the next patch." },
+  { a:"wine", b:"glitch", id:"corrupted_vintage", name:"Corrupted Vintage", emoji:"📉", type:"meta", rarity:"rare", cat:"meta", hidden:true,
+    taste:"Missing a texture. Tastes like static.", note:"Please reinstall and try again." },
+  { a:"wine", b:"error_404", id:"wine_not_found", name:"Wine Not Found", emoji:"❓", type:"meta", rarity:"rare", cat:"meta", hidden:true,
+    taste:"The page you were looking for does not exist.", note:"It has been moved, deleted, or never poured." },
+  { a:"wine", b:"algorithm", id:"recommended_for_you", name:"Recommended For You", emoji:"🧮", type:"meta", rarity:"uncommon", cat:"meta",
+    taste:"Suspiciously tailored to exactly your taste.", note:"Based on your recent browsing history." },
+
+  // --- concept + concept, no wine required ---
+  { a:"monday", b:"coffee", id:"barely_functional", name:"Barely Functional", emoji:"😩", type:"situation", rarity:"common", cat:"emotion",
+    taste:"Running on fumes and caffeine.", note:"Pairs well with: opening forty browser tabs." },
+  { a:"corporate", b:"ai", id:"layoffs", name:"Layoffs", emoji:"🤖", type:"situation", rarity:"rare", cat:"satire",
+    taste:"Framed as 'efficiency'. Tastes like nothing.", note:"The press release called it exciting." },
+  { a:"capitalism", b:"nepotism", id:"family_business", name:"Family Business", emoji:"👨‍👩‍👧", type:"concept", rarity:"rare", cat:"satire",
+    taste:"Passed down, not earned.", note:"The interview process was a formality." },
+  { a:"crypto", b:"money", id:"get_rich_quick", name:"Get Rich Quick", emoji:"🪙", type:"concept", rarity:"uncommon", cat:"money",
+    taste:"Volatile. Confident. Probably fine.", note:"Not financial advice." },
+  { a:"dating_app", b:"red_flag", id:"one_date_ghost", name:"Ghosted After One Date", emoji:"👻", type:"situation", rarity:"uncommon", cat:"emotion",
+    taste:"Promising at first. Then radio silence.", note:"The profile has since been deleted." },
+  { a:"deadline", b:"coffee", id:"all_nighter_2", name:"All-Nighter", emoji:"⏰", type:"situation", rarity:"common", cat:"job",
+    taste:"Sharp. Jittery. Due at 9am.", note:"Sleep is a tomorrow problem." },
+  { a:"gravity", b:"black_hole", id:"point_of_no_return", name:"Point Of No Return", emoji:"🕳️", type:"concept", rarity:"rare", cat:"science",
+    taste:"Once you start, you cannot stop.", note:"Not even light escapes this pour." },
+  { a:"cat", b:"dog", id:"chaos_household", name:"Chaos Household", emoji:"🐾", type:"character", rarity:"common", cat:"animal",
+    taste:"Two very different opinions about everything.", note:"Somehow they share a bed." },
+  { a:"ai", b:"algorithm", id:"recursive_loop", name:"Recursive Loop", emoji:"🧮", type:"meta", rarity:"rare", cat:"meta", hidden:true,
+    taste:"Calls itself. Then calls itself again.", note:"Stack overflow imminent." },
+  { a:"money", b:"capitalism", id:"the_point", name:"The Point", emoji:"💰", type:"concept", rarity:"rare", cat:"money",
+    taste:"That's the whole point, actually.", note:"No further notes provided." },
+  { a:"nostalgia", b:"time_travel", id:"rewind", name:"Rewind", emoji:"🌀", type:"concept", rarity:"uncommon", cat:"emotion",
+    taste:"Better the second time, allegedly.", note:"Some things are better left in the past." },
+  { a:"cancel_culture", b:"scandal", id:"pr_crisis", name:"PR Crisis", emoji:"😱", type:"situation", rarity:"rare", cat:"satire",
+    taste:"A statement is being drafted as we speak.", note:"Comments have been limited on this vintage." },
+  { a:"ai", b:"quantum", id:"undefined_behavior", name:"Undefined Behavior", emoji:"⚛️", type:"meta", rarity:"legendary", cat:"meta", hidden:true,
+    taste:"Nobody can explain what this is doing.", note:"It works. Do not ask why." },
+];
+
+/* ============================================================
+   BUILD RUNTIME ITEM TABLE (ingredients + combo outputs)
+   ============================================================ */
+
+function sortedKey(a, b) {
+  return [a, b].sort().join("|");
+}
+
+const ALL_ITEMS = { ...ING };
+const COMBO_MAP = {};
+RAW_COMBOS.forEach((c) => {
+  ALL_ITEMS[c.id] = { name: c.name, emoji: c.emoji, cat: c.cat, tier: "output" };
+  COMBO_MAP[sortedKey(c.a, c.b)] = c;
+});
+
+const RARITY_META = {
+  common:    { label: "Common",              order: 0 },
+  uncommon:  { label: "Uncommon",            order: 1 },
+  rare:      { label: "Rare",                order: 2 },
+  absurd:    { label: "Absurd",              order: 3 },
+  legendary: { label: "Legendary",           order: 4 },
+  illegal:   { label: "Illegal",             order: 5 },
+  whyexist:  { label: "Why Does This Exist?",order: 6 },
+};
+
+/* ============================================================
+   FALLBACK GENERATOR (for combos not predefined)
+   ============================================================ */
+
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+const FALLBACK_TEMPLATES = [
+  (a, b) => ({ name: `${b.name} O'Clock`, note: "Somehow it's always time for this." }),
+  (a, b) => ({ name: `${a.name}-Adjacent`, note: `Legally distinct from ${a.name}.` }),
+  (a, b) => ({ name: `Bottled ${b.name}`, note: "We don't know how either." }),
+  (a, b) => ({ name: `${a.name} Reserve`, note: `Aged in the presence of ${b.name}.` }),
+  (a, b) => ({ name: "Untitled Vintage", note: "Working title. Nobody followed up." }),
+  (a, b) => ({ name: `${a.name} × ${b.name}`, note: "A crossover nobody asked for." }),
+  (a, b) => ({ name: "Definitely Wine", note: "We are almost sure." }),
+  (a, b) => ({ name: `${b.name}'s Fault`, note: `${a.name} maintains its innocence.` }),
+  (a, b) => ({ name: "Error: Flavor Not Found", note: "Tastes like a missing dependency." }),
+  (a, b) => ({ name: `${a.name} Regret`, note: "Best served with hindsight." }),
+  (a, b) => ({ name: `Discount ${b.name}`, note: "Same idea. Lower budget." }),
+  (a, b) => ({ name: `${a.name} Situation`, note: "Nobody planned for this outcome." }),
+  (a, b) => ({ name: "Something Happened", note: "We're calling it a feature." }),
+  (a, b) => ({ name: `The ${b.name} Incident`, note: "There is a report. It is confidential." }),
+];
+
+function fallbackResult(idA, idB) {
+  const a = ALL_ITEMS[idA];
+  const b = ALL_ITEMS[idB];
+  const key = sortedKey(idA, idB);
+  const h = hashStr(key);
+  const template = FALLBACK_TEMPLATES[h % FALLBACK_TEMPLATES.length];
+  const { name, note } = template(a, b);
+  const sameCategory = a.cat === b.cat;
+  const isMeta = a.cat === "meta" || b.cat === "meta";
+  let rarity = sameCategory ? "common" : "uncommon";
+  if (h % 13 === 0) rarity = "whyexist";
+  else if (isMeta) rarity = "legendary";
+  else if (h % 5 === 0) rarity = "rare";
+  else if (h % 8 === 0) rarity = "absurd";
+  const crime = h % 9 === 0;
+  const tastes = [
+    "Nobody expected this combination, least of all the wine.",
+    "Tastes exactly how it sounds, which is not a compliment.",
+    "A flavor profile with no prior research to draw on.",
+    "Surprisingly balanced, given the circumstances.",
+    "This should not work. It works.",
+    "The label writes itself, unfortunately.",
+  ];
+  const taste = tastes[h % tastes.length];
+  return {
+    id: "fb_" + key.replace(/\|/g, "_"),
+    name,
+    emoji: h % 2 === 0 ? a.emoji : b.emoji,
+    type: "concept",
+    rarity,
+    cat: sameCategory ? a.cat : "satire",
+    taste,
+    note,
+    crime,
+    hidden: false,
+    generated: true,
+  };
+}
+
+/* ============================================================
+   NPCS
+   ============================================================ */
+
+const NPCS = [
+  { id:"chef", name:"The Chef", emoji:"👨‍🍳",
+    lines:["Needs a food pairing. Or an apology.","I would not serve this to a paying customer.","Actually? This works.","This has ruined my palate for the evening.","Where's the cheese course.","Send it back to the kitchen."] },
+  { id:"sommelier", name:"The Sommelier", emoji:"🍷",
+    lines:["Notes of ambition and poor decision-making.","A confident, if confused, vintage.","I detect... regret.","Exceptional bouquet. Questionable choices.","One might describe this as 'brave'.","I'll allow it, but I have concerns."] },
+  { id:"grandma", name:"Grandma", emoji:"👵",
+    lines:["Throw it away.","In my day we just drank tea.","You spent time on this?","It's fine. Add more sugar.","This is why you're single.","Bring it to Sunday dinner. I'll judge it there."] },
+  { id:"scientist", name:"The Scientist", emoji:"🧪",
+    lines:["This should not legally be called wine.","Fascinating. Terrifying. Fascinating.","I have several concerns.","The data does not support drinking this.","Peer review pending.","We are still waiting on the ethics approval."] },
+  { id:"manager", name:"Corporate Manager", emoji:"🧑‍💼",
+    lines:["Let's circle back on this deliverable.","This adds real synergy to the portfolio.","Can we put this in the Q3 deck?","I'll loop in Legal.","This is a game-changer, actually.","Per my last email, I love this."] },
+  { id:"vampire", name:"The Vampire", emoji:"🧛",
+    lines:["Interesting.","I've had worse. In 1666.","Not blood, but I respect the effort.","This has... character.","I'll allow it.","Bold choice. I like bold."] },
+  { id:"professor", name:"The Professor", emoji:"🎓",
+    lines:["The subtext here is remarkable.","One could write a thesis on this.","Historically significant. Debatably drinkable.","I'd cite this, if I could explain it.","Ten pages, please, on why this exists.","This raises more questions than it answers."] },
+];
+
+function reactionsFor(result, comboKey) {
+  const h = hashStr(comboKey + "|npc");
+  const idxA = h % NPCS.length;
+  let idxB = (h >> 3) % NPCS.length;
+  if (idxB === idxA) idxB = (idxB + 1) % NPCS.length;
+  const picks = [NPCS[idxA], NPCS[idxB]];
+  return picks.map((npc, i) => {
+    let line;
+    if (result.crime && npc.id === "scientist") line = "This should not legally exist.";
+    else if (result.rarity === "legendary" && npc.id === "professor") line = "This will be studied for generations.";
+    else if (result.rarity === "illegal" && npc.id === "manager") line = "I never saw this. Also, please sign this NDA.";
+    else line = npc.lines[hashStr(comboKey + npc.id + i) % npc.lines.length];
+    return { name: npc.name, emoji: npc.emoji, line };
+  });
+}
+
+/* ============================================================
+   PERSONALITY SYSTEM
+   ============================================================ */
+
+const PERSONALITY_TYPES = [
+  { id:"criminal",  title:"WINE CRIMINAL",        desc:"You've committed multiple wine crimes. No regrets." },
+  { id:"unhinged",  title:"UNHINGED",              desc:"You combine things that were never meant to meet." },
+  { id:"scientific",title:"SUSPICIOUSLY SCIENTIFIC",desc:"Every experiment starts with a hypothesis and ends with wine." },
+  { id:"online",    title:"CHRONICALLY ONLINE",    desc:"Your winery runs on internet culture and questionable references." },
+  { id:"pretentious",title:"PRETENTIOUS",          desc:"You chase rarity and vintage. The wine snobs would be proud." },
+  { id:"glitchy",   title:"GLITCH IN THE SYSTEM",  desc:"You keep finding the seams of this game." },
+  { id:"new",       title:"UNDECIDED",             desc:"Still finding your winemaking identity. Keep experimenting." },
+];
+
+function computePersonality(stats, categoryTally) {
+  const total = stats.totalDiscoveries;
+  if (total < 4) return PERSONALITY_TYPES.find((p) => p.id === "new");
+  if (stats.wineCrimes >= 5) return PERSONALITY_TYPES.find((p) => p.id === "criminal");
+  if (stats.hiddenFound >= 3) return PERSONALITY_TYPES.find((p) => p.id === "glitchy");
+  let topCat = null, topCount = 0;
+  Object.entries(categoryTally).forEach(([cat, count]) => {
+    if (count > topCount) { topCat = cat; topCount = count; }
+  });
+  if (topCat === "science") return PERSONALITY_TYPES.find((p) => p.id === "scientific");
+  if (topCat === "culture" || topCat === "tech") return PERSONALITY_TYPES.find((p) => p.id === "online");
+  if (stats.rareOrBetter >= total * 0.5 && total >= 6) return PERSONALITY_TYPES.find((p) => p.id === "pretentious");
+  return PERSONALITY_TYPES.find((p) => p.id === "unhinged");
+}
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+
+const STORAGE_KEY = "wine-game-save-v1";
+
+function emptyState() {
+  return {
+    discovered: {},       // id -> true
+    journal: [],          // array of discovery entries, newest first
+    stats: { totalDiscoveries: 0, wineCrimes: 0, hiddenFound: 0, rareOrBetter: 0 },
+    categoryTally: {},
+    seenOnboarding: false,
+  };
+}
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+
+</script>
+<script>
+
+/* ============================================================
+   PLAIN-JS APP (converted from React)
+   ============================================================ */
+
+const ICONS = {
+  sparkles: "✨", book: "📖", search: "🔍", x: "✕",
+  grape: "🍇", flask: "🧪", chevron: "›", trash: "🗑️", info: "ℹ️"
+};
+
+const STORAGE_KEY_LS = "wine-game-save-v1";
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_LS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { game: { ...emptyState(), ...parsed }, hadSave: true, seen: !!parsed.seenOnboarding };
+    }
+  } catch (e) {}
+  return { game: emptyState(), hadSave: false, seen: false };
+}
+
+let saveTimer = null;
+function saveGame() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_LS, JSON.stringify(state.game));
+      if (state.saveError) { state.saveError = false; renderSaveWarning(); }
+    } catch (e) {
+      state.saveError = true;
+      renderSaveWarning();
+    }
+  }, 400);
+}
+
+const boot = loadGame();
+
+const state = {
+  game: boot.game,
+  slotA: null,
+  slotB: null,
+  isFermenting: false,
+  lastResult: null,
+  search: "",
+  filterCat: "all",
+  mobileTab: "winery",
+  journalEntry: null,
+  showOnboarding: !boot.seen,
+  saveError: false,
+  dragItem: null,
+};
+
+/* ---------- derived data ---------- */
+
+function unlockedIds() {
+  const total = state.game.stats.totalDiscoveries;
+  const ids = new Set(BASE_IDS);
+  Object.keys(ING).forEach((id) => {
+    const tier = ING[id].tier;
+    if (typeof tier === "number" && tier > 0) {
+      const threshold = TIER_THRESHOLDS[tier];
+      if (total >= threshold) ids.add(id);
+    }
+  });
+  Object.keys(state.game.discovered).forEach((id) => ids.add(id));
+  return ids;
+}
+
+function availableIngredients() {
+  return Array.from(unlockedIds())
+    .map((id) => ({ id, ...ALL_ITEMS[id] }))
+    .filter((it) => it && it.name)
+    .sort((x, y) => x.name.localeCompare(y.name));
+}
+
+function filteredIngredients() {
+  const avail = availableIngredients();
+  return avail.filter((it) => {
+    if (state.filterCat !== "all" && it.cat !== state.filterCat) return false;
+    if (state.search && !it.name.toLowerCase().includes(state.search.toLowerCase())) return false;
+    return true;
+  });
+}
+
+function unlockedCategories() {
+  const cats = new Set();
+  availableIngredients().forEach((it) => cats.add(it.cat));
+  return cats;
+}
+
+function personality() {
+  return computePersonality(state.game.stats, state.game.categoryTally);
+}
+
+/* ---------- actions ---------- */
+
+function selectIngredient(id) {
+  if (state.slotA === null) {
+    state.slotA = id;
+  } else if (state.slotB === null && state.slotA !== id) {
+    state.slotB = id;
+  }
+  renderWinery();
+  renderIngredientsPanel();
+}
+
+function clearSlot(which) {
+  if (which === "a") state.slotA = null;
+  else state.slotB = null;
+  renderWinery();
+  renderIngredientsPanel();
+}
+
+function doFerment() {
+  if (!state.slotA || !state.slotB || state.isFermenting) return;
+  state.isFermenting = true;
+  renderWinery();
+
+  setTimeout(() => {
+    const key = sortedKey(state.slotA, state.slotB);
+    const combo = COMBO_MAP[key];
+    let result = combo ? { ...combo } : fallbackResult(state.slotA, state.slotB);
+
+    const isFirst = !state.game.discovered[result.id];
+    const total = state.game.stats.totalDiscoveries;
+    const entry = {
+      key: `${result.id}-${Date.now()}`,
+      id: result.id,
+      name: result.name,
+      emoji: result.emoji,
+      type: result.type,
+      rarity: result.rarity,
+      cat: result.cat,
+      taste: result.taste,
+      note: result.note,
+      crime: !!result.crime,
+      hidden: !!result.hidden,
+      first: isFirst,
+      order: total + 1,
+      npcReactions: reactionsFor(result, key),
+      ingredients: [ALL_ITEMS[state.slotA]?.name, ALL_ITEMS[state.slotB]?.name],
+    };
+
+    const g = state.game;
+    g.discovered = { ...g.discovered, [result.id]: true };
+    const nextTally = { ...g.categoryTally };
+    nextTally[result.cat] = (nextTally[result.cat] || 0) + 1;
+    const rarityOrder = RARITY_META[result.rarity]?.order ?? 0;
+    g.journal = [entry, ...g.journal].slice(0, 500);
+    g.stats = {
+      totalDiscoveries: g.stats.totalDiscoveries + 1,
+      wineCrimes: g.stats.wineCrimes + (result.crime ? 1 : 0),
+      hiddenFound: g.stats.hiddenFound + (result.hidden ? 1 : 0),
+      rareOrBetter: g.stats.rareOrBetter + (rarityOrder >= 2 ? 1 : 0),
+    };
+    g.categoryTally = nextTally;
+
+    state.lastResult = entry;
+    state.isFermenting = false;
+    state.slotA = null;
+    state.slotB = null;
+
+    saveGame();
+    renderHeader();
+    renderPersonality();
+    renderWinery();
+    renderIngredientsPanel();
+    renderJournal();
+  }, 900);
+}
+
+function dismissOnboarding() {
+  state.showOnboarding = false;
+  state.game.seenOnboarding = true;
+  saveGame();
+  renderModals();
+}
+
+function resetGame() {
+  if (!window.confirm("Clear your entire wine collection? This can't be undone.")) return;
+  try { localStorage.setItem(STORAGE_KEY_LS, JSON.stringify(emptyState())); } catch (e) {}
+  state.game = emptyState();
+  state.lastResult = null;
+  state.slotA = null;
+  state.slotB = null;
+  state.showOnboarding = true;
+  renderAll();
+}
+
+/* ---------- rendering: DiscoveryLabel ---------- */
+
+function discoveryLabelHTML(result, { onCloseAttr, standalone } = {}) {
+  const rarityLabel = RARITY_META[result.rarity]?.label || result.rarity;
+  const fromLine = result.ingredients
+    ? `<p class="mw-label-from">${escapeHtml(result.ingredients[0])} + ${escapeHtml(result.ingredients[1])}</p>`
+    : "";
+  const firstBanner = (result.first && !standalone)
+    ? `<div class="mw-first-banner">${ICONS.sparkles} First discovery</div>` : "";
+  const crimeTag = result.crime ? `<span class="mw-crime-tag">Wine crime</span>` : "";
+  const hiddenTag = result.hidden ? `<span class="mw-hidden-tag">Hidden discovery</span>` : "";
+  const note = result.note ? `<p class="mw-label-note">${escapeHtml(result.note)}</p>` : "";
+  const npcs = result.npcReactions ? `
+    <div class="mw-npc-list">
+      ${result.npcReactions.map(r => `
+        <div class="mw-npc">
+          <span class="mw-npc-emoji">${r.emoji}</span>
+          <span><strong>${escapeHtml(r.name)}:</strong> ${escapeHtml(r.line)}</span>
+        </div>`).join("")}
+    </div>` : "";
+  const dismissBtn = onCloseAttr ? `<button class="mw-label-dismiss" data-action="${onCloseAttr}">Try another combination</button>` : "";
+
+  return `
+    <div class="mw-label${standalone ? " mw-label-standalone" : ""}">
+      ${firstBanner}
+      <div class="mw-label-top">
+        <span class="mw-label-emoji">${result.emoji}</span>
+        <div>
+          <h3 class="mw-label-name">${escapeHtml(result.name)}</h3>
+          ${fromLine}
+        </div>
+      </div>
+      <div class="mw-label-badges">
+        <span class="mw-rarity-tag mw-rarity-${result.rarity}">${escapeHtml(rarityLabel)}</span>
+        ${crimeTag}
+        ${hiddenTag}
+      </div>
+      <p class="mw-label-taste">${escapeHtml(result.taste || "")}</p>
+      ${note}
+      ${npcs}
+      ${dismissBtn}
+    </div>`;
+}
+
+function escapeHtml(s) {
+  if (s === undefined || s === null) return "";
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ---------- rendering: sections ---------- */
+
+function renderHeader() {
+  document.getElementById("stat-total").textContent = state.game.stats.totalDiscoveries;
+  document.getElementById("stat-crimes").textContent = state.game.stats.wineCrimes;
+}
+
+function renderPersonality() {
+  const p = personality();
+  document.getElementById("personality-title").textContent = p.title;
+  document.getElementById("personality-desc").textContent = p.desc;
+}
+
+function renderIngredientsPanel() {
+  const cats = unlockedCategories();
+  const chipsEl = document.getElementById("cat-chips");
+  chipsEl.innerHTML = `
+    <button class="mw-chip${state.filterCat === "all" ? " active" : ""}" data-action="filter-cat" data-cat="all">All</button>
+    ${Object.keys(CATS).filter(c => cats.has(c)).map(c => `
+      <button class="mw-chip${state.filterCat === c ? " active" : ""}" data-action="filter-cat" data-cat="${c}">${CATS[c].emoji} ${escapeHtml(CATS[c].label)}</button>
+    `).join("")}
+  `;
+
+  const items = filteredIngredients();
+  const gridEl = document.getElementById("ingredient-grid");
+  if (items.length === 0) {
+    gridEl.innerHTML = `<p class="mw-empty">No ingredients match. Keep experimenting to unlock more.</p>`;
+  } else {
+    gridEl.innerHTML = items.map(it => `
+      <button class="mw-ingredient${state.slotA === it.id || state.slotB === it.id ? " selected" : ""}"
+        draggable="true" data-action="select-ingredient" data-id="${it.id}" title="${escapeHtml(it.name)}">
+        <span class="mw-ingredient-emoji">${it.emoji}</span>
+        <span class="mw-ingredient-name">${escapeHtml(it.name)}</span>
+      </button>
+    `).join("");
+  }
+}
+
+function slotContentHTML(which) {
+  const id = which === "a" ? state.slotA : state.slotB;
+  if (!id) return `<span class="mw-slot-placeholder">Drop something here</span>`;
+  const it = ALL_ITEMS[id];
+  return `
+    <span class="mw-slot-emoji">${it?.emoji || ""}</span>
+    <span class="mw-slot-name">${escapeHtml(it?.name || "")}</span>
+    <span class="mw-slot-x">${ICONS.x}</span>
+  `;
+}
+
+function renderWinery() {
+  const slotAEl = document.getElementById("slot-a");
+  const slotBEl = document.getElementById("slot-b");
+  slotAEl.className = "mw-slot" + (state.slotA ? " filled" : "");
+  slotBEl.className = "mw-slot" + (state.slotB ? " filled" : "");
+  slotAEl.innerHTML = slotContentHTML("a");
+  slotBEl.innerHTML = slotContentHTML("b");
+
+  const btn = document.getElementById("ferment-btn");
+  btn.disabled = !state.slotA || !state.slotB || state.isFermenting;
+  btn.textContent = state.isFermenting ? "Fermenting…" : "Ferment";
+
+  const chamber = document.getElementById("chamber");
+  if (state.isFermenting) {
+    chamber.innerHTML = `
+      <div class="mw-swirl">
+        <span class="mw-swirl-glass">🍷</span>
+        <p>Something is happening in the bottle…</p>
+      </div>`;
+  } else if (state.lastResult) {
+    chamber.innerHTML = discoveryLabelHTML(state.lastResult, { onCloseAttr: "close-result" });
+  } else {
+    chamber.innerHTML = `
+      <div class="mw-chamber-empty">
+        <span>🍇</span>
+        <p>Combine two things to see what happens.</p>
+      </div>`;
+  }
+
+  document.getElementById("footer-total").textContent = state.game.stats.totalDiscoveries;
+  document.getElementById("footer-crimes").textContent = state.game.stats.wineCrimes;
+  document.getElementById("footer-rare").textContent = state.game.stats.rareOrBetter;
+  document.getElementById("footer-cats").textContent = unlockedCategories().size;
+}
+
+function renderJournal() {
+  const listEl = document.getElementById("journal-list");
+  const emptyEl = document.getElementById("journal-empty");
+  if (state.game.journal.length === 0) {
+    emptyEl.style.display = "";
+    listEl.innerHTML = "";
+    return;
+  }
+  emptyEl.style.display = "none";
+  listEl.innerHTML = state.game.journal.map(entry => `
+    <button class="mw-journal-card" data-action="open-journal-entry" data-key="${entry.key}">
+      <span class="mw-journal-emoji">${entry.emoji}</span>
+      <span class="mw-journal-info">
+        <span class="mw-journal-name">${escapeHtml(entry.name)}</span>
+        <span class="mw-rarity-tag mw-rarity-${entry.rarity}">${escapeHtml(RARITY_META[entry.rarity]?.label || entry.rarity)}</span>
+      </span>
+      <span class="mw-journal-order">#${entry.order}</span>
+    </button>
+  `).join("");
+}
+
+function renderModals() {
+  const overlay = document.getElementById("modal-overlay");
+  if (state.journalEntry) {
+    overlay.style.display = "flex";
+    overlay.innerHTML = `
+      <div class="mw-modal" data-stop="1">
+        <button class="mw-modal-close" data-action="close-journal-entry" aria-label="Close">${ICONS.x}</button>
+        ${discoveryLabelHTML(state.journalEntry, { standalone: true })}
+      </div>`;
+    overlay.onclick = (e) => { if (e.target === overlay) { state.journalEntry = null; renderModals(); } };
+  } else if (state.showOnboarding) {
+    overlay.style.display = "flex";
+    overlay.innerHTML = `
+      <div class="mw-onboard">
+        <span class="mw-onboard-glass">🍇</span>
+        <h2>Make Your Own Wine</h2>
+        <p class="mw-onboard-line">You have grapes.</p>
+        <p class="mw-onboard-line">You have no qualifications.</p>
+        <p class="mw-onboard-line mw-onboard-emph">Good luck.</p>
+        <p class="mw-onboard-small">
+          Combine two ingredients in the winery to discover something new. There is no
+          wrong combination. There are only outcomes.
+        </p>
+        <button class="mw-ferment-btn" data-action="dismiss-onboarding">Start experimenting ${ICONS.chevron}</button>
+      </div>`;
+    overlay.onclick = null;
+  } else {
+    overlay.style.display = "none";
+    overlay.innerHTML = "";
+  }
+}
+
+function renderSaveWarning() {
+  const el = document.getElementById("save-warning");
+  el.style.display = state.saveError ? "flex" : "none";
+}
+
+function renderMobileTabs() {
+  document.querySelectorAll(".mw-tab-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === state.mobileTab);
+  });
+  document.getElementById("panel-ingredients").classList.toggle("mw-show-mobile", state.mobileTab === "ingredients");
+  document.getElementById("panel-winery").classList.toggle("mw-show-mobile", state.mobileTab === "winery");
+  document.getElementById("panel-journal").classList.toggle("mw-show-mobile", state.mobileTab === "journal");
+}
+
+function renderAll() {
+  renderHeader();
+  renderPersonality();
+  renderIngredientsPanel();
+  renderWinery();
+  renderJournal();
+  renderModals();
+  renderSaveWarning();
+  renderMobileTabs();
+}
+
+/* ---------- event wiring ---------- */
+
+document.addEventListener("click", (e) => {
+  const actionEl = e.target.closest("[data-action]");
+  if (!actionEl) return;
+  const action = actionEl.dataset.action;
+
+  if (action === "select-ingredient") {
+    selectIngredient(actionEl.dataset.id);
+  } else if (action === "filter-cat") {
+    state.filterCat = actionEl.dataset.cat;
+    renderIngredientsPanel();
+  } else if (action === "clear-slot-a") {
+    if (state.slotA) clearSlot("a");
+  } else if (action === "clear-slot-b") {
+    if (state.slotB) clearSlot("b");
+  } else if (action === "ferment") {
+    doFerment();
+  } else if (action === "close-result") {
+    state.lastResult = null;
+    renderWinery();
+  } else if (action === "open-journal-entry") {
+    const entry = state.game.journal.find(j => j.key === actionEl.dataset.key);
+    if (entry) { state.journalEntry = entry; renderModals(); }
+  } else if (action === "close-journal-entry") {
+    state.journalEntry = null;
+    renderModals();
+  } else if (action === "dismiss-onboarding") {
+    dismissOnboarding();
+  } else if (action === "reset-game") {
+    resetGame();
+  } else if (action === "mobile-tab") {
+    state.mobileTab = actionEl.dataset.tab;
+    renderMobileTabs();
+  }
+});
+
+document.addEventListener("dragstart", (e) => {
+  const el = e.target.closest("[data-action='select-ingredient']");
+  if (!el) return;
+  state.dragItem = el.dataset.id;
+  e.dataTransfer.effectAllowed = "copy";
+});
+
+function wireSlotDrop() {
+  ["slot-a", "slot-b"].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.addEventListener("dragover", (e) => e.preventDefault());
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (!state.dragItem) return;
+      if (i === 0) state.slotA = state.dragItem;
+      else state.slotB = state.dragItem;
+      state.dragItem = null;
+      renderWinery();
+      renderIngredientsPanel();
+    });
+  });
+}
+
+document.getElementById("search-input").addEventListener("input", (e) => {
+  state.search = e.target.value;
+  renderIngredientsPanel();
+});
+
+document.getElementById("ferment-btn").addEventListener("click", doFerment);
+document.getElementById("reset-btn").addEventListener("click", resetGame);
+
+wireSlotDrop();
+renderAll();
+
+</script>
+</body>
+</html>

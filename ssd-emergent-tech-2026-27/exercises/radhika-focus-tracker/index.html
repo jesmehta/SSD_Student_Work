@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Tracker</title>
+<style>
+  :root {
+    --glow: #00f6ff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #000000;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Start Screen & Character Selection                                  */
+  /* ------------------------------------------------------------------ */
+  #start-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    z-index: 20;
+  }
+
+  #start-screen h1 {
+    color: #eaeaea;
+    font-weight: 300;
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0;
+    text-align: center;
+    max-width: 70vw;
+  }
+
+  .character-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .char-btn {
+    padding: 24px 32px;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--glow);
+    background: rgba(0, 246, 255, 0.05);
+    border: 1px solid var(--glow);
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0, 246, 255, 0.3);
+    transition: all 0.2s ease;
+    text-align: center;
+    min-width: 200px;
+  }
+
+  .char-btn:hover {
+    background: var(--glow);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 246, 255, 0.8);
+    transform: scale(1.05);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Game screen                                                         */
+  /* ------------------------------------------------------------------ */
+  #game-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+  }
+
+  #instructions {
+    position: fixed;
+    top: 8vh;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--glow);
+    font-weight: 300;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    opacity: 0.85;
+    text-shadow: 0 0 8px rgba(0, 246, 255, 0.6);
+    pointer-events: none;
+    z-index: 5;
+    max-width: 80vw;
+  }
+
+  #focus-character {
+    position: fixed;
+    width: 64px; 
+    height: 64px;
+    margin-left: -32px;
+    margin-top: -32px;
+    image-rendering: pixelated; 
+    filter: drop-shadow(0 0 8px rgba(0, 246, 255, 0.4));
+    transition: left 1.3s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+                top 1.3s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+                filter 0.25s ease, transform 0.25s ease;
+    animation: char-breathe 2.2s ease-in-out infinite;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  @keyframes char-breathe {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 246, 255, 0.4)); }
+    50%      { filter: drop-shadow(0 0 16px rgba(0, 246, 255, 0.7)); }
+  }
+
+  #focus-character.focused {
+    filter: drop-shadow(0 0 25px rgba(0, 246, 255, 1));
+    transform: scale(1.15);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Jumpscare Image & Back Button                                       */
+  /* ------------------------------------------------------------------ */
+  #jumpscare-img {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 9999;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
+    color: transparent;
+  }
+
+  #jumpscare-img.active {
+    display: block;
+  }
+
+  #jumpscare-img.shake {
+    animation: violent-shake 0.12s linear infinite;
+  }
+
+  @keyframes violent-shake {
+    0%   { transform: translate(0, 0); }
+    10%  { transform: translate(-18px, -14px) scale(1.05); }
+    20%  { transform: translate(16px, 12px) scale(1.05); }
+    30%  { transform: translate(-14px, 16px) scale(1.05); }
+    40%  { transform: translate(18px, -16px) scale(1.05); }
+    50%  { transform: translate(-12px, -18px) scale(1.05); }
+    60%  { transform: translate(14px, 14px) scale(1.05); }
+    70%  { transform: translate(-16px, -12px) scale(1.05); }
+    80%  { transform: translate(12px, -14px) scale(1.05); }
+    90%  { transform: translate(-18px, 10px) scale(1.05); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* Failsafe in case any image URLs get blocked by their host site */
+  #jumpscare-img.fallback {
+    background-color: #ff0000 !important;
+    content: url('data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='); /* Clear broken image icon */
+  }
+
+  #jumpscare-img.fallback.shake {
+    animation: violent-shake 0.12s linear infinite, fallback-flash 0.15s steps(1) infinite;
+  }
+
+  @keyframes fallback-flash {
+    0%, 100% { background-color: #ff0000; }
+    50%      { background-color: #7a0000; }
+  }
+
+  #back-btn {
+    display: none;
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 32px;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(200, 0, 0, 0.8);
+    border: 1px solid #ff0000;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 10000; 
+    transition: background 0.2s ease;
+  }
+
+  #back-btn.active {
+    display: block;
+  }
+
+  #back-btn:hover {
+    background: rgba(255, 0, 0, 1);
+  }
+</style>
+</head>
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:9999;top:12px;left:12px;padding:8px 12px;background:#111d;color:#fff;border:1px solid #fff5;text-decoration:none;font:12px monospace">← exhibition</a>
+
+  <div id="start-screen">
+    <h1>Choose a character to focus on:</h1>
+    <div class="character-grid">
+      <button class="char-btn" data-char="barbie">Barbie</button>
+      <button class="char-btn" data-char="perry">Perry the Platypus</button>
+      <button class="char-btn" data-char="tom">Tom</button>
+      <button class="char-btn" data-char="bean">Mr. Bean</button>
+    </div>
+  </div>
+
+  <div id="game-screen">
+    <div id="instructions">Follow the character on the screen with your cursor to increase your focus.</div>
+    <canvas id="focus-character" width="64" height="64"></canvas>
+  </div>
+
+  <!-- Jumpscare Image Container -->
+  <img id="jumpscare-img" src="" alt="" draggable="false">
+  <button id="back-btn">Go Back</button>
+  
+  <audio id="jumpscare-audio" src="scream.mp3" preload="auto" loop></audio>
+
+<script>
+// ======================================================================
+// SETTINGS: Jumpscare Images Mapping
+// ======================================================================
+const SETTINGS = {
+  jumpscareImages: {
+    barbie: 'https://madabouthorror.co.uk/wp-content/uploads/2023/02/bad-barbie-4big.jpg',
+    perry: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnBAjf_9jO4ggCNDVwSTWVBVk60hmevmiG-Hcz7mvi43l0GVmDF_f4Tko&s=10',
+    tom: 'https://cdna.artstation.com/p/assets/images/images/020/135/422/large/hashim-fawx-picsart-08-23-01-02-47.jpg?1566505439',
+    bean: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0oBxn8l0zbm9lSaUX8X-IeB6gwgKAzHFMoB-lcqQD6dHF-r178I_fYF4&s=10'
+  }
+};
+
+// ======================================================================
+// PIXEL ART MATRICES (For Tracking Game Only)
+// ======================================================================
+const normalMaps = {
+  barbie: [
+    "00YYYY00",
+    "0YYYYYY0",
+    "0YSSSY00",
+    "0YSBSY00",
+    "00PPP000",
+    "00PPP000",
+    "00S0S000",
+    "00P0P000"
+  ],
+  perry: [
+    "0HHHH000",
+    "HHHHHH00",
+    "0TTTT000",
+    "TWBWBT00",
+    "TTOOOO00",
+    "0TTTTT0O",
+    "0TTTTTOO",
+    "0O00O000"
+  ],
+  tom: [
+    "G00000G0",
+    "GGGGGGG0",
+    "GEB0EB00",
+    "0GGGGG00",
+    "00GGG000",
+    "00G0G0GG",
+    "00G0G00G",
+    "00W0W000"
+  ],
+  bean: [
+    "00BBB000",
+    "0BSSSB00",
+    "00SBS000",
+    "00HRH000",
+    "00HWH000",
+    "00HHH000",
+    "00D0D000",
+    "00B0B000"
+  ]
+};
+
+const colors = {
+  "0": "transparent",
+  "Y": "#F4C430", 
+  "P": "#FF1493", 
+  "S": "#FAD6B1", 
+  "B": "#000000", 
+  "T": "#00A8A8", 
+  "O": "#FF8C00", 
+  "H": "#5C4033", 
+  "G": "#9E9E9E", 
+  "E": "#FFEA00", 
+  "W": "#FFFFFF", 
+  "R": "#D32F2F", 
+  "D": "#424242"
+};
+
+(() => {
+  'use strict';
+
+  const startScreen = document.getElementById('start-screen');
+  const charButtons = document.querySelectorAll('.char-btn');
+  const gameScreen = document.getElementById('game-screen');
+  const instructions = document.getElementById('instructions');
+  
+  const characterEl = document.getElementById('focus-character');
+  const ctxNormal = characterEl.getContext('2d'); 
+  
+  const jumpImg = document.getElementById('jumpscare-img');
+  const jumpAudio = document.getElementById('jumpscare-audio');
+  const backBtn = document.getElementById('back-btn');
+
+  let gameActive = false;
+  let gameEnded = false;
+  let moveIntervalId = null;
+  let jumpTimeoutId = null;
+  let selectedChar = 'barbie'; 
+
+  // Preload all jumpscare images immediately
+  Object.values(SETTINGS.jumpscareImages).forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+
+  // Handle image load failure (displays the flashing red fallback box)
+  jumpImg.addEventListener('error', () => {
+    jumpImg.classList.add('fallback');
+  });
+
+  // ------------------------------------------------------------------
+  // Canvas Drawing Function
+  // ------------------------------------------------------------------
+  function drawPixelArt(charName) {
+    ctxNormal.clearRect(0, 0, 64, 64); 
+    const map = normalMaps[charName];
+    const pixelSize = 8; 
+
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const colorCode = map[row][col];
+        if (colorCode !== "0") {
+          ctxNormal.fillStyle = colors[colorCode];
+          ctxNormal.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+        }
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Movement & Game Logic
+  // ------------------------------------------------------------------
+  const EDGE_MARGIN = 70;
+
+  function moveCharacterToRandomPosition() {
+    if (!gameActive || gameEnded) return;
+    const x = EDGE_MARGIN + Math.random() * (window.innerWidth - EDGE_MARGIN * 2);
+    const y = EDGE_MARGIN + Math.random() * (window.innerHeight - EDGE_MARGIN * 2);
+    characterEl.style.left = x + 'px';
+    characterEl.style.top = y + 'px';
+  }
+
+  function startCharacterMovement() {
+    moveCharacterToRandomPosition();
+    moveIntervalId = setInterval(moveCharacterToRandomPosition, 1800);
+  }
+
+  function stopCharacterMovement() {
+    if (moveIntervalId !== null) {
+      clearInterval(moveIntervalId);
+      moveIntervalId = null;
+    }
+  }
+
+  const FOCUS_RADIUS = 70;
+
+  function handleMouseMove(evt) {
+    if (!gameActive || gameEnded) return;
+    const rect = characterEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dist = Math.hypot(evt.clientX - cx, evt.clientY - cy);
+    characterEl.classList.toggle('focused', dist < FOCUS_RADIUS);
+  }
+
+  window.addEventListener('mousemove', handleMouseMove);
+
+  const MIN_DELAY_MS = 5000;  
+  const MAX_DELAY_MS = 12000; 
+
+  function scheduleJumpscare() {
+    const delay = MIN_DELAY_MS + Math.random() * (MAX_DELAY_MS - MIN_DELAY_MS);
+    jumpTimeoutId = setTimeout(triggerJumpscare, delay);
+  }
+
+  // ------------------------------------------------------------------
+  // Interactions
+  // ------------------------------------------------------------------
+  charButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      if (gameActive || gameEnded) return;
+      
+      selectedChar = e.target.getAttribute('data-char');
+      drawPixelArt(selectedChar);
+
+      // Pre-set the source for the jumpscare image so it's ready
+      jumpImg.src = SETTINGS.jumpscareImages[selectedChar];
+      jumpImg.classList.remove('fallback'); // Reset fallback status
+
+      jumpAudio.volume = 0;
+      jumpAudio.play().catch(() => {});
+
+      startScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+      instructions.style.display = 'block';
+      
+      gameActive = true;
+      startCharacterMovement();
+      scheduleJumpscare();
+    });
+  });
+
+  backBtn.addEventListener('click', () => {
+    jumpImg.classList.remove('active', 'shake');
+    backBtn.classList.remove('active');
+    
+    jumpAudio.pause();
+    jumpAudio.currentTime = 0;
+    jumpAudio.volume = 0; 
+
+    gameEnded = false;
+    gameActive = false;
+    startScreen.style.display = 'flex';
+  });
+
+  function triggerJumpscare() {
+    if (gameEnded) return;
+    gameEnded = true;
+    gameActive = false;
+
+    stopCharacterMovement();
+    window.removeEventListener('mousemove', handleMouseMove);
+
+    gameScreen.style.display = 'none';
+    instructions.style.display = 'none';
+
+    // Show the assigned image URL
+    jumpImg.classList.add('active', 'shake');
+    backBtn.classList.add('active');
+
+    try {
+      jumpAudio.currentTime = 0; 
+      jumpAudio.volume = 1.0; 
+    } catch (e) {}
+  }
+})();
+</script>
+
+</body>
+</html>

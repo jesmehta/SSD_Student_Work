@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BREAKLINE — Rooftop Escape</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#d7d4cd;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+}
+
+#hud{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    color:#181818;
+}
+
+#distance{
+    position:absolute;
+    top:24px;
+    left:28px;
+    font-size:13px;
+    font-weight:bold;
+    letter-spacing:3px;
+}
+
+#status{
+    position:absolute;
+    top:24px;
+    right:28px;
+    font-size:11px;
+    letter-spacing:2px;
+    opacity:.65;
+}
+
+#danger{
+    position:absolute;
+    left:28px;
+    bottom:28px;
+    width:180px;
+    height:4px;
+    background:#aaa8a2;
+}
+
+#dangerFill{
+    height:100%;
+    width:28%;
+    background:#181818;
+    transition:width .15s;
+}
+
+.screen{
+    position:fixed;
+    inset:0;
+    z-index:10;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(213,210,202,.9);
+}
+
+.panel{
+    width:min(650px,90vw);
+    text-align:center;
+    padding:45px;
+}
+
+h1{
+    margin:0;
+    font-size:clamp(65px,12vw,120px);
+    line-height:.78;
+    letter-spacing:-8px;
+    font-weight:900;
+}
+
+h2{
+    margin:28px 0;
+    font-size:12px;
+    letter-spacing:7px;
+}
+
+p{
+    color:#555;
+    line-height:1.7;
+}
+
+.controls{
+    margin-top:28px;
+    color:#666;
+    font-size:11px;
+    line-height:2;
+}
+
+button{
+    margin-top:25px;
+    padding:15px 48px;
+
+    background:#171717;
+    color:#eee;
+
+    border:2px solid #171717;
+
+    font-weight:bold;
+    letter-spacing:3px;
+
+    cursor:pointer;
+}
+
+button:hover{
+    background:#eee;
+    color:#171717;
+}
+
+.hidden{
+    display:none!important;
+}
+
+#mobile{
+    position:fixed;
+    z-index:5;
+
+    bottom:18px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:none;
+    gap:10px;
+}
+
+.mobileButton{
+    width:60px;
+    height:60px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #222;
+    background:rgba(235,232,224,.75);
+
+    font-weight:bold;
+    font-size:20px;
+}
+
+@media(max-width:700px){
+
+    #mobile{
+        display:flex;
+    }
+
+    .panel{
+        padding:25px;
+    }
+}
+</style>
+</head>
+
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:99999;top:12px;left:12px;padding:8px 12px;background:#080b14dd;color:#fff;border:1px solid #fff4;text-decoration:none;font:12px monospace">← exhibition</a>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+
+    <div id="distance">
+        DISTANCE 0000 M
+    </div>
+
+    <div id="status">
+        SECURITY PURSUIT
+    </div>
+
+    <div id="danger">
+        <div id="dangerFill"></div>
+    </div>
+
+</div>
+
+<div id="mobile">
+
+    <div class="mobileButton" id="jumpButton">
+        ↑
+    </div>
+
+    <div class="mobileButton" id="slideButton">
+        ↓
+    </div>
+
+    <div class="mobileButton" id="dashButton">
+        →
+    </div>
+
+</div>
+
+<!-- START -->
+
+<div class="screen" id="startScreen">
+
+    <div class="panel">
+
+        <h1>BREAK</h1>
+        <h1>LINE</h1>
+
+        <h2>ROOFTOP ESCAPE</h2>
+
+        <p>
+            The city is quiet.
+            The system is watching.
+            You have one direction left.
+        </p>
+
+        <p>
+            Run.
+        </p>
+
+        <div class="controls">
+            SPACE / ↑ — JUMP<br>
+            ↓ — SLIDE<br>
+            SHIFT / → — BURST<br>
+            R — RESTART
+        </div>
+
+        <button id="startButton">
+            RUN
+        </button>
+
+    </div>
+
+</div>
+
+<!-- GAME OVER -->
+
+<div class="screen hidden" id="gameOverScreen">
+
+    <div class="panel">
+
+        <h1>CAUGHT</h1>
+
+        <h2>ESCAPE FAILED</h2>
+
+        <p id="result">
+        </p>
+
+        <button id="restartButton">
+            TRY AGAIN
+        </button>
+
+    </div>
+
+</div>
+
+<!-- VICTORY -->
+
+<div class="screen hidden" id="victoryScreen">
+
+    <div class="panel">
+
+        <h1 style="color:#2f7a4f">ESCAPED</h1>
+
+        <h2>DISTRICT BREACHED</h2>
+
+        <p id="victoryResult">
+        </p>
+
+        <button id="victoryRestartButton">
+            RUN AGAIN
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   BREAKLINE
+   Slow / Open Rooftop Edition
+   ========================================================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W = innerWidth;
+let H = innerHeight;
+
+function resize(){
+
+    W = canvas.width = innerWidth;
+    H = canvas.height = innerHeight;
+}
+
+addEventListener("resize",resize);
+
+resize();
+
+/* =========================================================
+   GAME STATE
+   ========================================================= */
+
+let running = false;
+
+let cameraX = 0;
+
+let distance = 0;
+
+/*
+    Set once the player has crossed the finish
+    line. During this window the pursuer's
+    jurisdiction has ended (it freezes in place)
+    and the player keeps running for a couple of
+    seconds before the victory screen appears.
+*/
+
+let escaping = false;
+
+let escapeTimer = 0;
+
+/*
+    Deliberately slow.
+
+    The previous version started around 5.7
+    and climbed toward 9.
+
+    This version stays around 3.8–4.4.
+*/
+
+let speed = 3.8;
+
+const LEVEL_LENGTH = 9000;
+
+let buildings = [];
+let obstacles = [];
+let particles = [];
+
+/* =========================================================
+   PLAYER
+   ========================================================= */
+
+const player = {
+
+    x:220,
+
+    y:0,
+
+    width:28,
+
+    height:62,
+
+    velocityY:0,
+
+    jumps:0,
+
+    state:"run",
+
+    stateTimer:0,
+
+    burstTimer:0,
+
+    invincible:0
+};
+
+/* =========================================================
+   PURSUER
+   ========================================================= */
+
+const pursuer = {
+
+    distance:150,
+
+    x:70,
+
+    y:0,
+
+    width:29,
+
+    height:62,
+
+    velocityY:0,
+
+    jumping:false
+};
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+const keys={};
+
+addEventListener("keydown",e=>{
+
+    keys[e.code]=true;
+
+    if(
+        e.code==="Space" ||
+        e.code==="ArrowUp"
+    ){
+
+        e.preventDefault();
+
+        jump();
+    }
+
+    if(e.code==="ArrowDown"){
+
+        e.preventDefault();
+
+        slide();
+    }
+
+    if(
+        e.code==="ShiftLeft" ||
+        e.code==="ShiftRight" ||
+        e.code==="ArrowRight"
+    ){
+
+        burst();
+    }
+
+    if(e.code==="KeyR"){
+
+        if(!running){
+
+            startGame();
+        }
+    }
+});
+
+addEventListener("keyup",e=>{
+
+    keys[e.code]=false;
+});
+
+/* =========================================================
+   LEVEL GENERATION
+   ========================================================= */
+
+function generateLevel(){
+
+    buildings=[];
+    obstacles=[];
+
+    let x=0;
+
+    while(x < LEVEL_LENGTH + 1200){
+
+        const width =
+            700 +
+            Math.random()*450;
+
+        const roofHeight =
+            440 +
+            Math.random()*55;
+
+        buildings.push({
+            x:x,
+            width:width,
+            roof:roofHeight,
+            color:
+                Math.random() > .5
+                ? "#aaa8a1"
+                : "#b9b6af"
+        });
+
+        /*
+            Sparse obstacles.
+            Never place them near the beginning
+            or end of a rooftop.
+        */
+
+        if(Math.random() < 0.58){
+
+            const count =
+                Math.random() < .82 ? 1 : 2;
+
+            for(let i=0;i<count;i++){
+
+                const position =
+                    x +
+                    220 +
+                    Math.random() *
+                    Math.max(100,width-420);
+
+                const roll=Math.random();
+
+                if(roll < .45){
+
+                    obstacles.push({
+                        type:"crate",
+                        x:position,
+                        width:42,
+                        height:42
+                    });
+
+                }else if(roll < .78){
+
+                    obstacles.push({
+                        type:"bar",
+                        x:position,
+                        width:100,
+                        height:18
+                    });
+
+                }else{
+
+                    obstacles.push({
+                        type:"wall",
+                        x:position,
+                        width:32,
+                        height:78
+                    });
+                }
+            }
+        }
+
+        /*
+            Normal gaps are deliberately small enough
+            to be jumpable.
+        */
+
+        x +=
+            width +
+            70 +
+            Math.random()*100;
+    }
+
+    /*
+        IMPORTANT:
+        Add a guaranteed FINAL ROOFTOP that extends
+        beyond the finish line.
+
+        This prevents the player from ever reaching
+        the generated world's dead end.
+    */
+
+    buildings.push({
+
+        x:LEVEL_LENGTH-300,
+
+        width:1800,
+
+        roof:455,
+
+        color:"#a7a49d",
+
+        final:true
+    });
+
+    /*
+        Remove obstacles from the final section.
+        The player gets a clean run toward the ending.
+    */
+
+    obstacles =
+        obstacles.filter(
+            o => o.x < LEVEL_LENGTH-600
+        );
+}
+
+/* =========================================================
+   ROOF LOOKUP
+   ========================================================= */
+
+function getRoof(worldPosition){
+
+    for(let i=buildings.length-1;i>=0;i--){
+
+        const b=buildings[i];
+
+        if(
+            worldPosition>=b.x &&
+            worldPosition<=b.x+b.width
+        ){
+
+            return b.roof;
+        }
+    }
+
+    return null;
+}
+
+/* =========================================================
+   START GAME
+   ========================================================= */
+
+function startGame(){
+
+    generateLevel();
+
+    running=true;
+
+    cameraX=0;
+
+    distance=0;
+
+    speed=3.8;
+
+    player.x=220;
+
+    player.velocityY=0;
+
+    player.jumps=0;
+
+    player.state="run";
+
+    player.stateTimer=0;
+
+    player.burstTimer=0;
+
+    player.invincible=0;
+
+    pursuer.distance=150;
+
+    pursuer.velocityY=0;
+
+    pursuer.jumping=false;
+
+    escaping=false;
+
+    escapeTimer=0;
+
+    particles=[];
+
+    document
+        .getElementById("startScreen")
+        .classList
+        .add("hidden");
+
+    document
+        .getElementById("gameOverScreen")
+        .classList
+        .add("hidden");
+
+    document
+        .getElementById("victoryScreen")
+        .classList
+        .add("hidden");
+}
+
+/* =========================================================
+   JUMP
+   ========================================================= */
+
+function jump(){
+
+    if(!running)return;
+
+    if(player.jumps<2){
+
+        player.velocityY=-14;
+
+        player.jumps++;
+
+        player.state="jump";
+
+        createDust(
+            player.x,
+            player.y+player.height
+        );
+    }
+}
+
+/* =========================================================
+   SLIDE
+   ========================================================= */
+
+function slide(){
+
+    if(!running)return;
+
+    const roof=
+        getRoof(
+            player.x+
+            player.width/2
+        );
+
+    if(
+        roof!==null &&
+        player.state!=="jump"
+    ){
+
+        player.state="slide";
+
+        player.stateTimer=32;
+    }
+}
+
+/* =========================================================
+   BURST
+   ========================================================= */
+
+function burst(){
+
+    if(!running)return;
+
+    if(player.burstTimer<=0){
+
+        player.burstTimer=14;
+
+        player.invincible=18;
+
+        createDust(
+            player.x,
+            player.y+player.height/2
+        );
+    }
+}
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+
+function createDust(x,y){
+
+    for(let i=0;i<9;i++){
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            velocityX:
+                -Math.random()*3,
+
+            velocityY:
+                -Math.random()*3,
+
+            life:
+                20+
+                Math.random()*20,
+
+            size:
+                2+
+                Math.random()*3
+        });
+    }
+}
+
+/* =========================================================
+   UPDATE
+   ========================================================= */
+
+function update(){
+
+    if(!running)return;
+
+    /*
+        Very slow progression.
+    */
+
+    speed =
+        Math.min(
+            4.4,
+            3.8 + distance/15000
+        );
+
+    distance += speed*.1;
+
+    /* -----------------------------------------
+       PLAYER PHYSICS
+    ----------------------------------------- */
+
+    const roof =
+        getRoof(
+            player.x +
+            player.width/2
+        );
+
+    /*
+        If there is no roof, the player is
+        crossing a legitimate gap.
+    */
+
+    if(roof === null){
+
+        player.velocityY += .72;
+
+        player.y += player.velocityY;
+
+    }else{
+
+        const floor =
+            H -
+            roof -
+            player.height;
+
+        player.velocityY += .72;
+
+        player.y += player.velocityY;
+
+        if(player.y >= floor){
+
+            player.y=floor;
+
+            player.velocityY=0;
+
+            player.jumps=0;
+
+            if(player.state==="jump"){
+
+                player.state="run";
+            }
+        }
+    }
+
+    /* -----------------------------------------
+       SLIDE
+    ----------------------------------------- */
+
+    if(player.stateTimer>0){
+
+        player.stateTimer--;
+
+    }else if(
+        player.state==="slide"
+    ){
+
+        player.state="run";
+    }
+
+    if(keys["ArrowDown"]){
+
+        slide();
+    }
+
+    /* -----------------------------------------
+       BURST
+    ----------------------------------------- */
+
+    if(player.burstTimer>0){
+
+        player.burstTimer--;
+
+        player.x += 8;
+
+    }else{
+
+        player.x += speed;
+    }
+
+    if(player.invincible>0){
+
+        player.invincible--;
+    }
+
+    /* -----------------------------------------
+       CAMERA
+    ----------------------------------------- */
+
+    cameraX =
+        player.x -
+        W*.28;
+
+    /* -----------------------------------------
+       OBSTACLES
+    ----------------------------------------- */
+
+    for(const o of obstacles){
+
+        const roof =
+            getRoof(o.x);
+
+        if(roof===null)continue;
+
+        const obstacle={
+
+            x:o.x,
+
+            y:
+                H -
+                roof -
+                o.height,
+
+            width:o.width,
+
+            height:o.height
+        };
+
+        const playerHeight =
+            player.state==="slide"
+            ? 32
+            : player.height;
+
+        const playerY =
+            player.state==="slide"
+            ? player.y+30
+            : player.y;
+
+        const pbox={
+
+            x:player.x,
+
+            y:playerY,
+
+            width:player.width,
+
+            height:playerHeight
+        };
+
+        if(collision(pbox,obstacle)){
+
+            /*
+                Slide under horizontal bars.
+            */
+
+            if(
+                o.type==="bar" &&
+                player.state==="slide"
+            ){
+
+                continue;
+            }
+
+            /*
+                Jump over obstacles.
+            */
+
+            if(
+                player.y+
+                player.height <
+                obstacle.y+15
+            ){
+
+                continue;
+            }
+
+            if(player.invincible<=0){
+
+                player.invincible=40;
+
+                pursuer.distance-=30;
+
+                createDust(
+                    player.x,
+                    player.y+
+                    player.height
+                );
+            }
+        }
+    }
+
+    /* -----------------------------------------
+       FALLING
+    ----------------------------------------- */
+
+    /*
+        Only allow a fall to kill the player
+        if they're actually in the middle of
+        the level.
+
+        The final rooftop prevents this from
+        happening at the ending.
+    */
+
+    if(
+        player.y >
+        H+100 &&
+        player.x <
+        LEVEL_LENGTH-300
+    ){
+
+        lose(
+            "You missed the rooftop."
+        );
+
+        return;
+    }
+
+    /* -----------------------------------------
+       PURSUER
+    ----------------------------------------- */
+
+    /*
+        JURISDICTION.
+
+        Once the player has crossed the finish
+        line (escaping === true), the pursuer's
+        jurisdiction ends — it simply stops here,
+        instead of continuing to chase right up
+        to the victory screen.
+    */
+
+    if(!escaping){
+
+        if(player.burstTimer>0){
+
+            pursuer.distance += .45;
+
+        }else{
+
+            pursuer.distance -= .018;
+        }
+
+        pursuer.distance =
+            Math.max(
+                45,
+                Math.min(
+                    180,
+                    pursuer.distance
+                )
+            );
+
+        pursuer.x =
+            player.x -
+            pursuer.distance;
+
+        /*
+            INDEPENDENT MOVEMENT.
+
+            The pursuer no longer copies the player's
+            y position. Instead it has its own gravity
+            and reacts to the terrain directly beneath
+            and ahead of it — jumping over gaps and
+            obstacles on its own, on its own timing.
+        */
+
+        const pursuerRoofNow =
+            getRoof(
+                pursuer.x +
+                pursuer.width/2
+            );
+
+        const pursuerLookaheadX =
+            pursuer.x +
+            pursuer.width +
+            45;
+
+        const roofAhead =
+            getRoof(pursuerLookaheadX);
+
+        const obstacleAhead =
+            obstacles.some(o=>
+                o.x >
+                pursuer.x+pursuer.width &&
+                o.x <
+                pursuer.x+pursuer.width+55
+            );
+
+        if(
+            !pursuer.jumping &&
+            pursuerRoofNow !== null &&
+            (roofAhead === null || obstacleAhead)
+        ){
+
+            pursuer.velocityY = -14;
+
+            pursuer.jumping = true;
+        }
+
+        pursuer.velocityY += .72;
+
+        pursuer.y += pursuer.velocityY;
+
+        if(pursuerRoofNow !== null){
+
+            const pursuerFloor =
+                H -
+                pursuerRoofNow -
+                pursuer.height;
+
+            if(pursuer.y >= pursuerFloor){
+
+                pursuer.y = pursuerFloor;
+
+                pursuer.velocityY = 0;
+
+                pursuer.jumping = false;
+            }
+        }
+
+        if(
+            pursuer.distance <= 42
+        ){
+
+            lose(
+                "Security caught up with you."
+            );
+
+            return;
+        }
+    }
+
+    /* -----------------------------------------
+       PARTICLES
+    ----------------------------------------- */
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ){
+
+        const p=particles[i];
+
+        p.x+=p.velocityX;
+        p.y+=p.velocityY;
+
+        p.velocityY+=.1;
+
+        p.life--;
+
+        if(p.life<=0){
+
+            particles.splice(i,1);
+        }
+    }
+
+    /* -----------------------------------------
+       GUARANTEED ENDING
+    ----------------------------------------- */
+
+    /*
+        IMPORTANT FIX:
+
+        "distance" and "player.x" advance at very
+        different rates (player.x moves roughly
+        10x faster than distance per frame), so
+        comparing distance to LEVEL_LENGTH let the
+        player run straight off the end of the
+        generated world — the guaranteed final
+        rooftop (which sits in player.x-space,
+        from LEVEL_LENGTH-300 to LEVEL_LENGTH+1500)
+        had already scrolled by long before
+        distance caught up, leaving nothing to
+        stand on: the "endless nothingness".
+
+        The win check now compares player.x
+        instead, so it fires while the player is
+        still safely on the final rooftop.
+    */
+
+    if(
+        !escaping &&
+        player.x >= LEVEL_LENGTH
+    ){
+
+        escaping = true;
+
+        escapeTimer = 120;
+    }
+
+    /*
+        The player keeps running for a couple of
+        seconds after crossing the line — with the
+        pursuer frozen behind — before the victory
+        screen appears, so it actually reads as an
+        escape rather than a sudden cutaway.
+    */
+
+    if(escaping){
+
+        escapeTimer--;
+
+        if(escapeTimer<=0){
+
+            win();
+
+            return;
+        }
+    }
+
+    updateHUD();
+}
+
+/* =========================================================
+   COLLISION
+   ========================================================= */
+
+function collision(a,b){
+
+    return(
+        a.x<
+        b.x+b.width &&
+
+        a.x+a.width>
+        b.x &&
+
+        a.y<
+        b.y+b.height &&
+
+        a.y+a.height>
+        b.y
+    );
+}
+
+/* =========================================================
+   LOSE
+   ========================================================= */
+
+function lose(reason){
+
+    running=false;
+
+    document
+        .getElementById("gameOverScreen")
+        .classList
+        .remove("hidden");
+
+    document
+        .getElementById("result")
+        .innerHTML=
+        `
+        You made it
+        <b>${Math.floor(distance)}m</b>.
+        <br><br>
+        ${reason}
+        `;
+}
+
+/* =========================================================
+   WIN
+   ========================================================= */
+
+function win(){
+
+    running=false;
+
+    /*
+        Freeze the player at the end rather than
+        immediately cutting away.
+    */
+
+    player.state="run";
+
+    document
+        .getElementById("victoryScreen")
+        .classList
+        .remove("hidden");
+
+    document
+        .getElementById("victoryResult")
+        .innerHTML=`
+            You made it
+            <b>${Math.floor(distance)}m</b>.
+            <br><br>
+            You reached the final rooftop
+            and disappeared beyond the city.
+            <br><br>
+            <b>YOU ESCAPED.</b>
+        `;
+}
+
+/* =========================================================
+   HUD
+   ========================================================= */
+
+function updateHUD(){
+
+    document
+        .getElementById("distance")
+        .textContent=
+        `DISTANCE ${
+            String(
+                Math.floor(distance)
+            ).padStart(4,"0")
+        } M`;
+
+    const danger=
+        1-
+        (pursuer.distance-42)/
+        138;
+
+    document
+        .getElementById("dangerFill")
+        .style.width=
+        `${Math.max(
+            5,
+            Math.min(
+                100,
+                danger*100
+            )
+        )}%`;
+}
+
+/* =========================================================
+   SKY
+   ========================================================= */
+
+function drawSky(){
+
+    ctx.fillStyle="#d9d6cf";
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    /*
+        Large empty sky.
+
+        This intentionally gives the game
+        a calmer feeling.
+    */
+
+    ctx.fillStyle=
+        "rgba(255,255,255,.16)";
+
+    ctx.fillRect(
+        0,
+        H*.43,
+        W,
+        130
+    );
+
+    /* distant skyline */
+
+    for(
+        let i=-5;
+        i<20;
+        i++
+    ){
+
+        const x=
+            i*220-
+            cameraX*.12;
+
+        const height=
+            100+
+            Math.abs(
+                Math.sin(i*2.7)
+            )*150;
+
+        ctx.fillStyle="#bcb9b1";
+
+        ctx.fillRect(
+            x,
+            H-100-height,
+            160,
+            height
+        );
+    }
+}
+
+/* =========================================================
+   BUILDINGS
+   ========================================================= */
+
+function drawBuildings(){
+
+    for(const b of buildings){
+
+        const x=
+            b.x-cameraX;
+
+        if(
+            x+b.width<0 ||
+            x>W
+        ){
+
+            continue;
+        }
+
+        const y=
+            H-b.roof;
+
+        /* building */
+
+        ctx.fillStyle=b.color;
+
+        ctx.fillRect(
+            x,
+            y,
+            b.width,
+            H-y
+        );
+
+        /* roof */
+
+        ctx.fillStyle="#252525";
+
+        ctx.fillRect(
+            x,
+            y,
+            b.width,
+            5
+        );
+
+        /*
+            Sparse windows.
+
+            Less visual clutter.
+        */
+
+        for(
+            let wx=x+35;
+            wx<x+b.width-20;
+            wx+=65
+        ){
+
+            for(
+                let wy=y+55;
+                wy<H-40;
+                wy+=60
+            ){
+
+                ctx.fillStyle=
+                    "rgba(35,35,35,.12)";
+
+                ctx.fillRect(
+                    wx,
+                    wy,
+                    14,
+                    20
+                );
+            }
+        }
+    }
+}
+
+/* =========================================================
+   OBSTACLES
+   ========================================================= */
+
+function drawObstacles(){
+
+    for(const o of obstacles){
+
+        const x=
+            o.x-cameraX;
+
+        if(
+            x<-100 ||
+            x>W+100
+        ){
+
+            continue;
+        }
+
+        const roof=
+            getRoof(o.x);
+
+        if(roof===null)
+            continue;
+
+        const y=
+            H-roof-o.height;
+
+        if(o.type==="crate"){
+
+            ctx.fillStyle="#3d3d3d";
+
+            ctx.fillRect(
+                x,
+                y,
+                o.width,
+                o.height
+            );
+
+            ctx.strokeStyle="#777";
+
+            ctx.lineWidth=2;
+
+            ctx.strokeRect(
+                x,
+                y,
+                o.width,
+                o.height
+            );
+
+        }else if(
+            o.type==="bar"
+        ){
+
+            /*
+                Low horizontal obstacle.
+                Intended to be slid under.
+            */
+
+            ctx.fillStyle="#282828";
+
+            ctx.fillRect(
+                x,
+                y,
+                o.width,
+                o.height
+            );
+
+            ctx.fillRect(
+                x,
+                y,
+                6,
+                55
+            );
+
+            ctx.fillRect(
+                x+o.width-6,
+                y,
+                6,
+                55
+            );
+
+        }else{
+
+            ctx.fillStyle="#292929";
+
+            ctx.fillRect(
+                x,
+                y,
+                o.width,
+                o.height
+            );
+
+            ctx.fillStyle="#777";
+
+            ctx.fillRect(
+                x,
+                y,
+                5,
+                o.height
+            );
+        }
+    }
+}
+
+/* =========================================================
+   PLAYER
+   ========================================================= */
+
+function limbSegment(x1,y1,angle,length,width,color){
+
+    const x2 = x1+Math.sin(angle)*length;
+    const y2 = y1+Math.cos(angle)*length;
+
+    ctx.strokeStyle=color;
+    ctx.lineWidth=width;
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();
+
+    return {x:x2,y:y2};
+}
+
+function drawPlayer(){
+
+    const x=
+        player.x-cameraX;
+
+    const y=
+        player.y;
+
+    ctx.save();
+
+    if(
+        player.invincible>0 &&
+        Math.floor(
+            player.invincible/5
+        )%2===0
+    ){
+
+        ctx.globalAlpha=.45;
+    }
+
+    const skin  = "#e3b993";
+    const hair  = "#181818";
+    const shirt = player.burstTimer>0 ? "#38bdf8" : "#0f766e";
+    const pants = "#23262d";
+    const shoe  = "#111111";
+
+    const headX = x+14;
+    const headY = y-9;
+
+    const shoulderX = x+14;
+    const shoulderY = y+9;
+
+    const hipX = x+14;
+    const hipY = y+34;
+
+    if(
+        player.state==="slide"
+    ){
+
+        /* ---- SLIDE POSE ---- */
+
+        ctx.save();
+
+        ctx.translate(x+8,y+40);
+        ctx.rotate(-0.18);
+
+        /* trailing leg, tucked under */
+
+        const trailKnee=
+            limbSegment(6,-2,2.1,12,9,pants);
+
+        limbSegment(
+            trailKnee.x,trailKnee.y,
+            2.7,11,8,pants
+        );
+
+        /* torso */
+
+        ctx.fillStyle=shirt;
+
+        ctx.fillRect(-4,-11,38,16);
+
+        /* leading leg, extended forward */
+
+        limbSegment(30,2,1.35,23,9,pants);
+
+        /* trailing arm, braced back */
+
+        limbSegment(2,-6,-0.85,15,7,shirt);
+
+        /* head */
+
+        ctx.fillStyle=skin;
+
+        ctx.beginPath();
+
+        ctx.arc(36,-9,9,0,Math.PI*2);
+
+        ctx.fill();
+
+        ctx.fillStyle=hair;
+
+        ctx.beginPath();
+
+        ctx.arc(36,-13,8,Math.PI,0);
+
+        ctx.fill();
+
+        ctx.restore();
+
+    }else if(
+        player.state==="jump"
+    ){
+
+        /* ---- AIRBORNE / TUCKED POSE ---- */
+
+        /* head */
+
+        ctx.fillStyle=skin;
+
+        ctx.beginPath();
+
+        ctx.arc(headX,headY,9,0,Math.PI*2);
+
+        ctx.fill();
+
+        ctx.fillStyle=hair;
+
+        ctx.beginPath();
+
+        ctx.arc(headX,headY-4,8,Math.PI,0);
+
+        ctx.fill();
+
+        /* torso, leaning into the jump */
+
+        ctx.save();
+
+        ctx.translate(shoulderX,shoulderY);
+        ctx.rotate(0.12);
+
+        ctx.fillStyle=shirt;
+
+        ctx.fillRect(-9,0,18,26);
+
+        ctx.restore();
+
+        /* legs, tucked up under the body */
+
+        const lKnee=
+            limbSegment(hipX-5,hipY,-0.9,12,8,pants);
+
+        limbSegment(lKnee.x,lKnee.y,-2.0,11,7,pants);
+
+        const rKnee=
+            limbSegment(hipX+5,hipY,-0.4,12,8,pants);
+
+        limbSegment(rKnee.x,rKnee.y,-1.5,11,7,pants);
+
+        /* arms, swept forward and up */
+
+        const lElbow=
+            limbSegment(shoulderX-6,shoulderY+3,-1.3,12,7,shirt);
+
+        limbSegment(lElbow.x,lElbow.y,-0.7,10,6,skin);
+
+        const rElbow=
+            limbSegment(shoulderX+6,shoulderY+3,-0.6,12,7,shirt);
+
+        limbSegment(rElbow.x,rElbow.y,-1.1,10,6,skin);
+
+    }else{
+
+        /* ---- ANIMATED RUNNING POSE ---- */
+
+        const phase=
+            performance.now()*.012;
+
+        /* head */
+
+        ctx.fillStyle=skin;
+
+        ctx.beginPath();
+
+        ctx.arc(headX,headY,9,0,Math.PI*2);
+
+        ctx.fill();
+
+        ctx.fillStyle=hair;
+
+        ctx.beginPath();
+
+        ctx.arc(headX,headY-4,8,Math.PI,0);
+
+        ctx.fill();
+
+        /* torso, slight forward lean */
+
+        ctx.save();
+
+        ctx.translate(shoulderX,shoulderY);
+        ctx.rotate(0.08);
+
+        ctx.fillStyle=shirt;
+
+        ctx.fillRect(-9,0,18,26);
+
+        ctx.restore();
+
+        /*
+            Two-segment legs. Offsetting the shin's
+            phase a quarter-cycle ahead of the thigh
+            produces a natural-looking knee bend
+            during the recovery swing instead of a
+            rigid, single-piece limb.
+        */
+
+        for(let side=0;side<2;side++){
+
+            const p=
+                phase+(side===0?0:Math.PI);
+
+            const thighAngle=
+                Math.sin(p)*0.95;
+
+            const shinAngle=
+                Math.sin(p+Math.PI/2)*0.85+0.55;
+
+            const knee=
+                limbSegment(
+                    hipX,hipY,
+                    thighAngle,15,8,pants
+                );
+
+            const foot=
+                limbSegment(
+                    knee.x,knee.y,
+                    thighAngle+shinAngle,14,7,pants
+                );
+
+            ctx.fillStyle=shoe;
+
+            ctx.beginPath();
+
+            ctx.arc(foot.x,foot.y,4,0,Math.PI*2);
+
+            ctx.fill();
+        }
+
+        /* arms, swinging opposite the legs */
+
+        for(let side=0;side<2;side++){
+
+            const p=
+                phase+(side===0?Math.PI:0);
+
+            const upperAngle=
+                Math.sin(p)*0.7;
+
+            const foreAngle=
+                Math.sin(p+Math.PI/2)*0.6+0.5;
+
+            const elbow=
+                limbSegment(
+                    shoulderX,shoulderY+2,
+                    upperAngle,13,6,shirt
+                );
+
+            limbSegment(
+                elbow.x,elbow.y,
+                upperAngle+foreAngle,12,5,skin
+            );
+        }
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   PURSUER
+   ========================================================= */
+
+function drawPursuer(){
+
+    const x=
+        pursuer.x-cameraX;
+
+    const y=
+        pursuer.y;
+
+    ctx.save();
+
+    ctx.fillStyle="#333";
+
+    /* head */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+14,
+        y-9,
+        10,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* body */
+
+    ctx.fillRect(
+        x+5,
+        y,
+        19,
+        37
+    );
+
+    /* arms */
+
+    ctx.fillRect(
+        x-7,
+        y+8,
+        14,
+        8
+    );
+
+    ctx.fillRect(
+        x+23,
+        y+8,
+        14,
+        8
+    );
+
+    /* legs */
+
+    ctx.fillRect(
+        x+5,
+        y+35,
+        8,
+        28
+    );
+
+    ctx.fillRect(
+        x+18,
+        y+35,
+        8,
+        28
+    );
+
+    ctx.restore();
+}
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+
+function drawParticles(){
+
+    for(const p of particles){
+
+        ctx.globalAlpha=
+            Math.max(
+                0,
+                p.life/40
+            );
+
+        ctx.fillStyle="#555";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x-cameraX,
+            p.y,
+            p.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    ctx.globalAlpha=1;
+}
+
+/* =========================================================
+   DRAW
+   ========================================================= */
+
+function draw(){
+
+    drawSky();
+
+    drawBuildings();
+
+    drawObstacles();
+
+    drawParticles();
+
+    drawPursuer();
+
+    drawPlayer();
+}
+
+/* =========================================================
+   LOOP
+   ========================================================= */
+
+function loop(){
+
+    update();
+
+    draw();
+
+    requestAnimationFrame(loop);
+}
+
+loop();
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+document
+    .getElementById("startButton")
+    .onclick=startGame;
+
+document
+    .getElementById("restartButton")
+    .onclick=startGame;
+
+document
+    .getElementById("victoryRestartButton")
+    .onclick=startGame;
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+document
+    .getElementById("jumpButton")
+    .addEventListener(
+        "touchstart",
+        e=>{
+            e.preventDefault();
+            jump();
+        },
+        {passive:false}
+    );
+
+document
+    .getElementById("slideButton")
+    .addEventListener(
+        "touchstart",
+        e=>{
+            e.preventDefault();
+            slide();
+        },
+        {passive:false}
+    );
+
+document
+    .getElementById("dashButton")
+    .addEventListener(
+        "touchstart",
+        e=>{
+            e.preventDefault();
+            burst();
+        },
+        {passive:false}
+    );
+
+</script>
+
+</body>
+</html>

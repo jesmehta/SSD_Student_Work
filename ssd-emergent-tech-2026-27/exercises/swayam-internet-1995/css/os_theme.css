@@ -1,0 +1,2413 @@
+/* =========================================================
+   1995 TIME-TRAVEL WEB SIMULATOR
+   WINDOWS 95 AUTHENTIC UI
+   Version 0.1.1
+   ========================================================= */
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+
+    background: #111;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 11px;
+
+    color: #000;
+
+    image-rendering: pixelated;
+}
+
+
+/* =========================================================
+   CRT MONITOR
+   ========================================================= */
+
+#monitor {
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #333 0%,
+            #171717 58%,
+            #080808 100%
+        );
+}
+
+
+/* =========================================================
+   MONITOR SCREEN
+   ========================================================= */
+
+#monitor-screen {
+    position: relative;
+
+    width: 640px;
+    height: 480px;
+
+    overflow: hidden;
+
+    background: #008080;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.08),
+        0 0 80px rgba(0, 0, 0, 0.9);
+}
+
+
+/* =========================================================
+   COMPUTER DISPLAY
+   ========================================================= */
+
+#computer {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 640px;
+    height: 480px;
+
+    transform-origin: center center;
+}
+
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+#desktop {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 640px;
+    height: 480px;
+
+    overflow: hidden;
+
+    background: #008080;
+
+    user-select: none;
+}
+
+
+/* =========================================================
+   DESKTOP ICONS
+   ========================================================= */
+
+.desktop-icons {
+    position: absolute;
+
+    top: 7px;
+    left: 6px;
+
+    width: 82px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.desktop-icon {
+    position: relative;
+
+    width: 78px;
+    min-height: 57px;
+
+    padding: 2px 1px;
+
+    border: 1px solid transparent;
+
+    background: transparent;
+
+    color: #fff;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    line-height: 10px;
+
+    text-align: center;
+
+    cursor: default;
+}
+
+
+.desktop-icon:focus {
+    outline: none;
+}
+
+
+.desktop-icon.selected {
+    background: #000080;
+
+    border: 1px dotted #fff;
+}
+
+
+.icon-label {
+    display: block;
+
+    width: 76px;
+
+    margin-top: 2px;
+
+    text-align: center;
+
+    text-shadow:
+        1px 1px #000,
+        -1px 0 #000,
+        0 1px #000;
+
+    word-wrap: break-word;
+}
+
+
+/* =========================================================
+   PIXEL ICON SYSTEM
+   ========================================================= */
+
+.pixel-icon {
+    position: relative;
+
+    display: block;
+
+    width: 32px;
+    height: 32px;
+
+    margin: 0 auto;
+
+    image-rendering: pixelated;
+}
+
+
+/* COMPUTER ICON */
+
+.computer-icon {
+    width: 30px;
+    height: 27px;
+
+    margin-top: 1px;
+
+    background: #c0c0c0;
+
+    border:
+        2px solid #000;
+
+    box-shadow:
+        inset 2px 2px #fff,
+        inset -2px -2px #808080;
+}
+
+
+.computer-icon .monitor-screen {
+    position: absolute;
+
+    left: 4px;
+    top: 4px;
+
+    width: 18px;
+    height: 13px;
+
+    background: #000080;
+
+    border:
+        1px solid #000;
+
+    box-shadow:
+        inset 1px 1px #8080ff;
+}
+
+
+.computer-icon .monitor-stand {
+    position: absolute;
+
+    left: 9px;
+    bottom: -5px;
+
+    width: 8px;
+    height: 5px;
+
+    background: #c0c0c0;
+
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+
+.computer-icon::after {
+    content: "";
+
+    position: absolute;
+
+    left: 5px;
+    bottom: -6px;
+
+    width: 18px;
+    height: 3px;
+
+    background: #c0c0c0;
+
+    border:
+        1px solid #000;
+}
+
+
+/* NETWORK ICON */
+
+.network-icon {
+    width: 32px;
+    height: 29px;
+}
+
+
+.network-monitor {
+    position: absolute;
+
+    left: 2px;
+    top: 2px;
+
+    width: 22px;
+    height: 16px;
+
+    background: #c0c0c0;
+
+    border: 2px solid #000;
+
+    box-shadow:
+        inset 1px 1px #fff,
+        inset -1px -1px #808080;
+}
+
+
+.network-monitor::after {
+    content: "";
+
+    position: absolute;
+
+    left: 4px;
+    top: 4px;
+
+    width: 12px;
+    height: 8px;
+
+    background: #000080;
+}
+
+
+.network-cable {
+    position: absolute;
+
+    left: 12px;
+    bottom: 1px;
+
+    width: 2px;
+    height: 9px;
+
+    background: #000;
+}
+
+
+.network-cable::after {
+    content: "";
+
+    position: absolute;
+
+    left: -6px;
+    bottom: 0;
+
+    width: 14px;
+    height: 2px;
+
+    background: #000;
+}
+
+
+/* GLOBE / NETSCAPE ICON */
+
+.globe-icon {
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    background: #d8d8d8;
+
+    border: 2px solid #000;
+
+    box-shadow:
+        inset 3px 2px #fff,
+        inset -3px -2px #808080;
+}
+
+
+.globe-line {
+    position: absolute;
+
+    background: #000080;
+}
+
+
+.globe-line-1 {
+    left: 5px;
+    top: 13px;
+
+    width: 16px;
+    height: 2px;
+}
+
+
+.globe-line-2 {
+    left: 12px;
+    top: 3px;
+
+    width: 2px;
+    height: 22px;
+}
+
+
+.globe-line-3 {
+    left: 7px;
+    top: 5px;
+
+    width: 12px;
+    height: 18px;
+
+    border-left: 1px solid #000080;
+    border-right: 1px solid #000080;
+
+    background: transparent;
+}
+
+
+/* CLOCK ICON */
+
+.clock-icon {
+    width: 29px;
+    height: 29px;
+
+    border-radius: 50%;
+
+    background: #fff;
+
+    border: 2px solid #000;
+
+    box-shadow:
+        inset 2px 2px #808080;
+}
+
+
+.clock-hand {
+    position: absolute;
+
+    left: 13px;
+    top: 6px;
+
+    width: 2px;
+
+    background: #000;
+    transform-origin: bottom center;
+}
+
+
+.clock-hour {
+    height: 8px;
+
+    transform: rotate(-25deg);
+}
+
+
+.clock-minute {
+    height: 11px;
+
+    transform: rotate(35deg);
+}
+
+
+/* RECYCLE BIN */
+
+.recycle-icon {
+    width: 28px;
+    height: 31px;
+}
+
+
+.recycle-bin-body {
+    position: absolute;
+
+    left: 5px;
+    top: 8px;
+
+    width: 18px;
+    height: 19px;
+
+    background: #c0c0c0;
+
+    border:
+        2px solid #000;
+
+    box-shadow:
+        inset 2px 0 #fff,
+        inset -2px 0 #808080;
+}
+
+
+.recycle-bin-body::before {
+    content: "";
+
+    position: absolute;
+
+    left: -3px;
+    top: -5px;
+
+    width: 22px;
+    height: 4px;
+
+    background: #c0c0c0;
+
+    border: 2px solid #000;
+}
+
+
+.recycle-paper {
+    position: absolute;
+
+    left: 8px;
+    top: 4px;
+
+    width: 11px;
+    height: 9px;
+
+    background: #fff;
+
+    border: 1px solid #000;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   WINDOWS
+   ========================================================= */
+
+#windowLayer {
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+}
+
+
+.win95-window {
+    position: absolute;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    box-shadow:
+        1px 1px #808080;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   TITLE BAR
+   ========================================================= */
+
+.window-titlebar {
+    height: 16px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding-left: 3px;
+    padding-right: 2px;
+
+    background: #000080;
+
+    color: #fff;
+
+    font-size: 8px;
+    font-weight: bold;
+
+    line-height: 16px;
+
+    cursor: default;
+
+    user-select: none;
+}
+
+
+.window-titlebar.inactive {
+    background: #808080;
+}
+
+
+.window-title {
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   WINDOW CONTROL BUTTONS
+   ========================================================= */
+
+.window-controls {
+    display: flex;
+
+    gap: 2px;
+}
+
+
+.window-button {
+    width: 14px;
+    height: 13px;
+
+    padding: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    color: #000;
+
+    font-family: Arial, sans-serif;
+    font-size: 8px;
+    font-weight: bold;
+
+    line-height: 8px;
+
+    cursor: default;
+}
+
+
+.window-button:active {
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}
+
+
+/* =========================================================
+   MENU BAR
+   ========================================================= */
+
+.window-menu-bar {
+    height: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding-left: 6px;
+
+    background: #c0c0c0;
+
+    border-bottom: 1px solid #808080;
+
+    font-size: 8px;
+}
+
+
+.window-menu-bar span:first-letter {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   WINDOW CONTENT
+   ========================================================= */
+
+.window-content {
+    padding: 12px;
+
+    background: #c0c0c0;
+
+    font-size: 8px;
+}
+
+
+.window-content p {
+    margin:
+        7px 0;
+
+    line-height: 12px;
+}
+
+
+.welcome-heading {
+    margin-bottom: 8px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+}
+
+
+.inset-panel {
+    margin-top: 10px;
+    margin-bottom: 12px;
+
+    padding: 6px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #808080;
+    border-left: 2px solid #808080;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+
+    line-height: 13px;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.dialog-buttons {
+    display: flex;
+
+    justify-content: flex-end;
+}
+
+
+.win95-button {
+    min-width: 60px;
+    height: 20px;
+
+    padding: 2px 8px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    cursor: default;
+}
+
+
+.win95-button:active {
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}
+
+
+.default-button {
+    outline: 1px solid #000;
+    outline-offset: -3px;
+}
+
+
+/* =========================================================
+   STATUS BAR
+   ========================================================= */
+
+.window-status-bar {
+    height: 15px;
+
+    margin: 0 2px 2px;
+
+    padding: 2px 4px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+
+    font-size: 7px;
+}
+
+
+/* =========================================================
+   TASKBAR
+   ========================================================= */
+
+#taskbar {
+    position: absolute;
+
+    left: 0;
+    bottom: 0;
+
+    width: 640px;
+    height: 28px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 2px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+
+    z-index: 10000;
+}
+
+
+/* =========================================================
+   START BUTTON
+   ========================================================= */
+
+#startButton {
+    position: relative;
+
+    width: 60px;
+    height: 23px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    padding: 2px 5px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+    font-weight: bold;
+
+    cursor: default;
+}
+
+
+#startButton.active,
+#startButton:active {
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}
+
+
+.start-logo {
+    position: relative;
+
+    width: 14px;
+    height: 14px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+
+    gap: 1px;
+
+    transform: skewY(-8deg);
+}
+
+
+.start-logo i {
+    display: block;
+
+    background: #000080;
+}
+
+
+.start-text {
+    line-height: 14px;
+}
+
+
+/* =========================================================
+   TASKBAR APPLICATION AREA
+   ========================================================= */
+
+.taskbar-windows {
+    flex: 1;
+
+    height: 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    margin-left: 3px;
+}
+
+
+.taskbar-window {
+    height: 23px;
+
+    min-width: 115px;
+    max-width: 160px;
+
+    overflow: hidden;
+
+    padding: 2px 6px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    font-weight: normal;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.taskbar-window.active {
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   TASKBAR DIVIDER
+   ========================================================= */
+
+.taskbar-divider {
+    width: 2px;
+    height: 22px;
+
+    margin: 0 2px;
+
+    border-left: 1px solid #808080;
+    border-right: 1px solid #fff;
+}
+
+
+/* =========================================================
+   SYSTEM TRAY
+   ========================================================= */
+
+#systemTray {
+    height: 23px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    padding:
+        2px 5px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #808080;
+    border-left: 2px solid #808080;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+
+    font-size: 7px;
+}
+
+
+.speaker-icon {
+    font-size: 8px;
+}
+
+
+#connectionStatus {
+    font-weight: bold;
+
+    color: #000;
+}
+
+/* ========================================
+   WIN95 SYSTEM CLOCK
+======================================== */
+
+#systemClock {
+    min-width: 43px;
+
+    height: 19px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 3px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+
+    text-align: center;
+
+    font-size: 7px;
+}
+
+/* =========================================================
+   START MENU
+   ========================================================= */
+
+#startMenu {
+    position: absolute;
+
+    left: 2px;
+    bottom: 28px;
+
+    width: 130px;
+
+    display: flex;
+    align-items: stretch;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    z-index: 20000;
+
+    overflow: visible;
+}
+
+#startMenu.hidden {
+    display: none;
+}
+
+
+/* =========================================================
+   WINDOWS 95 BANNER
+   ========================================================= */
+
+.start-menu-banner {
+    width: 24px;
+    flex: 0 0 24px;
+
+    background: #808080;
+
+    overflow: hidden;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.start-menu-banner img {
+    display: block;
+
+    width: 18px;
+    height: 155px;
+
+    margin: 0 0 7px 0;
+    padding: 0;
+
+    object-fit: fill;
+
+    image-rendering: pixelated;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   START MENU ITEMS CONTAINER
+   ========================================================= */
+
+.start-menu-items {
+    flex: 1;
+
+    padding: 3px 2px;
+}
+
+
+/* =========================================================
+   START MENU ITEM
+   ========================================================= */
+
+.start-menu-item {
+    position: relative;
+
+    width: 100%;
+    height: 26px;
+    min-height: 26px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 2px 4px;
+
+    border: 0;
+
+    background: transparent;
+    color: #000;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    text-align: left;
+
+    cursor: default;
+}
+
+.start-menu-item:hover {
+    background: #000080;
+    color: #fff;
+}
+
+
+/* =========================================================
+   MAIN MENU ICONS
+   ========================================================= */
+
+.menu-icon {
+    width: 22px;
+    height: 22px;
+
+    margin-right: 3px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 22px;
+
+    text-align: center;
+}
+
+.menu-icon img {
+    display: block;
+
+    width: 20px;
+    height: 20px;
+
+    max-width: 20px;
+    max-height: 20px;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+}
+
+
+/* =========================================================
+   INDIVIDUAL MAIN MENU ICON SIZES
+   ========================================================= */
+
+/* Settings */
+#startMenu .start-menu-item:nth-of-type(3) .menu-icon img {
+    width: 24px;
+    height: 24px;
+
+    max-width: 24px;
+    max-height: 24px;
+}
+
+/* Find */
+#startMenu .start-menu-item:nth-of-type(4) .menu-icon img {
+    width: 18px;
+    height: 18px;
+
+    max-width: 18px;
+    max-height: 18px;
+}
+
+/* Run */
+#startMenu .start-menu-item[data-run="true"] .menu-icon img {
+    width: 18px;
+    height: 18px;
+
+    max-width: 18px;
+    max-height: 18px;
+}
+
+/* Shut Down */
+#startMenu .start-menu-item:nth-of-type(7) .shutdown-icon img {
+    width: 26px;
+    height: 26px;
+
+    max-width: 26px;
+    max-height: 26px;
+
+    position: relative;
+    top: -1px;
+}
+
+
+/* =========================================================
+   MAIN MENU TEXT
+   ========================================================= */
+
+.menu-text {
+    flex: 1;
+
+    line-height: 24px;
+
+    font-size: 8px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   MAIN MENU ARROWS
+   ========================================================= */
+
+.submenu-arrow {
+    width: 10px;
+
+    flex: 0 0 10px;
+
+    font-size: 7px;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   START MENU SEPARATOR
+   ========================================================= */
+
+.start-menu-separator {
+    height: 2px;
+
+    margin: 3px 4px;
+
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #fff;
+}
+
+
+/* =========================================================
+   PROGRAMS SUBMENU
+   ========================================================= */
+
+#programsSubmenu {
+    position: absolute;
+
+    left: 100%;
+    top: 0;
+
+    width: 130px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    padding: 2px;
+
+    display: none;
+
+    z-index: 30000;
+}
+
+
+/* Show Programs submenu */
+
+#startMenu .start-menu-item:first-of-type:hover ~ #programsSubmenu,
+#programsSubmenu:hover {
+    display: block;
+}
+
+/* =========================================================
+   PROGRAMS SUBMENU — ICON SIZES
+   ========================================================= */
+
+.programs-submenu-item .submenu-icon img {
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+
+/* Accessories */
+.programs-submenu-item:nth-child(1) .submenu-icon img {
+    width: 16px;
+    height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+}
+
+
+/* StartUp */
+.programs-submenu-item:nth-child(2) .submenu-icon img {
+    width: 16px;
+    height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+}
+
+
+/* MS-DOS Prompt */
+.programs-submenu-item:nth-child(3) .submenu-icon img {
+    width: 28px;
+    height: 28px;
+    max-width: 28px;
+    max-height: 28px;
+}
+
+
+/* Windows Explorer */
+.programs-submenu-item:nth-child(4) .submenu-icon img {
+    width: 18px;
+    height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+}
+
+/* =========================================================
+   PROGRAMS SUBMENU — ALIGNMENT
+   ========================================================= */
+
+.programs-submenu-item {
+    width: 100%;
+    height: 24px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 4px;
+
+    position: relative;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    color: #000;
+}
+
+
+/* =========================================================
+   SUBMENU ICON AREA
+   ========================================================= */
+
+.programs-submenu-item .submenu-icon {
+    width: 30px;
+    height: 24px;
+
+    flex: 0 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =========================================================
+   SUBMENU ICONS
+   ========================================================= */
+
+.programs-submenu-item .submenu-icon img {
+    display: block;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =========================================================
+   SUBMENU TEXT
+   ========================================================= */
+
+.programs-submenu-item .submenu-text {
+    flex: 1;
+
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    line-height: normal;
+
+    white-space: nowrap;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =========================================================
+   SUBMENU ARROWS
+   ========================================================= */
+
+.programs-submenu-item .submenu-arrow {
+    width: 12px;
+
+    height: 24px;
+
+    flex: 0 0 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 8px;
+
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================================================
+   PROGRAMS SUBMENU — HOVER
+   ========================================================= */
+
+.programs-submenu-item:hover {
+    background: #000080;
+    color: #ffffff;
+}
+
+.programs-submenu-item:hover .submenu-text {
+    color: #ffffff;
+}
+
+.programs-submenu-item:hover .submenu-arrow {
+    color: #ffffff;
+}
+
+/* =========================================================
+   FIND SUBMENU
+   ========================================================= */
+
+#findSubmenu {
+    position: absolute;
+
+    left: 100%;
+    top: 80px;
+
+    width: 145px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    padding: 2px;
+
+    display: none;
+
+    z-index: 30000;
+}
+
+
+/* Show Find submenu */
+
+#startMenu .start-menu-item:nth-of-type(4):hover ~ #findSubmenu,
+#findSubmenu:hover {
+    display: block;
+}
+
+
+/* =========================================================
+   FIND SUBMENU ITEMS
+   ========================================================= */
+
+.find-submenu-item {
+    width: 100%;
+    height: 24px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 4px;
+
+    position: relative;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+
+    color: #000;
+}
+
+/* Icon area */
+
+.find-submenu-item .submenu-icon {
+    width: 30px;
+    height: 24px;
+
+    flex: 0 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Icons */
+
+.find-submenu-item .submenu-icon img {
+    width: 18px;
+    height: 18px;
+
+    max-width: 18px;
+    max-height: 18px;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+
+    display: block;
+}
+
+
+/* Text */
+
+.find-submenu-item .submenu-text {
+    flex: 1;
+
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    line-height: normal;
+
+    white-space: nowrap;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Hover */
+
+.find-submenu-item:hover {
+    background: #000080;
+    color: #fff;
+}
+
+.find-submenu-item:hover .submenu-text {
+    color: #fff;
+}
+
+/* =========================================================
+   DOCUMENTS SUBMENU
+   ========================================================= */
+
+#documentsSubmenu {
+    position: absolute;
+
+    left: 100%;
+    top: 26px;
+
+    width: 145px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #000000;
+    border-bottom: 2px solid #000000;
+
+    padding: 2px;
+
+    display: none;
+
+    z-index: 30000;
+}
+
+
+/* Show Documents submenu */
+
+#documentsSubmenu:hover,
+.start-menu-item:hover + #documentsSubmenu {
+    display: block;
+}
+
+
+/* =========================================================
+   DOCUMENTS SUBMENU ITEMS
+   ========================================================= */
+
+.documents-submenu-item {
+    width: 100%;
+    height: 24px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 4px;
+
+    position: relative;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+
+    color: #000;
+}
+
+
+/* Icon area */
+
+.documents-submenu-item .submenu-icon {
+    width: 30px;
+    height: 24px;
+
+    flex: 0 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Icon */
+
+.documents-submenu-item .submenu-icon img {
+    width: 18px;
+    height: 18px;
+
+    max-width: 18px;
+    max-height: 18px;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+
+    display: block;
+}
+
+
+/* Text */
+
+.documents-submenu-item .submenu-text {
+    flex: 1;
+
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    line-height: normal;
+
+    white-space: nowrap;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Hover */
+
+.documents-submenu-item:hover {
+    background: #000080;
+    color: #fff;
+}
+
+/* =========================================================
+   SETTINGS SUBMENU
+   ========================================================= */
+
+#settingsSubmenu {
+    position: absolute;
+
+    left: 100%;
+    top: 52px;
+
+    width: 145px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #000000;
+    border-bottom: 2px solid #000000;
+
+    padding: 2px;
+
+    display: none;
+
+    z-index: 30000;
+}
+
+
+/* Show Settings submenu */
+
+#settingsSubmenu:hover,
+.start-menu-item:hover + #settingsSubmenu {
+    display: block;
+}
+
+
+/* =========================================================
+   SETTINGS SUBMENU ITEMS
+   ========================================================= */
+
+.settings-submenu-item {
+    width: 100%;
+    height: 24px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 4px;
+
+    position: relative;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+
+    color: #000;
+}
+
+
+/* Icon area */
+
+.settings-submenu-item .submenu-icon {
+    width: 30px;
+    height: 24px;
+
+    flex: 0 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Icon */
+
+.settings-submenu-item .submenu-icon img {
+    width: 18px;
+    height: 18px;
+
+    max-width: 18px;
+    max-height: 18px;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+
+    display: block;
+}
+
+
+/* Text */
+
+.settings-submenu-item .submenu-text {
+    flex: 1;
+
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    line-height: normal;
+
+    white-space: nowrap;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Hover */
+
+.settings-submenu-item:hover {
+    background: #000080;
+    color: #fff;
+}
+
+/* =========================================================
+   WINDOWS 95 RUN DIALOG
+   ========================================================= */
+
+#runDialog {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 330px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    box-sizing: border-box;
+
+    display: none;
+
+    z-index: 30000;
+}
+
+
+/* =========================================================
+   TITLE BAR
+   ========================================================= */
+
+.run-dialog-titlebar {
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+
+    padding-left: 3px;
+    padding-right: 2px;
+
+    box-sizing: border-box;
+
+    background: #000080;
+
+    color: #fff;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+    font-weight: bold;
+}
+
+
+.run-dialog-title {
+    flex: 1;
+}
+
+
+.run-dialog-close {
+    width: 14px;
+    height: 14px;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #c0c0c0;
+
+    color: #000;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+
+    line-height: 9px;
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.run-dialog-content {
+    position: relative;
+
+    min-height: 135px;
+
+    padding: 12px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   RUN ICON
+   ========================================================= */
+
+.run-dialog-icon {
+    position: absolute;
+
+    left: 12px;
+    top: 14px;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.run-dialog-icon img {
+    width: 28px;
+    height: 28px;
+
+    max-width: 28px;
+    max-height: 28px;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+
+    display: block;
+}
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+.run-dialog-message {
+    margin-left: 46px;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    line-height: 13px;
+
+    color: #000;
+}
+
+
+/* =========================================================
+   OPEN LABEL
+   ========================================================= */
+
+.run-dialog-label {
+    display: block;
+
+    margin-top: 13px;
+    margin-bottom: 3px;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    color: #000;
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.run-dialog-input {
+    width: 100%;
+    height: 20px;
+
+    padding: 2px 3px;
+
+    box-sizing: border-box;
+
+    background: #fff;
+
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    color: #000;
+
+    outline: none;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.run-dialog-buttons {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 5px;
+
+    margin-top: 10px;
+}
+
+
+.run-dialog-buttons button {
+    min-width: 60px;
+    height: 22px;
+
+    padding: 2px 7px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    color: #000;
+}
+
+
+.run-dialog-buttons button:active,
+.run-dialog-close:active {
+    border-top-color: #000;
+    border-left-color: #000;
+    border-right-color: #fff;
+    border-bottom-color: #fff;
+}
+
+/* =========================================================
+   WINDOWS 95 PAINT MENU BAR
+   ========================================================= */
+
+.paint-menubar {
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 3px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    font-family:
+        "MS Sans Serif",
+        "Microsoft Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 8px;
+
+    color: #000;
+}
+
+.paint-menu-item {
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 6px;
+
+    box-sizing: border-box;
+
+    cursor: default;
+}
+
+.paint-menu-item:hover {
+    background: #000080;
+    color: #fff;
+}
+
+/* =========================================================
+   WINDOWS 95 PAINT WORKSPACE
+   ========================================================= */
+
+.paint-workspace {
+    display: flex;
+
+    background: #808080;
+
+    padding: 3px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAINT TOOLBOX
+   ========================================================= */
+
+.paint-toolbox {
+    width: 44px;
+
+    flex: 0 0 44px;
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 20px);
+    grid-auto-rows: 20px;
+
+    gap: 2px;
+
+    padding: 2px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+}
+
+
+/* =========================================================
+   PAINT TOOLS
+   ========================================================= */
+
+.paint-tool {
+    width: 20px;
+    height: 20px;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+
+    color: #000;
+
+    cursor: default;
+}
+
+.paint-tool:active {
+    border-top-color: #000;
+    border-left-color: #000;
+    border-right-color: #fff;
+    border-bottom-color: #fff;
+}
+
+
+/* =========================================================
+   PAINT CANVAS AREA
+   ========================================================= */
+
+.paint-canvas-area {
+    margin-left: 4px;
+
+    padding: 4px;
+
+    background: #808080;
+
+    overflow: auto;
+}
+
+
+#paintCanvas {
+    display: block;
+
+    background: #fff;
+
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+
+    image-rendering: pixelated;
+
+    cursor: crosshair;
+}
+
+/* =========================================================
+   WINDOWS 95 PAINT COLOUR PALETTE
+   ========================================================= */
+
+.paint-palette {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns: repeat(8, 18px);
+    grid-template-rows: repeat(2, 18px);
+
+    gap: 2px;
+
+    padding: 3px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+}
+
+
+.paint-color {
+    width: 18px;
+    height: 18px;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+    background: #fff;
+
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+
+    cursor: default;
+}
+
+
+.paint-color:active {
+    border-top-color: #000;
+    border-left-color: #000;
+    border-right-color: #fff;
+    border-bottom-color: #fff;
+}
+
+
+.paint-color[data-color="#000000"] {
+    background: #000000;
+}
+
+.paint-color[data-color="#808080"] {
+    background: #808080;
+}
+
+.paint-color[data-color="#800000"] {
+    background: #800000;
+}
+
+.paint-color[data-color="#808000"] {
+    background: #808000;
+}
+
+.paint-color[data-color="#008000"] {
+    background: #008000;
+}
+
+.paint-color[data-color="#008080"] {
+    background: #008080;
+}
+
+.paint-color[data-color="#000080"] {
+    background: #000080;
+}
+
+.paint-color[data-color="#800080"] {
+    background: #800080;
+}
+
+.paint-color[data-color="#ffffff"] {
+    background: #ffffff;
+}
+
+.paint-color[data-color="#c0c0c0"] {
+    background: #c0c0c0;
+}
+
+.paint-color[data-color="#ff0000"] {
+    background: #ff0000;
+}
+
+.paint-color[data-color="#ffff00"] {
+    background: #ffff00;
+}
+
+.paint-color[data-color="#00ff00"] {
+    background: #00ff00;
+}
+
+.paint-color[data-color="#00ffff"] {
+    background: #00ffff;
+}
+
+.paint-color[data-color="#0000ff"] {
+    background: #0000ff;
+}
+
+.paint-color[data-color="#ff00ff"] {
+    background: #ff00ff;
+}

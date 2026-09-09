@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chain of Events — Branch Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas-bg:#15140f;
+    --grid-dot: rgba(232,163,61,0.10);
+    --paper:#EDE6D6;
+    --paper-hi:#F5F0E4;
+    --paper-edge:#C9BFA6;
+    --ink:#221f18;
+    --amber:#E8A33D;
+    --amber-dim:#a97a2f;
+    --red:#C1443C;
+    --wire:#8a8674;
+    --muted:#8f8a78;
+    --panel-bg:#1b1a14;
+    --panel-border:#3a3628;
+    --panel-text:#e7e2d4;
+    --sel-ring: 0 0 0 2px var(--amber), 0 8px 24px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--canvas-bg); color:var(--panel-text);
+    font-family:'Source Serif 4', Georgia, serif;
+    overflow:hidden;
+  }
+  .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+  button{ font-family:inherit; cursor:pointer; }
+  input, textarea, select{ font-family:'Source Serif 4', Georgia, serif; }
+  :focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+
+  #app{ height:100vh; display:flex; flex-direction:column; }
+
+  /* ---------- Top bar ---------- */
+  #topbar{
+    display:flex; align-items:center; gap:18px;
+    padding:10px 16px; background:#100f0b; border-bottom:1px solid var(--panel-border);
+    flex-wrap:wrap; z-index:20;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .brand-mark{
+    width:34px; height:34px; border:1.5px solid var(--amber); color:var(--amber);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    border-radius:2px; transform:rotate(-3deg); flex:none;
+  }
+  .brand-title{ font-family:'IBM Plex Mono',monospace; font-weight:700; letter-spacing:.12em; font-size:13px; color:var(--panel-text); }
+  .brand-sub{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--muted); margin-top:2px; }
+
+  .mode-toggle{ display:flex; border:1px solid var(--panel-border); border-radius:3px; overflow:hidden; }
+  .mode-btn{
+    background:transparent; border:none; color:var(--muted); padding:8px 16px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; font-weight:600;
+    border-right:1px solid var(--panel-border);
+  }
+  .mode-btn:last-child{ border-right:none; }
+  .mode-btn.active{ background:var(--amber); color:#1b1305; }
+
+  .topbar-actions{ display:flex; align-items:center; gap:8px; }
+  .tool-btn{
+    background:var(--amber); color:#1b1305; border:1px solid var(--amber);
+    padding:8px 14px; border-radius:3px; font-family:'IBM Plex Mono',monospace;
+    font-size:11px; font-weight:600; letter-spacing:.04em;
+  }
+  .tool-btn.ghost{ background:transparent; color:var(--panel-text); border-color:var(--panel-border); }
+  .tool-btn.ghost:hover{ border-color:var(--amber); color:var(--amber); }
+  .tool-btn.danger{ background:var(--red); border-color:var(--red); color:#fff; }
+  .tool-btn:disabled{ opacity:.32; cursor:not-allowed; }
+  .tool-btn.ghost:disabled:hover{ border-color:var(--panel-border); color:var(--panel-text); }
+  .divider{ width:1px; height:22px; background:var(--panel-border); margin:0 4px; }
+
+  /* ---------- Build view ---------- */
+  #build-view{ flex:1; display:flex; min-height:0; position:relative; }
+  #canvas-scroll{
+    flex:1; overflow:auto; position:relative;
+    background-color:var(--canvas-bg);
+    background-image: radial-gradient(var(--grid-dot) 1.2px, transparent 1.2px);
+    background-size: 28px 28px;
+  }
+  #canvas{ position:relative; width:3600px; height:2600px; }
+  #wires{ position:absolute; top:0; left:0; width:3600px; height:2600px; pointer-events:none; }
+  #nodes-layer{ position:absolute; top:0; left:0; width:100%; height:100%; }
+
+  .node-card{
+    position:absolute; width:220px;
+    background:var(--paper); border:1px solid var(--paper-edge);
+    border-radius:2px; box-shadow:0 3px 10px rgba(0,0,0,.35);
+    color:var(--ink); user-select:none;
+  }
+  .node-card.selected{ box-shadow:var(--sel-ring); }
+  .node-card.type-ending{ border:1px dashed var(--red); background:#EFE2DD; }
+
+  .node-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:7px 9px; cursor:grab; border-bottom:1px solid var(--paper-edge);
+    background:linear-gradient(180deg, var(--paper-hi), var(--paper));
+  }
+  .node-head:active{ cursor:grabbing; }
+  .node-tag{ font-size:9.5px; letter-spacing:.08em; color:var(--amber-dim); font-weight:600; }
+  .type-ending .node-tag{ color:var(--red); }
+  .node-actions{ display:flex; gap:6px; align-items:center; }
+  .node-icon-btn{
+    background:transparent; border:none; color:#8a8272; font-size:12px; line-height:1;
+    padding:2px 4px; border-radius:2px;
+  }
+  .node-icon-btn:hover{ color:var(--red); background:rgba(193,68,60,.12); }
+  .node-icon-btn.star{ color:var(--amber-dim); }
+  .node-icon-btn.star.is-root{ color:var(--amber); }
+  .node-icon-btn.star:hover{ color:var(--amber); }
+
+  .node-body{ padding:8px 10px 10px; cursor:pointer; }
+  .node-title{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+    margin:0 0 6px; line-height:1.3; color:var(--ink);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .node-desc{
+    font-size:11.5px; line-height:1.55; color:#4a4636; min-height:52px;
+    background-image: repeating-linear-gradient(to bottom, transparent, transparent 17px, rgba(60,55,40,.16) 18px);
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .node-desc.placeholder{ color:#a89f88; font-style:italic; }
+
+  .node-ports{
+    display:flex; gap:6px; padding:8px 10px 10px; border-top:1px dashed var(--paper-edge);
+    flex-wrap:wrap;
+  }
+  .port{
+    width:22px; height:22px; border:1.5px solid var(--amber-dim); border-radius:3px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--amber-dim);
+    background:rgba(232,163,61,.10);
+  }
+  .port.connected{ border-color:var(--amber); color:#7a5416; background:rgba(232,163,61,.28); }
+  .port.dangling{ border-color:var(--red); color:var(--red); background:rgba(193,68,60,.10); }
+  .port.port-add{
+    border-style:dashed; color:#8a8272; border-color:#8a8272; background:transparent; cursor:pointer;
+  }
+  .port.port-add:hover{ color:var(--amber); border-color:var(--amber); }
+
+  .root-flag{
+    position:absolute; top:-10px; left:-8px; background:var(--amber); color:#1b1305;
+    font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:700; letter-spacing:.06em;
+    padding:2px 6px; border-radius:2px; transform:rotate(-4deg); box-shadow:0 2px 6px rgba(0,0,0,.4);
+  }
+  .branch-badge{
+    position:absolute; top:-10px; left:-8px; background:#2a2718; border:1px solid var(--amber-dim);
+    color:var(--amber-dim); font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:700;
+    letter-spacing:.05em; padding:2px 6px; border-radius:2px; transform:rotate(-4deg);
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
+  }
+  .branch-badge.unlinked{ background:#2a1613; border-color:var(--red); color:var(--red); }
+  .incoming-chip{
+    position:absolute; bottom:-9px; left:10px; background:#1b1a14; border:1px solid var(--wire);
+    color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:9px; padding:1px 6px;
+    border-radius:8px;
+  }
+  .incomplete-badge{
+    background:transparent; border:1px solid var(--amber-dim); color:var(--amber-dim);
+    width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:9px; font-weight:700; font-family:'IBM Plex Mono',monospace;
+  }
+  .end-stamp{
+    position:absolute; bottom:8px; right:8px; border:2px solid var(--red); color:var(--red);
+    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:10px; letter-spacing:.08em;
+    padding:2px 7px; border-radius:2px; transform:rotate(-8deg); opacity:.85; pointer-events:none;
+  }
+
+  /* ---------- Inspector ---------- */
+  #inspector{
+    width:330px; flex:none; background:var(--panel-bg); border-left:1px solid var(--panel-border);
+    padding:16px; overflow-y:auto; z-index:15;
+  }
+  #inspector.hidden{ display:none; }
+  .insp-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .insp-eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; color:var(--amber); }
+  #insp-close{ background:none; border:none; color:var(--muted); font-size:16px; padding:2px 6px; }
+  #insp-close:hover{ color:var(--panel-text); }
+  .insp-label{
+    display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em;
+    color:var(--muted); margin:14px 0 6px; text-transform:uppercase;
+  }
+  .insp-input, .insp-textarea, .insp-select{
+    width:100%; background:#100f0b; border:1px solid var(--panel-border); color:var(--panel-text);
+    padding:9px 10px; border-radius:3px; font-size:13.5px;
+  }
+  .insp-textarea{ min-height:88px; resize:vertical; line-height:1.5; }
+  .insp-input:focus, .insp-textarea:focus, .insp-select:focus{ border-color:var(--amber); }
+  .choice-row{
+    display:flex; gap:6px; align-items:center; margin-bottom:8px; padding:8px;
+    background:#100f0b; border:1px solid var(--panel-border); border-radius:3px;
+  }
+  .choice-letter{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--amber);
+    width:16px; flex:none; text-align:center;
+  }
+  .choice-fields{ flex:1; display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .choice-label-input{
+    background:transparent; border:none; border-bottom:1px solid var(--panel-border); color:var(--panel-text);
+    font-size:12.5px; padding:3px 2px;
+  }
+  .choice-label-input:focus{ border-bottom-color:var(--amber); }
+  .choice-target-select{
+    background:transparent; border:none; color:var(--muted); font-size:11px;
+    font-family:'IBM Plex Mono',monospace; padding:2px;
+  }
+  .choice-remove{ background:none; border:none; color:#8a8272; font-size:14px; flex:none; padding:2px 5px; }
+  .choice-remove:hover{ color:var(--red); }
+  .choice-reorder{ display:flex; flex-direction:column; gap:1px; flex:none; }
+  .choice-move{ background:none; border:none; color:var(--muted); font-size:9px; padding:0 3px; line-height:1.5; }
+  .choice-move:hover:not(:disabled){ color:var(--amber); }
+  .choice-move:disabled{ opacity:.25; cursor:not-allowed; }
+  .add-choice-btn{
+    width:100%; background:transparent; border:1px dashed var(--panel-border); color:var(--muted);
+    padding:9px; border-radius:3px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.05em;
+    margin-top:2px;
+  }
+  .add-choice-btn:hover{ border-color:var(--amber); color:var(--amber); }
+  .add-choice-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .insp-footer{ margin-top:22px; display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--panel-border); padding-top:16px; }
+  .insp-btn{
+    padding:9px; border-radius:3px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    letter-spacing:.05em; background:transparent; border:1px solid var(--panel-border); color:var(--panel-text);
+  }
+  .insp-btn:hover{ border-color:var(--amber); color:var(--amber); }
+  .insp-btn.danger{ border-color:var(--red); color:var(--red); }
+  .insp-btn.danger:hover{ background:var(--red); color:#fff; }
+  .insp-hint{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); margin-top:6px; line-height:1.5; }
+  .insp-warning{
+    background:rgba(232,163,61,.12); border:1px solid var(--amber-dim); color:var(--amber);
+    padding:8px 10px; border-radius:3px; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    margin-bottom:14px; line-height:1.6;
+  }
+  .linked-from-list{ display:flex; flex-direction:column; gap:5px; margin-bottom:4px; }
+  .linked-from-item{
+    font-size:11px; color:var(--muted); background:#100f0b; border:1px solid var(--panel-border);
+    border-radius:3px; padding:6px 8px; cursor:pointer; text-align:left; width:100%;
+  }
+  .linked-from-item:hover{ border-color:var(--amber); color:var(--panel-text); }
+  .lf-choice{ color:var(--panel-text); }
+
+  /* ---------- Bottom hint bar ---------- */
+  #hintbar{
+    position:absolute; left:16px; bottom:14px; z-index:10;
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);
+    background:rgba(16,15,11,.85); border:1px solid var(--panel-border); padding:7px 12px; border-radius:3px;
+    pointer-events:none;
+  }
+
+  /* ---------- Simulate view ---------- */
+  #sim-view{
+    flex:1; display:flex; align-items:center; justify-content:center; padding:40px 20px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(232,163,61,.05), transparent 60%),
+      var(--canvas-bg);
+    overflow-y:auto;
+  }
+  #sim-view.hidden{ display:none; }
+  #sim-card{
+    width:100%; max-width:600px; background:var(--paper); color:var(--ink);
+    border:1px solid var(--paper-edge); border-radius:2px; padding:38px 34px;
+    box-shadow:0 10px 40px rgba(0,0,0,.5); position:relative;
+  }
+  .sim-eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.14em; color:var(--amber-dim); margin-bottom:10px; }
+  .sim-title{ font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; margin:0 0 16px; line-height:1.3; }
+  .sim-desc{ font-size:16.5px; line-height:1.75; color:#332f22; margin-bottom:26px; white-space:pre-wrap; }
+  .sim-choices{ display:flex; flex-direction:column; gap:10px; }
+  .sim-choice-btn{
+    text-align:left; padding:14px 16px; background:transparent; border:1px solid var(--paper-edge);
+    border-radius:2px; font-size:14.5px; color:var(--ink); display:flex; gap:10px; align-items:center;
+  }
+  .sim-choice-btn:hover{ border-color:var(--amber); background:rgba(232,163,61,.10); }
+  .sim-choice-btn .arrow{ color:var(--amber-dim); font-family:'IBM Plex Mono',monospace; }
+  .sim-choice-btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .sim-end-stamp{
+    display:inline-block; border:2px solid var(--red); color:var(--red); font-family:'IBM Plex Mono',monospace;
+    font-weight:700; font-size:12px; letter-spacing:.1em; padding:4px 10px; border-radius:2px;
+    transform:rotate(-3deg); margin-bottom:18px;
+  }
+  .sim-footer{ display:flex; gap:10px; margin-top:26px; padding-top:20px; border-top:1px dashed var(--paper-edge); }
+  .sim-footer-btn{
+    background:transparent; border:1px solid var(--paper-edge); color:#5a5644; padding:9px 16px;
+    border-radius:2px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.05em;
+  }
+  .sim-footer-btn:hover{ border-color:var(--ink); color:var(--ink); }
+  .sim-footer-btn.primary{ background:var(--amber); border-color:var(--amber); color:#1b1305; }
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed; bottom:20px; left:50%; transform:translate(-50%, 20px);
+    background:#100f0b; border:1px solid var(--amber); color:var(--panel-text);
+    padding:10px 18px; border-radius:3px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    opacity:0; pointer-events:none; z-index:100; transition:opacity .25s, transform .25s;
+  }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  #toast.error{ border-color:var(--red); }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 760px){
+    #build-view{ flex-direction:column; }
+    #inspector{
+      position:fixed; left:0; right:0; bottom:0; top:auto; width:auto; max-height:70vh;
+      border-left:none; border-top:1px solid var(--panel-border); border-radius:8px 8px 0 0;
+    }
+    .brand-sub{ display:none; }
+    #hintbar{ display:none; }
+    #sim-card{ padding:26px 20px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:9999;top:12px;right:14px;padding:8px 12px;border:1px solid #e8a33d;background:#15140fee;color:#f5f0e4;font:600 11px 'IBM Plex Mono',monospace;text-decoration:none;letter-spacing:.05em">← EXHIBITION</a>
+<div id="app">
+
+  <header id="topbar">
+    <div class="brand">
+      <div class="brand-mark">§</div>
+      <div>
+        <div class="brand-title">CHAIN OF EVENTS</div>
+        <div class="brand-sub">branching case file — build &amp; simulate</div>
+      </div>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="build">BUILD</button>
+      <button class="mode-btn" data-mode="simulate">SIMULATE</button>
+    </div>
+
+    <div class="topbar-actions">
+      <button id="btn-add-situation" class="tool-btn">+ Situation</button>
+      <button id="btn-add-ending" class="tool-btn ghost">+ Ending</button>
+      <button id="btn-fit" class="tool-btn ghost">⌖ Center</button>
+      <div class="divider"></div>
+      <button id="btn-undo" class="tool-btn ghost" disabled title="Undo (Ctrl+Z)">↺ Undo</button>
+      <button id="btn-redo" class="tool-btn ghost" disabled title="Redo (Ctrl+Shift+Z)">↻ Redo</button>
+      <div class="divider"></div>
+      <button id="btn-export" class="tool-btn ghost">Export</button>
+      <button id="btn-import" class="tool-btn ghost">Import</button>
+      <input type="file" id="file-import" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <main id="build-view">
+    <div id="canvas-scroll">
+      <div id="canvas">
+        <svg id="wires">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--wire)"></path>
+            </marker>
+          </defs>
+        </svg>
+        <div id="nodes-layer"></div>
+      </div>
+    </div>
+    <aside id="inspector" class="hidden"></aside>
+    <div id="hintbar">DRAG a header to move · CLICK a card to edit · + PORT to branch · Ctrl+Z to undo · badges show branch path &amp; incoming links</div>
+  </main>
+
+  <section id="sim-view" class="hidden">
+    <div id="sim-card"></div>
+  </section>
+
+</div>
+<div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CARD_W = 220, SIT_H = 176, END_H = 130;
+  var STORAGE_KEY = "chain-of-events-project";
+
+  var state = null;          // { nodes:{id:node}, rootId }
+  var selectedNodeId = null;
+  var mode = "build";
+  var simCurrentId = null, simHistory = [];
+  var dragCtx = null;
+  var saveTimer = null;
+  var confirmTimers = {};
+  var undoStack = [], redoStack = [];
+  var UNDO_LIMIT = 40;
+  var focusTitleOnNextRender = null;
+
+  var els = {
+    canvasScroll: document.getElementById("canvas-scroll"),
+    canvas: document.getElementById("canvas"),
+    wiresSvg: document.getElementById("wires"),
+    nodesLayer: document.getElementById("nodes-layer"),
+    inspector: document.getElementById("inspector"),
+    buildView: document.getElementById("build-view"),
+    simView: document.getElementById("sim-view"),
+    simCard: document.getElementById("sim-card"),
+    toast: document.getElementById("toast")
+  };
+
+  function uid(prefix){ return prefix + "_" + Math.random().toString(36).slice(2,9); }
+
+  function seedState(){
+    var rootId = uid("n");
+    var nodes = {};
+    nodes[rootId] = {
+      id: rootId, type: "situation",
+      title: "The Signal Arrives",
+      description: "A new invention surfaces from the shadow council. Click this card to rewrite it — then use the + port below to branch your first choice.",
+      x: 460, y: 90,
+      choices: [
+        { id: uid("c"), label: "Investigate quietly", targetId: null },
+        { id: uid("c"), label: "Alert the public", targetId: null }
+      ]
+    };
+    return { nodes: nodes, rootId: rootId };
+  }
+
+  function toast(msg, isError){
+    els.toast.textContent = msg;
+    els.toast.classList.toggle("error", !!isError);
+    els.toast.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ els.toast.classList.remove("show"); }, 2600);
+  }
+
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try{
+        window.storage.set(STORAGE_KEY, JSON.stringify(state), false).then(function(res){
+          if(!res){ toast("Could not save — changes may not persist", true); }
+        }).catch(function(){ toast("Could not save — changes may not persist", true); });
+      }catch(e){ /* storage unavailable, silently skip */ }
+    }, 350);
+  }
+
+  function loadState(cb){
+    try{
+      window.storage.get(STORAGE_KEY, false).then(function(res){
+        if(res && res.value){
+          try{
+            var parsed = JSON.parse(res.value);
+            if(parsed && parsed.nodes && parsed.rootId){ state = parsed; cb(); return; }
+          }catch(e){}
+        }
+        state = seedState(); cb();
+      }).catch(function(){ state = seedState(); cb(); });
+    }catch(e){ state = seedState(); cb(); }
+  }
+
+  /* ---------------- undo / redo ---------------- */
+
+  function pushUndo(){
+    undoStack.push(JSON.stringify(state));
+    if(undoStack.length > UNDO_LIMIT) undoStack.shift();
+    redoStack = [];
+    updateUndoButtons();
+  }
+  function doUndo(){
+    if(!undoStack.length) return;
+    redoStack.push(JSON.stringify(state));
+    state = JSON.parse(undoStack.pop());
+    if(!state.nodes[selectedNodeId]) selectedNodeId = null;
+    renderCanvas(); renderInspector(); scheduleSave(); updateUndoButtons();
+    toast("Undid last change");
+  }
+  function doRedo(){
+    if(!redoStack.length) return;
+    undoStack.push(JSON.stringify(state));
+    state = JSON.parse(redoStack.pop());
+    if(!state.nodes[selectedNodeId]) selectedNodeId = null;
+    renderCanvas(); renderInspector(); scheduleSave(); updateUndoButtons();
+    toast("Redid change");
+  }
+  function updateUndoButtons(){
+    var u = document.getElementById("btn-undo"), r = document.getElementById("btn-redo");
+    if(u) u.disabled = undoStack.length === 0;
+    if(r) r.disabled = redoStack.length === 0;
+  }
+
+  /* ---------------- node helpers ---------------- */
+
+  function nodeList(){ return Object.keys(state.nodes).map(function(k){ return state.nodes[k]; }); }
+
+  /* Auto-numbered branch path from the opening scene, e.g. root's 2nd choice's 1st choice -> "2.1".
+     Computed fresh every render so it always reflects the current wiring, never stored. */
+  function computePathLabels(){
+    var labels = {};
+    if(!state.rootId || !state.nodes[state.rootId]) return labels;
+    var visited = {};
+    visited[state.rootId] = true;
+    var queue = [{ id: state.rootId, label: null }];
+    while(queue.length){
+      var cur = queue.shift();
+      var node = state.nodes[cur.id];
+      if(!node) continue;
+      if(cur.label) labels[cur.id] = cur.label;
+      if(node.type === "situation"){
+        node.choices.forEach(function(c, idx){
+          if(c.targetId && state.nodes[c.targetId] && !visited[c.targetId]){
+            visited[c.targetId] = true;
+            var childLabel = cur.label ? (cur.label + "." + (idx + 1)) : String(idx + 1);
+            queue.push({ id: c.targetId, label: childLabel });
+          }
+        });
+      }
+    }
+    return labels;
+  }
+
+  /* Which nodes point at this one, for spotting converging branches and dead-linked cards. */
+  function computeIncoming(){
+    var incoming = {};
+    nodeList().forEach(function(n){ incoming[n.id] = []; });
+    nodeList().forEach(function(n){
+      if(n.type !== "situation") return;
+      n.choices.forEach(function(c){
+        if(c.targetId && incoming[c.targetId]){
+          incoming[c.targetId].push({ sourceId: n.id, sourceTitle: n.title || "Untitled", label: c.label || "(unlabeled choice)" });
+        }
+      });
+    });
+    return incoming;
+  }
+
+  function getIncompleteReasons(node){
+    var reasons = [];
+    if(!node.title || node.title === "New Situation" || node.title === "An Ending") reasons.push("no title yet");
+    if(!node.description) reasons.push("no description yet");
+    if(node.type === "situation"){
+      if(node.choices.length === 0) reasons.push("no choices yet");
+      var unlabeled = node.choices.filter(function(c){ return !c.label; }).length;
+      if(unlabeled > 0) reasons.push(unlabeled + " unlabeled choice" + (unlabeled > 1 ? "s" : ""));
+    }
+    return reasons;
+  }
+
+  function createNode(type, x, y){
+    var id = uid("n");
+    var node = {
+      id: id, type: type,
+      title: type === "ending" ? "An Ending" : "New Situation",
+      description: "",
+      x: x, y: y,
+      choices: type === "situation" ? [ { id: uid("c"), label: "", targetId: null } ] : []
+    };
+    state.nodes[id] = node;
+    return node;
+  }
+
+  function deleteNode(id){
+    if(nodeList().length <= 1){ toast("A story needs at least one node", true); return; }
+    delete state.nodes[id];
+    nodeList().forEach(function(n){
+      n.choices.forEach(function(c){ if(c.targetId === id) c.targetId = null; });
+    });
+    if(state.rootId === id){ state.rootId = nodeList()[0].id; }
+    if(selectedNodeId === id) selectedNodeId = null;
+  }
+
+  function cardHeight(node){ return node.type === "ending" ? END_H : SIT_H; }
+
+  function freeSpotNear(x, y){
+    return { x: x, y: y };
+  }
+
+  /* ---------------- rendering: canvas ---------------- */
+
+  function renderCanvas(){
+    els.nodesLayer.innerHTML = "";
+    var wiresSvgContent = els.wiresSvg.querySelector("defs").outerHTML;
+    var pathLabels = computePathLabels();
+    var incomingMap = computeIncoming();
+
+    nodeList().forEach(function(node){
+      els.nodesLayer.appendChild(buildCardEl(node, pathLabels, incomingMap));
+    });
+
+    // wires
+    var paths = [];
+    nodeList().forEach(function(node){
+      if(node.type !== "situation") return;
+      var n = node.choices.length;
+      node.choices.forEach(function(choice, i){
+        if(!choice.targetId || !state.nodes[choice.targetId]) return;
+        var target = state.nodes[choice.targetId];
+        var startX = node.x + (CARD_W / n) * (i + 0.5);
+        var startY = node.y + SIT_H;
+        var endX = target.x + CARD_W / 2;
+        var endY = target.y;
+        var midY = (startY + endY) / 2;
+        var d = "M " + startX + " " + startY +
+                " C " + startX + " " + (startY + 55) + ", " +
+                endX + " " + (endY - 55) + ", " + endX + " " + endY;
+        paths.push('<path d="' + d + '" stroke="var(--wire)" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.85"></path>');
+      });
+    });
+    els.wiresSvg.innerHTML = wiresSvgContent + paths.join("");
+  }
+
+  function buildCardEl(node, pathLabels, incomingMap){
+    var card = document.createElement("div");
+    card.className = "node-card type-" + node.type + (node.id === selectedNodeId ? " selected" : "");
+    card.style.left = node.x + "px";
+    card.style.top = node.y + "px";
+    card.style.height = cardHeight(node) + "px";
+    card.dataset.id = node.id;
+
+    var isRoot = node.id === state.rootId;
+    var tagLabel = (node.type === "ending" ? "ENDING" : "SITUATION") + " — " + node.id.slice(-4).toUpperCase();
+    var incomingList = (incomingMap && incomingMap[node.id]) || [];
+    var reasons = getIncompleteReasons(node);
+
+    var html = "";
+    if(isRoot){
+      html += '<div class="root-flag">START</div>';
+    } else if(pathLabels && pathLabels[node.id]){
+      html += '<div class="branch-badge">BRANCH ' + pathLabels[node.id] + '</div>';
+    } else {
+      html += '<div class="branch-badge unlinked" title="No path from the opening scene reaches this node yet">⚠ UNLINKED</div>';
+    }
+    if(incomingList.length >= 2){
+      html += '<div class="incoming-chip" title="' + incomingList.length + ' different choices lead here">← ' + incomingList.length + '</div>';
+    }
+    html += '<div class="node-head" data-drag-handle="1">' +
+              '<span class="node-tag mono">' + tagLabel + '</span>' +
+              '<span class="node-actions">' +
+                (reasons.length ? '<span class="incomplete-badge" title="' + escapeHtml(reasons.join(" · ")) + '">!</span>' : '') +
+                '<button class="node-icon-btn star' + (isRoot ? ' is-root' : '') + '" data-action="set-root" title="Set as opening scene">★</button>' +
+                '<button class="node-icon-btn" data-action="delete-node" title="Delete node">✕</button>' +
+              '</span>' +
+            '</div>' +
+            '<div class="node-body" data-action="select">' +
+              '<p class="node-title">' + escapeHtml(node.title || "Untitled") + '</p>' +
+              '<div class="node-desc' + (node.description ? "" : " placeholder") + '">' +
+                escapeHtml(node.description || "No description yet — click to write one.") +
+              '</div>' +
+            '</div>';
+
+    if(node.type === "situation"){
+      html += '<div class="node-ports">';
+      node.choices.forEach(function(c, i){
+        var letter = String.fromCharCode(97 + i);
+        var cls = "port " + (c.targetId ? "connected" : "dangling");
+        html += '<div class="' + cls + '" title="' + escapeHtml(c.label || "(untitled choice)") + '">' + letter + '</div>';
+      });
+      if(node.choices.length < 5){
+        html += '<div class="port port-add" data-action="add-port" title="Add a new choice">+</div>';
+      }
+      html += '</div>';
+    } else {
+      html += '<div class="end-stamp">END</div>';
+    }
+
+    card.innerHTML = html;
+    return card;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(m){
+      return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[m];
+    });
+  }
+
+  /* ---------------- rendering: inspector ---------------- */
+
+  function renderInspector(){
+    if(!selectedNodeId || !state.nodes[selectedNodeId]){
+      els.inspector.classList.add("hidden");
+      return;
+    }
+    var node = state.nodes[selectedNodeId];
+    els.inspector.classList.remove("hidden");
+    var incomingMap = computeIncoming();
+    var incomingList = incomingMap[node.id] || [];
+    var reasons = getIncompleteReasons(node);
+
+    var html = '<div class="insp-head">' +
+        '<span class="insp-eyebrow mono">' + (node.type === "ending" ? "ENDING FILE" : "SITUATION FILE") + ' — #' + node.id.slice(-4).toUpperCase() + '</span>' +
+        '<button id="insp-close">✕</button>' +
+      '</div>';
+
+    if(reasons.length){
+      html += '<div class="insp-warning">⚠ Still needs: ' + escapeHtml(reasons.join(" · ")) + '</div>';
+    }
+
+    html += '<label class="insp-label">Title</label>' +
+      '<input class="insp-input" id="insp-title" value="' + escapeHtml(node.title) + '" placeholder="Name this moment">' +
+      '<label class="insp-label">Description</label>' +
+      '<textarea class="insp-textarea" id="insp-desc" placeholder="What happens here? What does the reader see, learn, decide?">' + escapeHtml(node.description) + '</textarea>' +
+      '<label class="insp-label">Node type</label>' +
+      '<select class="insp-select" id="insp-type">' +
+        '<option value="situation"' + (node.type === "situation" ? " selected" : "") + '>Situation — branches into choices</option>' +
+        '<option value="ending"' + (node.type === "ending" ? " selected" : "") + '>Ending — terminal outcome</option>' +
+      '</select>';
+
+    if(node.type === "situation"){
+      html += '<label class="insp-label">Choices (' + node.choices.length + '/5)</label><div id="insp-choices">';
+      node.choices.forEach(function(c, i){
+        var letter = String.fromCharCode(97 + i);
+        html += '<div class="choice-row" data-choice-id="' + c.id + '">' +
+          '<span class="choice-letter mono">' + letter + '</span>' +
+          '<div class="choice-reorder">' +
+            '<button class="choice-move" data-dir="up"' + (i === 0 ? " disabled" : "") + ' title="Move up">▲</button>' +
+            '<button class="choice-move" data-dir="down"' + (i === node.choices.length - 1 ? " disabled" : "") + ' title="Move down">▼</button>' +
+          '</div>' +
+          '<div class="choice-fields">' +
+            '<input class="choice-label-input" data-cfield="label" value="' + escapeHtml(c.label) + '" placeholder="What can the reader choose?">' +
+            '<select class="choice-target-select mono" data-cfield="target">' +
+              '<option value="">— not connected yet —</option>' +
+              '<option value="__new__">+ create a new connected node</option>' +
+              nodeOptions(c.targetId) +
+            '</select>' +
+          '</div>' +
+          '<button class="choice-remove" data-action="remove-choice" title="Remove this choice">✕</button>' +
+        '</div>';
+      });
+      html += '</div>';
+      html += '<button class="add-choice-btn" id="insp-add-choice"' + (node.choices.length >= 5 ? " disabled" : "") + '>+ ADD ANOTHER CHOICE</button>';
+      html += '<div class="insp-hint">Point a choice at "create a new connected node" to spin off a fresh scene already wired to this one — good for quick sidelines.</div>';
+    }
+
+    if(incomingList.length){
+      html += '<label class="insp-label">Linked from (' + incomingList.length + ')</label><div class="linked-from-list">';
+      incomingList.forEach(function(link){
+        html += '<button class="linked-from-item mono" data-source-id="' + link.sourceId + '">← ' +
+          escapeHtml(link.sourceTitle) + ' <span class="lf-choice">"' + escapeHtml(link.label) + '"</span></button>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div class="insp-footer">';
+    if(state.rootId !== node.id){
+      html += '<button class="insp-btn" id="insp-set-root">Set as opening scene</button>';
+    }
+    html += '<button class="insp-btn danger" id="insp-delete" data-armed="0">Delete this node</button>';
+    html += '</div>';
+
+    els.inspector.innerHTML = html;
+    bindInspectorEvents(node);
+
+    if(focusTitleOnNextRender === node.id){
+      focusTitleOnNextRender = null;
+      var titleField = document.getElementById("insp-title");
+      if(titleField){ titleField.focus(); titleField.select(); }
+    }
+  }
+
+  function nodeOptions(selectedId){
+    return nodeList().map(function(n){
+      var label = (n.type === "ending" ? "[END] " : "") + (n.title || "Untitled");
+      return '<option value="' + n.id + '"' + (n.id === selectedId ? " selected" : "") + '>' + escapeHtml(label) + '</option>';
+    }).join("");
+  }
+
+  function bindInspectorEvents(node){
+    document.getElementById("insp-close").addEventListener("click", function(){
+      selectedNodeId = null; renderInspector(); renderCanvas();
+    });
+    var titleField = document.getElementById("insp-title");
+    titleField.addEventListener("focus", function(){ pushUndo(); }, { once: true });
+    titleField.addEventListener("input", function(e){
+      node.title = e.target.value; renderCanvas(); scheduleSave();
+    });
+    var descField = document.getElementById("insp-desc");
+    descField.addEventListener("focus", function(){ pushUndo(); }, { once: true });
+    descField.addEventListener("input", function(e){
+      node.description = e.target.value; renderCanvas(); scheduleSave();
+    });
+    document.getElementById("insp-type").addEventListener("change", function(e){
+      pushUndo();
+      var newType = e.target.value;
+      if(newType === "ending" && node.choices.length > 0){
+        node.choices = [];
+      }
+      if(newType === "situation" && node.choices.length === 0){
+        node.choices.push({ id: uid("c"), label: "", targetId: null });
+      }
+      node.type = newType;
+      renderCanvas(); renderInspector(); scheduleSave();
+    });
+
+    var setRootBtn = document.getElementById("insp-set-root");
+    if(setRootBtn){
+      setRootBtn.addEventListener("click", function(){
+        pushUndo();
+        state.rootId = node.id; renderCanvas(); renderInspector(); scheduleSave();
+        toast("Set as the opening scene");
+      });
+    }
+
+    document.querySelectorAll(".linked-from-item").forEach(function(item){
+      item.addEventListener("click", function(){
+        var sourceId = item.dataset.sourceId;
+        if(!state.nodes[sourceId]) return;
+        selectedNodeId = sourceId;
+        renderCanvas(); renderInspector();
+        var src = state.nodes[sourceId];
+        els.canvasScroll.scrollTo({
+          left: Math.max(0, src.x - els.canvasScroll.clientWidth / 2 + CARD_W / 2),
+          top: Math.max(0, src.y - els.canvasScroll.clientHeight / 2),
+          behavior: "smooth"
+        });
+      });
+    });
+
+    var delBtn = document.getElementById("insp-delete");
+    delBtn.addEventListener("click", function(){
+      if(delBtn.dataset.armed === "1"){
+        pushUndo();
+        var idToDelete = node.id;
+        deleteNode(idToDelete);
+        renderCanvas(); renderInspector(); scheduleSave();
+      } else {
+        delBtn.dataset.armed = "1";
+        delBtn.textContent = "Click again to confirm delete";
+        clearTimeout(confirmTimers.delNode);
+        confirmTimers.delNode = setTimeout(function(){
+          delBtn.dataset.armed = "0";
+          delBtn.textContent = "Delete this node";
+        }, 3000);
+      }
+    });
+
+    var addChoiceBtn = document.getElementById("insp-add-choice");
+    if(addChoiceBtn){
+      addChoiceBtn.addEventListener("click", function(){
+        if(node.choices.length >= 5) return;
+        pushUndo();
+        node.choices.push({ id: uid("c"), label: "", targetId: null });
+        renderCanvas(); renderInspector(); scheduleSave();
+      });
+    }
+
+    var choicesWrap = document.getElementById("insp-choices");
+    if(choicesWrap){
+      choicesWrap.querySelectorAll(".choice-row").forEach(function(row){
+        var cid = row.dataset.choiceId;
+        var choice = node.choices.find(function(c){ return c.id === cid; });
+        if(!choice) return;
+
+        var labelInput = row.querySelector('[data-cfield="label"]');
+        labelInput.addEventListener("focus", function(){ pushUndo(); }, { once: true });
+        labelInput.addEventListener("input", function(e){
+          choice.label = e.target.value; scheduleSave();
+          // update tooltip on canvas port without full rerender by patching canvas
+          renderCanvas();
+        });
+        row.querySelector('[data-cfield="target"]').addEventListener("change", function(e){
+          var val = e.target.value;
+          if(val === "__new__"){
+            pushUndo();
+            var idx = node.choices.indexOf(choice);
+            var count = node.choices.length;
+            var nx = node.x + (idx - (count - 1) / 2) * 250;
+            var ny = node.y + 250;
+            var newNode = createNode("situation", nx, ny);
+            choice.targetId = newNode.id;
+            selectedNodeId = newNode.id;
+            focusTitleOnNextRender = newNode.id;
+            renderCanvas(); renderInspector(); scheduleSave();
+            toast("New scene created and connected");
+            return;
+          }
+          pushUndo();
+          choice.targetId = val || null;
+          renderCanvas(); renderInspector(); scheduleSave();
+        });
+        row.querySelector('[data-action="remove-choice"]').addEventListener("click", function(){
+          pushUndo();
+          node.choices = node.choices.filter(function(c){ return c.id !== cid; });
+          renderCanvas(); renderInspector(); scheduleSave();
+        });
+        row.querySelectorAll(".choice-move").forEach(function(btn){
+          btn.addEventListener("click", function(){
+            if(btn.disabled) return;
+            var dir = btn.dataset.dir;
+            var idx = node.choices.indexOf(choice);
+            var swapWith = dir === "up" ? idx - 1 : idx + 1;
+            if(swapWith < 0 || swapWith >= node.choices.length) return;
+            pushUndo();
+            var tmp = node.choices[swapWith];
+            node.choices[swapWith] = node.choices[idx];
+            node.choices[idx] = tmp;
+            renderCanvas(); renderInspector(); scheduleSave();
+          });
+        });
+      });
+    }
+  }
+
+  /* ---------------- canvas interactions ---------------- */
+
+  els.nodesLayer.addEventListener("pointerdown", function(e){
+    var card = e.target.closest(".node-card");
+    if(!card) return;
+    var id = card.dataset.id;
+    var action = e.target.dataset.action;
+
+    if(action === "delete-node"){
+      var btn = e.target;
+      if(btn.dataset.armed === "1"){
+        pushUndo();
+        deleteNode(id); renderCanvas(); renderInspector(); scheduleSave();
+      } else {
+        btn.dataset.armed = "1"; btn.textContent = "!";
+        setTimeout(function(){ if(btn){ btn.dataset.armed = "0"; btn.textContent = "✕"; } }, 2200);
+      }
+      e.stopPropagation();
+      return;
+    }
+    if(action === "set-root"){
+      pushUndo();
+      state.rootId = id; renderCanvas(); renderInspector(); scheduleSave();
+      e.stopPropagation();
+      return;
+    }
+    if(action === "add-port"){
+      var node = state.nodes[id];
+      if(node.choices.length < 5){
+        pushUndo();
+        node.choices.push({ id: uid("c"), label: "", targetId: null });
+        selectedNodeId = id;
+        renderCanvas(); renderInspector(); scheduleSave();
+      }
+      e.stopPropagation();
+      return;
+    }
+    if(action === "select"){
+      selectedNodeId = id;
+      renderCanvas(); renderInspector();
+    }
+
+    if(e.target.closest('[data-drag-handle="1"]')){
+      selectedNodeId = id;
+      renderCanvas(); renderInspector();
+      startDrag(e, id);
+    }
+  });
+
+  function startDrag(e, id){
+    var node = state.nodes[id];
+    var scrollRect = els.canvasScroll.getBoundingClientRect();
+    var startPointerX = e.clientX, startPointerY = e.clientY;
+    var startX = node.x, startY = node.y;
+    dragCtx = { id: id };
+    pushUndo();
+
+    function onMove(ev){
+      var dx = ev.clientX - startPointerX;
+      var dy = ev.clientY - startPointerY;
+      node.x = Math.max(0, startX + dx);
+      node.y = Math.max(0, startY + dy);
+      renderCanvas();
+    }
+    function onUp(){
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      dragCtx = null;
+      scheduleSave();
+    }
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+  }
+
+  /* click empty canvas to deselect */
+  els.canvasScroll.addEventListener("pointerdown", function(e){
+    if(e.target === els.canvasScroll || e.target === els.canvas){
+      selectedNodeId = null; renderCanvas(); renderInspector();
+    }
+  });
+
+  /* ---------------- top bar actions ---------------- */
+
+  document.querySelectorAll(".mode-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      setMode(btn.dataset.mode);
+    });
+  });
+
+  function setMode(m){
+    mode = m;
+    document.querySelectorAll(".mode-btn").forEach(function(b){
+      b.classList.toggle("active", b.dataset.mode === m);
+    });
+    els.buildView.classList.toggle("hidden", m !== "build");
+    els.simView.classList.toggle("hidden", m !== "simulate");
+    if(m === "simulate"){
+      simCurrentId = state.rootId;
+      simHistory = [];
+      renderSim();
+    }
+  }
+
+  document.getElementById("btn-add-situation").addEventListener("click", function(){
+    pushUndo();
+    var c = centerOfView();
+    var node = createNode("situation", c.x, c.y);
+    selectedNodeId = node.id;
+    focusTitleOnNextRender = node.id;
+    renderCanvas(); renderInspector(); scheduleSave();
+  });
+  document.getElementById("btn-add-ending").addEventListener("click", function(){
+    pushUndo();
+    var c = centerOfView();
+    var node = createNode("ending", c.x, c.y);
+    selectedNodeId = node.id;
+    focusTitleOnNextRender = node.id;
+    renderCanvas(); renderInspector(); scheduleSave();
+  });
+  document.getElementById("btn-undo").addEventListener("click", doUndo);
+  document.getElementById("btn-redo").addEventListener("click", doRedo);
+  function centerOfView(){
+    var x = els.canvasScroll.scrollLeft + els.canvasScroll.clientWidth / 2 - CARD_W / 2;
+    var y = els.canvasScroll.scrollTop + els.canvasScroll.clientHeight / 2 - 60;
+    return { x: Math.max(20, x), y: Math.max(20, y) };
+  }
+
+  document.getElementById("btn-fit").addEventListener("click", function(){
+    var root = state.nodes[state.rootId];
+    if(!root) return;
+    els.canvasScroll.scrollTo({
+      left: Math.max(0, root.x - els.canvasScroll.clientWidth / 2 + CARD_W / 2),
+      top: Math.max(0, root.y - els.canvasScroll.clientHeight / 2),
+      behavior: "smooth"
+    });
+  });
+
+  document.getElementById("btn-export").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var stamp = new Date().toISOString().slice(0,10);
+    a.href = url; a.download = "chain-of-events-" + stamp + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("Exported as JSON");
+  });
+
+  document.getElementById("btn-import").addEventListener("click", function(){
+    document.getElementById("file-import").click();
+  });
+  document.getElementById("file-import").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        var parsed = JSON.parse(ev.target.result);
+        if(!parsed || !parsed.nodes || !parsed.rootId || !parsed.nodes[parsed.rootId]){
+          throw new Error("bad shape");
+        }
+        pushUndo();
+        state = parsed; selectedNodeId = null;
+        renderCanvas(); renderInspector(); scheduleSave();
+        toast("Story imported");
+      }catch(err){
+        toast("Import failed — that file isn't a valid Chain of Events export", true);
+      }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  /* ---------------- simulate mode ---------------- */
+
+  function renderSim(){
+    var node = state.nodes[simCurrentId];
+    if(!node){
+      els.simCard.innerHTML = '<p class="sim-desc">This story has no opening scene yet. Go back to Build mode and set one.</p>';
+      return;
+    }
+    var html = "";
+    if(node.type === "ending"){
+      html += '<div class="sim-end-stamp">END OF LINE</div>';
+    } else {
+      html += '<div class="sim-eyebrow mono">' + (simHistory.length === 0 ? "OPENING SCENE" : "CHOICE " + simHistory.length) + '</div>';
+    }
+    html += '<h1 class="sim-title">' + escapeHtml(node.title || "Untitled") + '</h1>';
+    html += '<div class="sim-desc">' + escapeHtml(node.description || "(no description written yet)") + '</div>';
+
+    if(node.type === "situation"){
+      if(node.choices.length === 0){
+        html += '<p class="insp-hint mono" style="color:#8a8272;">This path doesn&rsquo;t continue anywhere yet.</p>';
+      } else {
+        html += '<div class="sim-choices">';
+        node.choices.forEach(function(c){
+          var enabled = !!c.targetId;
+          html += '<button class="sim-choice-btn" data-target="' + (c.targetId || "") + '"' + (enabled ? "" : " disabled") + '>' +
+            '<span class="arrow">→</span><span>' + escapeHtml(c.label || "(unwritten choice)") + (enabled ? "" : " — not connected yet") + '</span>' +
+          '</button>';
+        });
+        html += '</div>';
+      }
+    }
+
+    html += '<div class="sim-footer">';
+    if(simHistory.length > 0){ html += '<button class="sim-footer-btn" id="sim-back">← Back</button>'; }
+    html += '<button class="sim-footer-btn primary" id="sim-restart">Restart from the beginning</button>';
+    html += '</div>';
+
+    els.simCard.innerHTML = html;
+
+    els.simCard.querySelectorAll(".sim-choice-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var target = btn.dataset.target;
+        if(!target) return;
+        simHistory.push(simCurrentId);
+        simCurrentId = target;
+        renderSim();
+        els.simView.scrollTop = 0;
+      });
+    });
+    var backBtn = document.getElementById("sim-back");
+    if(backBtn){
+      backBtn.addEventListener("click", function(){
+        simCurrentId = simHistory.pop();
+        renderSim();
+      });
+    }
+    document.getElementById("sim-restart").addEventListener("click", function(){
+      simCurrentId = state.rootId; simHistory = [];
+      renderSim();
+    });
+  }
+
+  /* ---------------- keyboard ---------------- */
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && selectedNodeId){
+      selectedNodeId = null; renderCanvas(); renderInspector();
+      return;
+    }
+    var inField = document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA");
+    if(inField) return; // let the browser handle undo/redo natively inside a text field
+    var isZ = e.key === "z" || e.key === "Z";
+    if((e.ctrlKey || e.metaKey) && isZ && !e.shiftKey){ e.preventDefault(); doUndo(); return; }
+    if((e.ctrlKey || e.metaKey) && ((isZ && e.shiftKey) || e.key === "y" || e.key === "Y")){ e.preventDefault(); doRedo(); return; }
+  });
+
+  /* ---------------- init ---------------- */
+  loadState(function(){
+    renderCanvas();
+    renderInspector();
+    updateUndoButtons();
+  });
+
+})();
+</script>
+</body>
+</html>

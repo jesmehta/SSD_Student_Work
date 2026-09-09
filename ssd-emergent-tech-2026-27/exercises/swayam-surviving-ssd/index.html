@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Swayam Kadam's Surviving SSD game, converted from Processing and joystick input to p5.js and keyboard controls.">
+  <title>Surviving SSD — Swayam Kadam</title>
+  <link rel="stylesheet" href="../../css/exercise-shell.css">
+  <style>@font-face{font-family:SSDPixel;src:url('assets/pixelFont.ttf') format('truetype');font-display:swap}:root{--accent:#ff365e}.controls{flex-wrap:wrap}</style>
+</head>
+<body class="play-layout">
+  <header class="exercise-header"><a href="../../index.html">← Exhibition</a><span>Processing → p5.js</span></header>
+  <main class="exercise-main">
+    <section class="exercise-intro"><p class="kicker">Swayam Kadam · Hardware Software Bridge</p><h1>Surviving SSD</h1><p class="lede">Dodge academic hazards for sixty seconds, meet helpful—or costly—characters, and try to graduate without collecting six K.T.s.</p></section>
+    <section class="canvas-stage">
+      <div id="canvas-host" class="canvas-host"><p id="boot-status" style="padding:1rem;color:#ff7890;font:14px/1.5 monospace">Loading game…</p></div>
+      <div class="controls"><span>Move</span><span class="keys"><span class="key">←</span><span class="key">↑</span><span class="key">↓</span><span class="key">→</span></span><span>Start / continue / restart <span class="key">Space</span> or click/tap</span><span>Sound begins after interaction</span></div>
+    </section>
+  </main>
+  <footer class="exercise-footer"><span>Emergent Technology 2026–27</span><span>Keyboard edition</span></footer>
+  <script>window.addEventListener('error',function(event){var s=document.getElementById('boot-status');if(s)s.textContent='Game startup error: '+(event.message||'unknown error')+(event.filename?' — '+event.filename.split('/').pop()+':'+event.lineno:'')});window.addEventListener('unhandledrejection',function(event){var s=document.getElementById('boot-status');if(s)s.textContent='Game startup error: '+String(event.reason||'unknown promise error')});</script>
+  <script src="../../vendor/p5-1.9.4.min.js"></script>
+  <script src="sketch.js?v=20260909-2"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An exhibition of interactive experiments by the Emergent Technology cohort of 2026–27.">
+  <title>Emergent Technology 2026–27</title>
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/site.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="hero">
+    <nav class="masthead" aria-label="Primary navigation">
+      <a class="wordmark" href="./" aria-label="Emergent Technology home">ET / 26—27</a>
+      <a class="skip-link" href="#exercises">Explore the work ↓</a>
+    </nav>
+
+    <div class="hero-copy">
+      <p class="eyebrow">Interactive student exhibition</p>
+      <h1>Emergent<br><span>Technology</span></h1>
+      <div class="hero-footer">
+        <p>Experiments where code, bodies, machines and strange ideas meet.</p>
+        <p class="year">2026<br>—27</p>
+      </div>
+    </div>
+  </header>
+
+  <main id="exercises">
+    <section class="collection" aria-labelledby="collection-title">
+      <div class="collection-heading">
+        <div>
+          <p class="eyebrow">The collection</p>
+          <h2 id="collection-title">Works in progress</h2>
+        </div>
+        <p id="work-count" class="work-count" aria-live="polite"></p>
+      </div>
+
+      <div class="filters" aria-label="Filter exercises">
+        <button class="filter is-active" type="button" data-filter="all">All</button>
+        <button class="filter" type="button" data-filter="web">Web</button>
+        <button class="filter" type="button" data-filter="game">Games</button>
+        <button class="filter" type="button" data-filter="camera">Camera + ML</button>
+        <button class="filter" type="button" data-filter="physical">Physical → digital</button>
+      </div>
+
+      <div id="work-grid" class="work-grid"></div>
+      <noscript><p class="notice">JavaScript is required to display the exhibition index.</p></noscript>
+    </section>
+  </main>
+
+  <footer>
+    <p>Emergent Technology 2026–27</p>
+    <p>Built as a web archive of interactive experiments.</p>
+  </footer>
+</body>
+</html>

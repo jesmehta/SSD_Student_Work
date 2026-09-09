@@ -1,0 +1,938 @@
+/* =========================================================
+   NETSCAPE NAVIGATOR 1.1 — 1995 UI
+   CLEAN BASE STYLE
+   ========================================================= */
+
+.netscape-window {
+    background: #c0c0c0;
+    overflow: hidden;
+}
+
+/* =========================================================
+   NETSCAPE MENU BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-menubar-11 {
+    height: 24px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 6px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 13px;
+
+    color: #000000;
+
+    white-space: nowrap;
+}
+
+
+#netscapeWindow .netscape-menubar-11 .menu-item {
+    height: 22px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 9px;
+
+    box-sizing: border-box;
+
+    color: #000000;
+
+    text-decoration: none;
+
+    cursor: default;
+}
+
+
+#netscapeWindow .netscape-menubar-11 .menu-item:hover {
+    background: #000080;
+    color: #ffffff;
+}
+
+/* =========================================================
+   NETSCAPE NETSITE / LOCATION BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-location-11 {
+    height: 28px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 2px 5px;
+
+    gap: 5px;
+
+    background: #c0c0c0;
+
+    border-bottom: 1px solid #808080;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 10px;
+
+    color: #000000;
+}
+
+
+#netscapeWindow .netscape-location-label {
+    flex: 0 0 auto;
+
+    font-size: 10px;
+
+    color: #000000;
+
+    white-space: nowrap;
+}
+
+
+#netscapeWindow .netscape-location-input {
+    height: 21px;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    padding: 1px 4px;
+
+    background: #ffffff;
+
+    color: #000080;
+
+    border-top: 2px solid #404040;
+    border-left: 2px solid #404040;
+
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 11px;
+
+    outline: none;
+}
+
+
+#netscapeWindow .netscape-location-go {
+    height: 21px;
+
+    min-width: 38px;
+
+    padding: 0 6px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    color: #000000;
+
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   NETSCAPE DIRECTORY BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-directory-11 {
+    height: 27px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 2px 7px;
+
+    gap: 10px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 2px solid #808080;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    font-family:
+        "Times New Roman",
+        Times,
+        serif;
+
+    font-size: 11px;
+}
+
+
+#netscapeWindow .netscape-directory-11 a {
+    color: #0000ee;
+
+    text-decoration: underline;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
+
+#netscapeWindow .netscape-directory-11 a:visited {
+    color: #551a8b;
+}
+
+
+#netscapeWindow .netscape-directory-11 a:hover {
+    color: #0000ee;
+}
+
+#netscapeWindow .netscape-page-inner-11 {
+    min-height: 100%;
+
+    box-sizing: border-box;
+
+    padding: 16px 18px 30px;
+}
+
+/* =========================================================
+   NETSCAPE STATUS BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-status-11 {
+    height: 20px;
+
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    padding: 0 5px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #ffffff;
+
+    border-bottom: 1px solid #808080;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+
+    color: #000000;
+
+    white-space: nowrap;
+}
+/* =========================================================
+   NETSCAPE NAVIGATOR 1.1
+   FINAL CHROME OVERRIDE
+   1995 WINDOWS UI
+   ========================================================= */
+
+#netscapeWindow {
+    width: min(760px, calc(100% - 20px));
+    max-width: calc(100% - 20px);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   MENU BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-menu-11 {
+    height: 22px;
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 3px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+
+    font-family: "MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+
+    color: #000000;
+}
+
+
+#netscapeWindow .netscape-menu-11 span {
+    display: block;
+
+    padding: 2px 8px;
+
+    height: 20px;
+    box-sizing: border-box;
+
+    white-space: nowrap;
+}
+
+
+#netscapeWindow .netscape-menu-11 span:hover {
+    background: #000080;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+#netscapeWindow .netscape-toolbar-11 {
+    position: relative;
+
+    height: 52px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: stretch;
+
+    padding: 2px 4px;
+
+    gap: 1px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+}
+
+/* =========================================================
+   DIRECTORY BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-directory-11 {
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    padding: 2px 8px;
+
+    gap: 13px;
+
+    background: #c0c0c0;
+
+    border-bottom: 2px solid #808080;
+
+    white-space: nowrap;
+    overflow: hidden;
+
+    font-family:
+        "Times New Roman",
+        Times,
+        serif;
+
+    font-size: 10px;
+}
+
+
+#netscapeWindow .netscape-directory-11 a {
+    color: #0000ee;
+
+    text-decoration: underline;
+
+    cursor: pointer;
+}
+
+
+#netscapeWindow .netscape-directory-11 a:visited {
+    color: #551a8b;
+}
+
+/* =========================================================
+   STATUS BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-status-11 {
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    padding: 0 5px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #ffffff;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+
+    color: #000000;
+}
+
+/* =========================================================
+   NETSCAPE TOOLBAR
+   ========================================================= */
+
+#netscapeWindow .netscape-toolbar-11 {
+    width: 100%;
+    height: 52px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 2px 4px;
+
+    gap: 4px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   NETSCAPE TOOLBAR
+   ========================================================= */
+
+#netscapeWindow .netscape-toolbar-11 {
+    width: 100%;
+    height: 68px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: flex-start;
+
+    padding: 2px 4px;
+
+    gap: 4px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #808080;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+#netscapeWindow .netscape-button-11 {
+    position: relative;
+
+    width: 48px;
+    height: 62px;
+
+    min-width: 48px;
+    max-width: 48px;
+
+    flex: 0 0 48px;
+
+    display: block;
+
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+    font-size: 0;
+    line-height: normal;
+
+    overflow: visible;
+
+    cursor: default;
+}
+
+
+/* =========================================================
+   BLANK BUTTON PNG
+   ========================================================= */
+
+#netscapeWindow .netscape-button-image {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    display: block;
+
+    width: 48px;
+    height: 48px;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: fill;
+
+    image-rendering: pixelated;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   BUTTON LABEL
+   ========================================================= */
+
+#netscapeWindow .netscape-button-label {
+    position: absolute;
+
+    top: 48px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 70px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+    line-height: 11px;
+
+    font-weight: normal;
+
+    color: #000000;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   NETSCAPE LOGO / THROBBER
+   ========================================================= */
+
+#netscapeWindow .netscape-throbber-11 {
+    width: 48px;
+    height: 48px;
+
+    min-width: 48px;
+    min-height: 48px;
+
+    max-width: 48px;
+    max-height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+}
+
+
+#netscapeWindow .netscape-logo-image {
+    display: block;
+
+    width: 48px;
+    height: 48px;
+
+    max-width: 48px;
+    max-height: 48px;
+
+    object-fit: contain;
+
+    margin: 0;
+    padding: 0;
+
+    image-rendering: pixelated;
+}
+
+/* =========================================================
+   NETSCAPE WINDOW — KEEP INSIDE SIMULATED SCREEN
+   ========================================================= */
+
+#netscapeWindow {
+    box-sizing: border-box;
+
+    width: min(760px, calc(100% - 20px));
+
+    max-width: calc(100% - 20px);
+
+    overflow: hidden;
+}
+
+
+/* Keep every Netscape section inside the window */
+
+#netscapeWindow .netscape-menu-11,
+#netscapeWindow .netscape-toolbar-11,
+#netscapeWindow .netscape-location-11,
+#netscapeWindow .netscape-directory-11,
+#netscapeWindow .netscape-page-11,
+#netscapeWindow .netscape-status-11 {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* Prevent toolbar contents from forcing the window wider */
+
+#netscapeWindow .netscape-toolbar-11 {
+    overflow: hidden;
+    min-width: 0;
+}
+
+
+/* Prevent location field from creating horizontal overflow */
+
+#netscapeWindow .netscape-location-11 {
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    width: 100%;
+}
+
+#netscapeWindow .netscape-location-input,
+#netscapeWindow .netscape-location-11 input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+}
+
+
+/* Prevent directory links from expanding the window */
+
+#netscapeWindow .netscape-directory-11 {
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Browser page stays inside the frame */
+
+#netscapeWindow .netscape-page-11 {
+    min-width: 0;
+    min-height: 0;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+
+    scrollbar-width: auto !important;
+}
+
+/* =========================================================
+   NETSCAPE — FILL SIMULATED SCREEN WIDTH
+   ========================================================= */
+
+#netscapeWindow {
+    left: 0 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    box-sizing: border-box;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* =========================================================
+   NETSCAPE LOGO — FINAL
+   ========================================================= */
+
+#netscapeWindow {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+#netscapeWindow .netscape-throbber-11 {
+    position: absolute !important;
+
+    right: 8px !important;
+    top: 116px !important;
+
+    width: 53px !important;
+    height: 43px !important;
+
+    min-width: 53px !important;
+    min-height: 43px !important;
+
+    max-width: 53px !important;
+    max-height: 43px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    overflow: visible !important;
+
+    z-index: 99999 !important;
+}
+
+#netscapeWindow .netscape-logo-image {
+    display: block !important;
+
+    width: 53px !important;
+    height: 43px !important;
+
+    max-width: 53px !important;
+    max-height: 43px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    object-fit: contain !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    image-rendering: pixelated !important;
+}
+
+/* =========================================================
+   NETSCAPE LOGO BESIDE NETSITE BAR
+   ========================================================= */
+
+#netscapeWindow .netscape-location-logo-11 {
+    width: 53px;
+    height: 32px;
+
+    flex: 0 0 53px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-left: 6px;
+
+    overflow: visible;
+}
+
+#netscapeWindow .netscape-location-logo-11 img {
+    display: block;
+
+    width: 53px;
+    height: 43px;
+
+    max-width: 53px;
+    max-height: 43px;
+
+    object-fit: contain;
+
+    margin: 0;
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+}
+
+/* =========================================================
+   NETSCAPE DIRECTORY BUTTONS
+   ========================================================= */
+
+#netscapeWindow .netscape-directory-11 {
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    padding: 2px 6px;
+
+    gap: 2px;
+
+    background: #c0c0c0;
+
+    border-top: 1px solid #ffffff;
+    border-bottom: 2px solid #808080;
+
+    overflow: hidden;
+}
+
+
+/* ---------------------------------------------------------
+   DIRECTORY BUTTON
+   --------------------------------------------------------- */
+
+#netscapeWindow .netscape-directory-button {
+    height: 22px;
+
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 1px 10px;
+
+    background: #c0c0c0;
+
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+
+    font-family:
+        "MS Sans Serif",
+        Arial,
+        sans-serif;
+
+    font-size: 9px;
+
+    line-height: 16px;
+
+    color: #000000;
+
+    white-space: nowrap;
+
+    cursor: default;
+}
+
+
+/* ---------------------------------------------------------
+   PRESSED STATE
+   --------------------------------------------------------- */
+
+#netscapeWindow .netscape-directory-button:active {
+    border-top: 2px solid #404040;
+    border-left: 2px solid #404040;
+
+    border-right: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+
+    padding-left: 11px;
+    padding-top: 2px;
+}
+
+/* =========================================================
+   NETSCAPE — FILL VERTICALLY TO TASKBAR
+   ========================================================= */
+
+#netscapeWindow {
+    height: calc(100% - 28px) !important;
+    max-height: calc(100% - 28px) !important;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   NETSCAPE — MAKE PAGE FILL REMAINING VERTICAL SPACE
+   ========================================================= */
+
+#netscapeWindow {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+#netscapeWindow .netscape-menu-11,
+#netscapeWindow .netscape-toolbar-11,
+#netscapeWindow .netscape-location-11,
+#netscapeWindow .netscape-directory-11,
+#netscapeWindow .netscape-status-11 {
+    flex-shrink: 0 !important;
+}
+
+#netscapeWindow .netscape-page-11 {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+#netscapeWindow .netscape-status-11 {
+    flex: 0 0 20px !important;
+}
+
+/* =========================================================
+   EXTERNAL SIMULATED WEBSITE FRAME
+   ========================================================= */
+
+.netscape-website-frame {
+    display: block;
+
+    width: 100%;
+
+    border: none;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+}

@@ -1,0 +1,193 @@
+/* =====================================================
+   NETSCAPE HOME PAGE — 1995
+   ===================================================== */
+
+.netscape-home-1995 {
+    box-sizing: border-box;
+
+    width: 100%;
+    margin: 0;
+    padding: 12px 12px 30px;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    line-height: 1.2;
+
+    background: #c0c0c0;
+    color: #000000;
+
+    text-align: left;
+}
+
+.netscape-home-1995 *,
+.netscape-home-1995 *::before,
+.netscape-home-1995 *::after {
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   MAIN NETSCAPE WELCOME IMAGE
+   ===================================================== */
+
+.netscape-welcome-page-image {
+    display: block;
+
+    width: 830px;
+    max-width: 100%;
+    height: auto;
+
+    margin: 0 auto 18px;
+}
+
+
+/* =====================================================
+   NEWS / PROMOTIONAL TEXT
+   ===================================================== */
+
+.netscape-news {
+    width: 92%;
+    max-width: 1000px;
+
+    margin: 0 auto;
+
+    text-align: left;
+}
+
+.netscape-news h2 {
+    margin: 18px 0 2px;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: bold;
+
+    text-transform: uppercase;
+}
+
+.netscape-news p {
+    margin: 0 0 12px;
+    padding-left: 28px;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    line-height: 1.15;
+
+    text-align: left;
+}
+
+.netscape-news a {
+    color: #0000cc;
+}
+
+
+/* =====================================================
+   LINE ABOVE SECOND POSTER
+   ===================================================== */
+
+.netscape-home-1995 > hr {
+    border: 0;
+    border-top: 1px solid #808080;
+
+    margin: 14px 0;
+}
+
+
+/* =====================================================
+   SECOND NETSCAPE NAVIGATOR POSTER
+   ===================================================== */
+
+.netscape-ad-placeholder {
+    width: 100%;
+    max-width: 830px;
+
+    margin: 0 auto;
+
+    padding: 0;
+
+    text-align: center;
+
+    background: transparent;
+    border: 0;
+}
+
+.netscape-navigator-banner {
+    display: block;
+
+    width: 830px;
+    max-width: 100%;
+    height: auto;
+
+    margin: 0 auto;
+}
+
+
+/* =====================================================
+   LINE BELOW SECOND POSTER
+   ===================================================== */
+
+.netscape-ad-placeholder + hr {
+    margin: 10px 0 14px;
+}
+
+
+/* =====================================================
+   WELCOME TO NETSCAPE
+   ===================================================== */
+
+.netscape-home-heading {
+    margin: 0 0 28px;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 25px;
+    line-height: 1.1;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   LOWER LINK COLUMNS
+   ===================================================== */
+
+.netscape-link-columns {
+    width: 72%;
+    max-width: 800px;
+
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    column-gap: 55px;
+    row-gap: 35px;
+}
+
+.netscape-link-column {
+    display: flex;
+    flex-direction: column;
+
+    align-items: flex-start;
+}
+
+.netscape-link-column h2 {
+    margin: 0 0 2px;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 17px;
+    line-height: 1;
+    font-weight: bold;
+
+    color: #3b087d;
+
+    text-transform: uppercase;
+}
+
+.netscape-link-column a {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    line-height: 1.05;
+
+    color: #0000cc;
+}

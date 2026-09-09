@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>let's be friends</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:99999;top:12px;left:12px;padding:8px 12px;background:#111d;color:#fff;border:1px solid #fff5;text-decoration:none;font:12px monospace">← exhibition</a>
+
+    <main id="experience">
+
+
+        <!-- =====================================
+             CAMERA
+             ===================================== -->
+
+        <section
+            id="camera-container"
+            class="hidden"
+        >
+
+            <video
+                id="camera-video"
+                autoplay
+                playsinline
+                muted
+            ></video>
+
+            <!-- REPLICA -->
+<div
+    id="replica"
+    class=""
+    aria-hidden="true"
+>
+</div>
+
+            <!-- FACE TRACKING STATUS -->
+
+            <div
+                id="face-tracking-status"
+                class="hidden"
+            >
+
+                <span
+                    id="face-status-dot"
+                ></span>
+
+                <span
+                    id="face-status-text"
+                >
+                    LOADING FACE TRACKER...
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             INCOMING FACETIME POPUP
+             ===================================== -->
+
+        <section
+            id="video-call-container"
+            class="hidden"
+            aria-label="Incoming FaceTime call"
+        >
+
+            <div id="video-call-window">
+
+
+                <!-- CALLER INFORMATION -->
+
+                <div id="video-call-caller-area">
+
+                    <div id="video-call-avatar">
+
+                        <svg
+                            viewBox="0 0 64 64"
+                            aria-hidden="true"
+                        >
+
+                            <circle
+                                cx="32"
+                                cy="32"
+                                r="32"
+                                class="avatar-background"
+                            ></circle>
+
+                            <circle
+                                cx="32"
+                                cy="24"
+                                r="9"
+                                class="avatar-detail"
+                            ></circle>
+
+                            <path
+                                d="M16 51c2-10 8-15 16-15s14 5 16 15"
+                                class="avatar-detail"
+                            ></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div id="video-call-caller-info">
+
+                        <div id="video-call-type">
+                            Incoming FaceTime
+                        </div>
+
+                        <div id="video-call-caller">
+                            Unknown
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DIVIDER -->
+
+                <div
+                    id="video-call-divider"
+                    aria-hidden="true"
+                ></div>
+
+
+                <!-- CALL ACTIONS -->
+
+                <div id="video-call-actions">
+
+
+                    <!-- ACCEPT -->
+
+                    <button
+                        id="pickup-button"
+                        class="call-action"
+                        aria-label="Accept call"
+                    >
+
+                        <span
+                            class="call-action-circle accept"
+                        >
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+
+                                <path
+                                    d="M4 7.5A2.5 2.5 0 0 1 6.5 5h7A2.5 2.5 0 0 1 16 7.5v7a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 4 14.5z"
+                                ></path>
+
+                                <path
+                                    d="M16 9l4-2v10l-4-2z"
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+                        <span class="call-action-label">
+                            Accept
+                        </span>
+
+                    </button>
+
+
+                    <!-- DECLINE -->
+
+                    <button
+                        id="decline-call-button"
+                        class="call-action"
+                        aria-label="Decline call"
+                    >
+
+                        <span
+                            class="call-action-circle decline"
+                        >
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+
+                                <path
+                                    d="M6.6 4.2 4.8 6c-.8.8-.9 2-.3 2.9 2.9 4.8 6.8 7.7 11.7 10 .9.4 2 .2 2.7-.5l1.6-1.6c.7-.7.7-1.8 0-2.5l-2.7-2.2c-.6-.5-1.5-.5-2.1 0l-1.5 1.2c-1.8-.9-3.3-2.2-4.3-4l1.2-1.5c.5-.6.5-1.5 0-2.1L9.1 4.2c-.7-.7-1.8-.7-2.5 0Z"
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+                        <span class="call-action-label">
+                            Decline
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             DIALOGUE
+             ===================================== -->
+
+        <section id="dialogue-container">
+
+            <div id="dialogue-text"></div>
+
+
+            <!-- NAME INPUT -->
+
+            <div
+                id="input-container"
+                class="hidden"
+            >
+
+                <input
+                    type="text"
+                    id="name-input"
+                    placeholder="Your name"
+                    autocomplete="off"
+                >
+
+                <button id="name-submit">
+                    Continue
+                </button>
+
+            </div>
+
+
+            <!-- CONVERSATION CHOICES -->
+
+            <div
+                id="choice-container"
+                class="hidden"
+            >
+
+                <button id="yes-button">
+                    YES
+                </button>
+
+                <button id="no-button">
+                    NO
+                </button>
+
+            </div>
+
+            <!-- CAMERA INTERACTION -->
+
+            <div
+                id="camera-interaction-container"
+                class="hidden"
+            >
+
+<button
+    id="wave-button"
+    class="camera-interaction-button"
+    aria-hidden="true"
+></button>
+
+
+                <button
+                    id="smile-button"
+                    class="camera-interaction-button"
+                >
+                    😊 I smiled
+                </button>
+
+            </div>
+
+            <!-- CONTINUE BUTTON -->
+
+            <button
+                id="continue-button"
+                class="hidden"
+            >
+                Continue
+            </button>
+
+        </section>
+
+    </main>
+
+    <script src="settings.js"></script>
+    <script src="dialogue.js"></script>
+    <script src="script.js"></script>
+
+<!-- STEP 2 — FACE REGION TEST -->
+<canvas id="faceRegionTestCanvas"></canvas>
+
+</body>
+
+</html>

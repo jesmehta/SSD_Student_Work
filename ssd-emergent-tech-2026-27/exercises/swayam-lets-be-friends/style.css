@@ -1,0 +1,942 @@
+/* =========================================
+   EVIL REPLICA
+   v0.2.0 — Incoming FaceTime Popup
+   ========================================= */
+
+
+/* =========================================
+   BASIC RESET
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+
+body {
+    background: #ffffff;
+    color: #171717;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   MAIN EXPERIENCE
+   ========================================= */
+
+#experience {
+    position: relative;
+
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+}
+
+
+/* =========================================
+   DIALOGUE
+   ========================================= */
+
+#dialogue-container {
+    position: relative;
+
+    z-index: 10;
+
+    width: min(90%, 620px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+}
+
+
+#dialogue-text {
+    min-height: 48px;
+
+    font-size: 22px;
+    font-weight: 400;
+
+    line-height: 1.6;
+
+    letter-spacing: 0.01em;
+
+    color: #171717;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease,
+        color 0.3s ease;
+}
+
+
+/* =========================================
+   CAMERA ACTIVE — WHITE DIALOGUE
+   ========================================= */
+
+/*
+    When the camera is visible, the dialogue
+    automatically changes from black to white.
+
+    No JavaScript change is required.
+*/
+
+#camera-container:not(.hidden)
+~ #dialogue-container
+#dialogue-text {
+    color: #ffffff;
+}
+
+
+/* Typing cursor also becomes white */
+
+#camera-container:not(.hidden)
+~ #dialogue-container
+#dialogue-text.typing::after {
+    background: #ffffff;
+}
+
+
+/* =========================================
+   TYPING CURSOR
+   ========================================= */
+
+#dialogue-text.typing::after {
+    content: "";
+
+    display: inline-block;
+
+    width: 2px;
+    height: 1.1em;
+
+    margin-left: 5px;
+
+    vertical-align: -0.15em;
+
+    background: #171717;
+
+    animation:
+        typingCursor 0.8s steps(1) infinite;
+}
+
+
+@keyframes typingCursor {
+
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================================
+   NAME INPUT
+   ========================================= */
+
+#input-container {
+    margin-top: 28px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+#name-input {
+    width: 260px;
+
+    padding: 12px 16px;
+
+    border: none;
+
+    border-bottom: 1px solid #cccccc;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #171717;
+
+    font-family: inherit;
+    font-size: 18px;
+
+    text-align: center;
+
+    transition:
+        border-color 0.3s ease;
+}
+
+
+#name-input:focus {
+    border-bottom-color: #171717;
+}
+
+
+#name-input::placeholder {
+    color: #aaaaaa;
+}
+
+
+/* =========================================
+   GENERAL BUTTONS
+   ========================================= */
+
+button {
+    border: none;
+
+    background: transparent;
+
+    color: #171717;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+button:hover {
+    opacity: 0.55;
+}
+
+
+button:active {
+    transform: scale(0.97);
+}
+
+
+button:focus-visible {
+    outline: 2px solid #888888;
+
+    outline-offset: 3px;
+}
+
+
+/* =========================================
+   NAME BUTTON
+   ========================================= */
+
+#name-submit {
+    padding: 8px 14px;
+
+    font-size: 14px;
+
+    letter-spacing: 0.04em;
+}
+
+
+/* =========================================
+   CHOICE BUTTONS
+   ========================================= */
+
+#choice-container {
+    margin-top: 28px;
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 40px;
+
+    flex-wrap: wrap;
+}
+
+
+#yes-button,
+#no-button {
+    min-width: 100px;
+
+    padding: 10px 16px;
+
+    border-bottom:
+        1px solid
+        transparent;
+
+    font-size: 14px;
+
+    letter-spacing: 0.04em;
+}
+
+
+#yes-button:hover,
+#no-button:hover {
+    opacity: 0.55;
+
+    border-bottom-color: #cccccc;
+}
+
+
+/* =========================================
+   INCOMING FACETIME POPUP
+   ========================================= */
+
+#video-call-container {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    pointer-events: none;
+
+    animation:
+        incomingCallAppear
+        0.4s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        )
+        forwards;
+}
+
+
+@keyframes incomingCallAppear {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(-8px)
+            scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+
+/* =========================================
+   SMALL STRETCHED PILL
+   ========================================= */
+
+#video-call-window {
+    width: 500px;
+
+    min-height: 116px;
+
+    padding:
+        18px
+        25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 24px;
+
+    border-radius: 70px;
+
+    background:
+        rgba(
+            38,
+            38,
+            40,
+            0.97
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+
+    box-shadow:
+        0 16px 45px
+        rgba(
+            0,
+            0,
+            0,
+            0.22
+        );
+
+    color: #ffffff;
+
+    pointer-events: auto;
+
+    backdrop-filter:
+        blur(24px);
+
+    -webkit-backdrop-filter:
+        blur(24px);
+}
+
+
+/* =========================================
+   CALLER AREA
+   ========================================= */
+
+#video-call-caller-area {
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    flex: 1;
+}
+
+
+/* =========================================
+   AVATAR
+   ========================================= */
+
+#video-call-avatar {
+    width: 62px;
+
+    height: 62px;
+
+    flex:
+        0 0
+        62px;
+
+    overflow: hidden;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #858585,
+            #4c4c4c
+        );
+}
+
+
+#video-call-avatar svg {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+}
+
+
+.avatar-background {
+    fill:
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+}
+
+
+.avatar-detail {
+    fill:
+        rgba(
+            255,
+            255,
+            255,
+            0.82
+        );
+}
+
+
+/* =========================================
+   CALLER INFORMATION
+   ========================================= */
+
+#video-call-caller-info {
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 4px;
+}
+
+
+#video-call-type {
+    font-size: 12px;
+
+    font-weight: 400;
+
+    line-height: 1.2;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.58
+        );
+}
+
+
+#video-call-caller {
+    font-size: 22px;
+
+    font-weight: 500;
+
+    line-height: 1.2;
+
+    letter-spacing: -0.01em;
+
+    color: #ffffff;
+}
+
+
+/* =========================================
+   DIVIDER
+   ========================================= */
+
+#video-call-divider {
+    width: 1px;
+
+    height: 52px;
+
+    flex:
+        0 0
+        1px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        );
+}
+
+
+/* =========================================
+   CALL ACTIONS
+   ========================================= */
+
+#video-call-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    flex:
+        0 0
+        auto;
+}
+
+
+.call-action {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    min-width: 52px;
+
+    color: #ffffff;
+
+    opacity: 1;
+}
+
+
+.call-action:hover {
+    opacity: 1;
+}
+
+
+/* =========================================
+   ACTION CIRCLES
+   ========================================= */
+
+.call-action-circle {
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
+}
+
+
+.call-action:hover
+.call-action-circle {
+    transform: scale(1.08);
+
+    filter: brightness(1.08);
+}
+
+
+.call-action:active
+.call-action-circle {
+    transform: scale(0.92);
+}
+
+
+/* =========================================
+   ACCEPT
+   ========================================= */
+
+.call-action-circle.accept {
+    background: #34c759;
+
+    box-shadow:
+        0 4px 12px
+        rgba(
+            52,
+            199,
+            89,
+            0.25
+        );
+}
+
+
+/* =========================================
+   DECLINE
+   ========================================= */
+
+.call-action-circle.decline {
+    background: #ff3b30;
+
+    box-shadow:
+        0 4px 12px
+        rgba(
+            255,
+            59,
+            48,
+            0.22
+        );
+}
+
+
+/* =========================================
+   ICONS
+   ========================================= */
+
+.call-action-circle svg {
+    width: 19px;
+
+    height: 19px;
+
+    fill: #ffffff;
+}
+
+
+/* =========================================
+   LABELS
+   ========================================= */
+
+.call-action-label {
+    font-size: 10px;
+
+    font-weight: 400;
+
+    line-height: 1;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.82
+        );
+}
+
+
+/* =========================================
+   CAMERA
+   ========================================= */
+
+#camera-container {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 5;
+
+    display: block;
+
+    background: #000000;
+
+    overflow: hidden;
+
+    animation:
+        cameraAppear
+        1s ease
+        forwards;
+}
+
+
+@keyframes cameraAppear {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+}
+
+
+#camera-video {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 1;
+
+    object-fit: cover;
+
+    transform: scaleX(-1);
+
+    display: block;
+
+    background: transparent;
+}
+
+
+/* =========================================
+   FACIAL LANDMARK CANVAS
+   ========================================= */
+
+#face-landmark-canvas {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    width: 100%;
+
+    height: 100%;
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   UTILITY
+   ========================================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================
+   DIALOGUE ANIMATION
+   ========================================= */
+
+.fade-out {
+    opacity: 0;
+
+    transform:
+        translateY(4px);
+}
+
+
+.fade-in {
+    opacity: 1;
+
+    transform:
+        translateY(0);
+}
+
+
+/* =========================================
+   SMALL SCREENS
+   ========================================= */
+
+@media (max-width: 560px) {
+
+    #video-call-window {
+        width:
+            calc(100vw - 30px);
+
+        min-height: 100px;
+
+        padding:
+            15px 18px;
+
+        gap: 15px;
+
+        border-radius: 60px;
+    }
+
+
+    #video-call-avatar {
+        width: 52px;
+
+        height: 52px;
+
+        flex-basis: 52px;
+    }
+
+
+    #video-call-caller-area {
+        gap: 11px;
+    }
+
+
+    #video-call-type {
+        font-size: 10px;
+    }
+
+
+    #video-call-caller {
+        font-size: 18px;
+    }
+
+
+    #video-call-divider {
+        height: 44px;
+    }
+
+
+    #video-call-actions {
+        gap: 10px;
+    }
+
+
+    .call-action {
+        min-width: 42px;
+    }
+
+
+    .call-action-circle {
+        width: 36px;
+
+        height: 36px;
+    }
+
+
+    .call-action-circle svg {
+        width: 17px;
+
+        height: 17px;
+    }
+
+
+    .call-action-label {
+        font-size: 9px;
+    }
+
+}
+
+/* =========================================
+   REPLICA — DEVELOPMENT
+   ========================================= */
+
+#replica {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 360px;
+    height: 480px;
+
+    transform: translate(-50%, -50%);
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: 20;
+}
+
+/* =========================================================
+   STEP 2 — FACE REGION TEST
+   ========================================================= */
+
+#faceRegionTestCanvas {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    pointer-events: none;
+
+    z-index: 999999;
+
+    display: block;
+}

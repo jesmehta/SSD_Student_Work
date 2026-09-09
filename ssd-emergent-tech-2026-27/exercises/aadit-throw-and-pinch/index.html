@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Throw &amp; Pinch — camera clay sculpting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --clay-bg:        #16130f;
+    --clay-bg-2:      #1f1a14;
+    --clay-panel:     rgba(31,26,20,0.86);
+    --clay-line:      rgba(237,230,218,0.10);
+    --clay-cream:     #ede6da;
+    --clay-cream-dim: rgba(237,230,218,0.62);
+    --clay-ochre:     #c1732f;
+    --clay-ochre-hi:  #e8923f;
+    --clay-slate:     #5b6b6b;
+    --clay-slate-hi:  #8aa0a0;
+    --clay-red:       #b5453a;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background: radial-gradient(120% 140% at 50% 0%, var(--clay-bg-2) 0%, var(--clay-bg) 60%);
+    color: var(--clay-cream);
+    font-family:'Inter', system-ui, sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #scene-canvas{ position:fixed; inset:0; display:block; touch-action:none; z-index:2; }
+
+  /* ---------- live camera background ---------- */
+  #bg-video{
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover;
+    transform:scaleX(-1);
+    filter:brightness(0.8) contrast(1.06) saturate(0.88);
+    background:#000;
+    z-index:0;
+    display:none;
+  }
+  #bg-skeleton{
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover;
+    transform:scaleX(-1);
+    z-index:1;
+    display:none;
+    pointer-events:none;
+  }
+  .video-vignette{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      linear-gradient(to bottom, rgba(10,8,6,0.55) 0%, rgba(10,8,6,0) 16%, rgba(10,8,6,0) 78%, rgba(10,8,6,0.6) 100%),
+      radial-gradient(120% 90% at 50% 50%, rgba(0,0,0,0) 55%, rgba(8,6,4,0.35) 100%);
+    display:none;
+  }
+  body.cam-live .video-vignette,
+  body.cam-live #bg-video,
+  body.cam-live #bg-skeleton{ display:block; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding:22px 26px;
+    pointer-events:none;
+    z-index:20;
+  }
+  .brand{
+    display:flex; flex-direction:column; gap:2px;
+    pointer-events:auto;
+  }
+  .brand .kiln-dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--clay-ochre-hi);
+    box-shadow:0 0 8px 1px rgba(232,146,63,0.7);
+    margin-right:8px; position:relative; top:-1px;
+  }
+  .brand h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:0.01em;
+    margin:0;
+    color:var(--clay-cream);
+  }
+  .brand p{
+    margin:2px 0 0 15px;
+    font-size:12px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--clay-cream-dim);
+  }
+
+  .top-controls{
+    display:flex; gap:10px; pointer-events:auto;
+  }
+  .btn{
+    font-family:'Inter', sans-serif;
+    font-size:12.5px; font-weight:600;
+    letter-spacing:0.03em;
+    color:var(--clay-cream);
+    background:var(--clay-panel);
+    border:1px solid var(--clay-line);
+    border-radius:9px;
+    padding:9px 14px;
+    cursor:pointer;
+    backdrop-filter: blur(10px);
+    display:flex; align-items:center; gap:7px;
+    transition: border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .btn:hover{ border-color:rgba(237,230,218,0.3); transform:translateY(-1px); }
+  .btn:active{ transform:translateY(0px); }
+  .btn.primary{
+    background: linear-gradient(180deg, var(--clay-ochre-hi), var(--clay-ochre));
+    color:#1a1108;
+    border-color:transparent;
+  }
+  .btn.primary:hover{ filter:brightness(1.06); }
+  .btn:focus-visible{ outline:2px solid var(--clay-ochre-hi); outline-offset:2px; }
+  .btn.toggled{
+    background: linear-gradient(180deg, var(--clay-slate-hi), var(--clay-slate));
+    color:#0d1414;
+    border-color:transparent;
+  }
+
+  /* ---------- instructions card ---------- */
+  .instructions{
+    position:fixed; left:26px; bottom:26px;
+    width:272px;
+    background:var(--clay-panel);
+    border:1px solid var(--clay-line);
+    border-radius:14px;
+    padding:16px 16px 14px;
+    backdrop-filter: blur(10px);
+    z-index:20;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .instructions.hidden{ opacity:0; transform:translateY(8px); pointer-events:none; }
+  .instructions h2{
+    font-family:'Fraunces', serif;
+    font-size:14px; font-weight:600; margin:0 0 10px 0;
+    color:var(--clay-ochre-hi);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .instructions .close-x{
+    cursor:pointer; color:var(--clay-cream-dim); font-size:14px;
+    background:none; border:none; padding:2px 4px;
+  }
+  .instructions ul{ list-style:none; margin:0; padding:0; }
+  .instructions li{
+    display:flex; align-items:flex-start; gap:10px;
+    font-size:12.5px; line-height:1.5; color:var(--clay-cream-dim);
+    margin-bottom:9px;
+  }
+  .instructions li:last-child{ margin-bottom:0; }
+  .gesture-icon{
+    flex:0 0 auto; width:26px; height:26px; border-radius:7px;
+    background:rgba(237,230,218,0.06);
+    border:1px solid var(--clay-line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+  }
+  .instructions b{ color:var(--clay-cream); font-weight:600; }
+
+  /* ---------- floating status dock (mode pill + tracking status) ---------- */
+  .status-dock{
+    position:fixed; right:26px; bottom:26px;
+    display:flex; flex-direction:column; align-items:flex-end; gap:10px;
+    z-index:20;
+  }
+  .mode-pill{
+    font-size:11px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
+    padding:7px 13px; border-radius:20px;
+    background:var(--clay-panel); border:1px solid var(--clay-line);
+    color:var(--clay-cream-dim);
+    display:flex; align-items:center; gap:7px;
+    backdrop-filter:blur(10px);
+  }
+  .mode-pill .swatch{ width:8px; height:8px; border-radius:2px; background:var(--clay-slate-hi); }
+  .mode-pill.pull .swatch{ background:var(--clay-ochre-hi); }
+  .mode-pill.push .swatch{ background:var(--clay-slate-hi); }
+  .mode-pill.flatten .swatch{ background:var(--clay-cream); }
+  .mode-pill.precise-push .swatch{ background:#8aa0a0; }
+  .mode-pill.rotate .swatch{ background:#7fb2c9; }
+  .mode-pill.move-xy .swatch{ background:#c9a37f; }
+  .mode-pill.move-z .swatch{ background:#a37fc9; }
+  .mode-pill.scale-rotate .swatch{ background:#e85fa3; }
+
+  /* ---------- gesture signifiers drawn over the camera feed ---------- */
+  .gesture-state-ring{ opacity:0.9; }
+  @keyframes flash-highlight{
+    0%,100%{ box-shadow:0 0 0 0 rgba(232,146,63,0); }
+    30%{ box-shadow:0 0 0 6px rgba(232,146,63,0.35); }
+  }
+  .instructions.flash{ animation: flash-highlight 1.1s ease 2; }
+  .gesture-preview{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+    display:flex; gap:14px; flex-wrap:wrap; justify-content:center; max-width:520px;
+    background:var(--clay-panel); border:1px solid var(--clay-line); border-radius:16px;
+    padding:22px 26px; backdrop-filter:blur(12px); z-index:40;
+    opacity:0; pointer-events:none; transition:opacity .35s ease;
+  }
+  .gesture-preview.show{ opacity:1; }
+  .gesture-preview h3{
+    width:100%; text-align:center; margin:0 0 4px 0;
+    font-family:'Fraunces', serif; font-size:16px; color:var(--clay-ochre-hi);
+  }
+  .gesture-preview .gp-item{
+    display:flex; flex-direction:column; align-items:center; gap:6px; width:88px;
+  }
+  .gesture-preview .gp-icon{
+    font-size:24px; width:48px; height:48px; border-radius:12px;
+    background:rgba(237,230,218,0.06); border:1px solid var(--clay-line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gesture-preview .gp-label{ font-size:11px; text-align:center; color:var(--clay-cream-dim); line-height:1.3; }
+
+  /* ---------- subdivision control (uncapped — type any level) ---------- */
+  .subdiv-control{
+    display:flex; align-items:center; gap:8px;
+    background:var(--clay-panel); border:1px solid var(--clay-line);
+    border-radius:9px; padding:8px 10px 8px 13px;
+    backdrop-filter: blur(10px);
+    pointer-events:auto;
+  }
+  .subdiv-control label{
+    font-size:11px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
+    color:var(--clay-cream-dim); white-space:nowrap;
+  }
+  .subdiv-control .stepper{
+    display:flex; align-items:center; gap:1px;
+    border:1px solid var(--clay-line); border-radius:7px; overflow:hidden;
+  }
+  .subdiv-control input[type="number"]{
+    -moz-appearance: textfield; appearance:textfield;
+    width:38px; height:24px; border:none; text-align:center;
+    background:rgba(237,230,218,0.06); color:var(--clay-cream);
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600;
+    outline:none;
+  }
+  .subdiv-control input[type="number"]::-webkit-outer-spin-button,
+  .subdiv-control input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  .subdiv-control .step-btn{
+    width:20px; height:24px; border:none; cursor:pointer;
+    background:rgba(237,230,218,0.06); color:var(--clay-cream-dim);
+    font-size:12px; font-weight:700; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    transition: background .12s ease, color .12s ease;
+  }
+  .subdiv-control .step-btn:hover{ background:rgba(237,230,218,0.14); color:var(--clay-cream); }
+
+  /* ---------- clay color swatch ---------- */
+  .color-control{
+    display:flex; align-items:center; gap:9px;
+    background:var(--clay-panel); border:1px solid var(--clay-line);
+    border-radius:9px; padding:8px 13px;
+    backdrop-filter: blur(10px);
+    pointer-events:auto;
+  }
+  .color-control label{
+    font-size:11px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
+    color:var(--clay-cream-dim); white-space:nowrap;
+  }
+  .color-control input[type="color"]{
+    -webkit-appearance:none; appearance:none;
+    width:24px; height:24px; padding:0; cursor:pointer;
+    background:none; border:2px solid rgba(237,230,218,0.3); border-radius:50%;
+  }
+  .color-control input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; border-radius:50%; }
+  .color-control input[type="color"]::-webkit-color-swatch{ border:none; border-radius:50%; }
+  .color-control input[type="color"]::-moz-color-swatch{ border:none; border-radius:50%; }
+
+  .cam-status{
+    display:flex; align-items:center; gap:7px;
+    font-size:10.5px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
+    background:var(--clay-panel); border:1px solid var(--clay-line);
+    padding:7px 13px; border-radius:20px;
+    backdrop-filter:blur(10px);
+    color:var(--clay-cream-dim);
+  }
+  .cam-status .dot{ width:6px; height:6px; border-radius:50%; background:var(--clay-red); transition:background .2s; }
+  .cam-status .dot.live{ background:#7cc576; box-shadow:0 0 6px 1px rgba(124,197,118,0.7); }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed; left:50%; top:26px; transform:translate(-50%,-14px);
+    background:var(--clay-panel); border:1px solid var(--clay-line);
+    padding:10px 18px; border-radius:10px; font-size:12.5px;
+    color:var(--clay-cream); opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:30; backdrop-filter:blur(10px);
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+
+  @media (max-width: 720px){
+    .instructions{ width:calc(100% - 220px); max-width:260px; }
+    .brand p{ display:none; }
+  }
+  .exhibition-back{
+    position:fixed; left:14px; bottom:14px; z-index:40;
+    padding:9px 12px; border:1px solid rgba(255,255,255,.22);
+    border-radius:999px; background:rgba(24,16,10,.76); color:#fff;
+    font:600 11px/1 system-ui,sans-serif; letter-spacing:.06em;
+    text-decoration:none; text-transform:uppercase; backdrop-filter:blur(10px);
+  }
+  .exhibition-back:hover{ border-color:var(--clay-gold); color:var(--clay-gold); }
+</style>
+</head>
+<body>
+
+<a class="exhibition-back" href="../../index.html">← Exhibition</a>
+
+<video id="bg-video" playsinline muted></video>
+<canvas id="bg-skeleton"></canvas>
+<div class="video-vignette"></div>
+<canvas id="scene-canvas"></canvas>
+
+<div class="topbar">
+  <div class="brand">
+    <h1><span class="kiln-dot"></span>Throw &amp; Pinch</h1>
+    <p>camera clay, no kiln required</p>
+  </div>
+  <div class="top-controls">
+    <div class="color-control">
+      <label for="clay-color">Color</label>
+      <input type="color" id="clay-color" value="#b5652e" />
+    </div>
+    <div class="subdiv-control">
+      <label for="subdiv-input">Detail</label>
+      <div class="stepper">
+        <button class="step-btn" id="subdiv-down" type="button" aria-label="Decrease detail">−</button>
+        <input type="number" id="subdiv-input" min="1" step="1" value="6" />
+        <button class="step-btn" id="subdiv-up" type="button" aria-label="Increase detail">+</button>
+      </div>
+    </div>
+    <button class="btn" id="btn-instructions" type="button">? How to sculpt</button>
+    <button class="btn" id="btn-mirror" type="button">⇋ Mirror off</button>
+    <button class="btn" id="btn-reset" type="button">↺ Reset clay</button>
+    <button class="btn" id="btn-download" type="button">⬇ Download STL</button>
+    <button class="btn primary" id="btn-camera" type="button">◎ Enable camera</button>
+  </div>
+</div>
+
+<div class="instructions" id="instructions">
+  <h2>How to sculpt <button class="close-x" id="btn-close-instructions" type="button">✕</button></h2>
+  <ul>
+    <li><span class="gesture-icon">📷</span><span>Enable your <b>camera</b> and it becomes the backdrop — the clay sits right in the scene with you.</span></li>
+    <li><span class="gesture-icon">☝️</span><span><b>Index finger</b> alone — precise push.</span></li>
+    <li><span class="gesture-icon">✌️</span><span><b>Two-finger press</b> (index+middle) — push.</span></li>
+    <li><span class="gesture-icon">🤏</span><span><b>Pinch</b> thumb + index — pull; the gap between your fingers sets the size.</span></li>
+    <li><span class="gesture-icon">✋</span><span><b>Open hand/palm</b> — flatten the clay underneath it.</span></li>
+    <li><span class="gesture-icon">🖐️</span><span><b>Three fingers</b> (index+middle+ring), either hand — rotate / manipulate: sideways spins the clay, up/down tilts it.</span></li>
+    <li><span class="gesture-icon">👍</span><span><b>Thumb horizontal</b> (pointing sideways) — move the clay on the x/y axis.</span></li>
+    <li><span class="gesture-icon">👍</span><span><b>Thumb vertical</b> (pointing up/down) — move the clay on the z axis.</span></li>
+    <li><span class="gesture-icon">🤲</span><span><b>Both hands pinching</b> — pull apart or together to scale, and swing them around each other to rotate.</span></li>
+    <li><span class="gesture-icon">⇋</span><span><b>Mirror</b> sculpts both sides of the clay at once, symmetrically.</span></li>
+    <li><span class="gesture-icon">🎨</span><span>The <b>Color</b> swatch changes the clay's color.</span></li>
+    <li><span class="gesture-icon">🎚️</span><span>The <b>Detail</b> stepper changes how fine the clay mesh is — no upper limit, though very high levels get slow. Your sculpt carries over to the new resolution.</span></li>
+    <li><span class="gesture-icon">⬇</span><span><b>Download STL</b> saves your sculpt as a 3D-printable file.</span></li>
+    <li><span class="gesture-icon">🖱️</span><span>No camera? <b>Click-drag</b> to pull, hold <b>Shift</b> to push, hold <b>Ctrl/⌘</b> to flatten. <b>Right-drag</b> orbits the camera, scroll to zoom.</span></li>
+  </ul>
+</div>
+
+<div class="gesture-preview" id="gesture-preview">
+  <h3>Quick gesture guide</h3>
+  <div class="gp-item"><span class="gp-icon">☝️</span><span class="gp-label">Index<br>Precise push</span></div>
+  <div class="gp-item"><span class="gp-icon">✌️</span><span class="gp-label">Two fingers<br>Push</span></div>
+  <div class="gp-item"><span class="gp-icon">🤏</span><span class="gp-label">Pinch<br>Pull</span></div>
+  <div class="gp-item"><span class="gp-icon">✋</span><span class="gp-label">Open palm<br>Flatten</span></div>
+  <div class="gp-item"><span class="gp-icon">🖐️</span><span class="gp-label">Three fingers<br>Rotate</span></div>
+  <div class="gp-item"><span class="gp-icon">👍</span><span class="gp-label">Thumb ↔<br>Move x/y</span></div>
+  <div class="gp-item"><span class="gp-icon">👍</span><span class="gp-label">Thumb ↕<br>Move z</span></div>
+  <div class="gp-item"><span class="gp-icon">🤲</span><span class="gp-label">Two hands<br>Scale/rotate</span></div>
+</div>
+
+<div class="status-dock">
+  <div class="mode-pill push" id="mode-pill">
+    <span class="swatch"></span><span id="mode-pill-text">idle</span>
+  </div>
+  <div class="cam-status"><span class="dot" id="cam-dot"></span><span id="cam-status-text">camera off</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://esm.sh/three@0.160.0",
+    "three/addons/": "https://esm.sh/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { STLExporter } from "three/addons/exporters/STLExporter.js";
+
+/* =========================================================================
+   UI plumbing
+   ========================================================================= */
+const $ = (id) => document.getElementById(id);
+const toastEl = $("toast");
+let toastTimer = null;
+function toast(msg, ms = 2600){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), ms);
+}
+
+$("btn-instructions").addEventListener("click", () => $("instructions").classList.toggle("hidden"));
+$("btn-close-instructions").addEventListener("click", () => $("instructions").classList.add("hidden"));
+
+let mirrorEnabled = false;
+const btnMirror = $("btn-mirror");
+btnMirror.addEventListener("click", () => {
+  mirrorEnabled = !mirrorEnabled;
+  btnMirror.classList.toggle("toggled", mirrorEnabled);
+  btnMirror.textContent = mirrorEnabled ? "⇋ Mirror on" : "⇋ Mirror off";
+  toast(mirrorEnabled ? "Mirror sculpting on — both sides shaped together." : "Mirror sculpting off.");
+});
+
+const modePill = $("mode-pill");
+const modePillText = $("mode-pill-text");
+const MODE_LABELS = {
+  pull: "pulling",
+  push: "pushing",
+  flatten: "flattening",
+  "precise-push": "precise push",
+  rotate: "rotating",
+  "move-xy": "moving x/y",
+  "move-z": "moving z",
+  "scale-rotate": "scaling & rotating",
+};
+function setModePill(mode){
+  modePill.classList.remove("pull","push","flatten","precise-push","rotate","move-xy","move-z","scale-rotate");
+  if(mode && MODE_LABELS[mode]){
+    modePill.classList.add(mode);
+    modePillText.textContent = MODE_LABELS[mode];
+  } else {
+    modePillText.textContent = "idle";
+  }
+}
+
+/* =========================================================================
+   THREE.JS SCENE
+   ========================================================================= */
+const canvas = $("scene-canvas");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0); // fully transparent — the live video (or CSS gradient fallback) shows through
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+// No scene fog: with a transparent canvas the fog would tint the clay/pedestal
+// toward an opaque color that no longer matches whatever's behind it.
+
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 1.5, 4.4);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.1, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 2.2;
+controls.maxDistance = 7.5;
+controls.maxPolarAngle = Math.PI * 0.62;
+controls.mouseButtons = { LEFT: null, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+controls.touches = { ONE: THREE.TOUCH.NONE, TWO: THREE.TOUCH.DOLLY_PAN };
+
+/* ---- lighting: warm key, cool fill, ochre rim, matches the studio palette ---- */
+const hemi = new THREE.HemisphereLight(0x3c3630, 0x0c0a08, 0.65);
+scene.add(hemi);
+
+const key = new THREE.DirectionalLight(0xffe3bd, 2.1);
+key.position.set(3.2, 4.5, 2.6);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.near = 1;
+key.shadow.camera.far = 12;
+key.shadow.camera.left = -3; key.shadow.camera.right = 3;
+key.shadow.camera.top = 3; key.shadow.camera.bottom = -3;
+key.shadow.bias = -0.0025;
+scene.add(key);
+
+const rim = new THREE.PointLight(0xe8923f, 6, 10, 2);
+rim.position.set(-2.6, 1.6, -2.2);
+scene.add(rim);
+
+const fill = new THREE.PointLight(0x5b6b6b, 2.2, 10, 2);
+fill.position.set(-1.6, 0.6, 2.6);
+scene.add(fill);
+
+// No pedestal/plate — the clay just floats in front of the live camera feed
+// (or the studio gradient fallback), and is turned by hand gesture / a group
+// wrapper below rather than resting on any visible turntable geometry.
+const clayGroup = new THREE.Group();
+scene.add(clayGroup);
+
+/* =========================================================================
+   THE CLAY — deformable icosphere
+   ========================================================================= */
+const CLAY_RADIUS = 0.95;
+let CLAY_DETAIL = 6; // subdivision level; higher = smoother sculpting, heavier — adjustable via slider
+
+// Store the resting (un-deformed) position of every vertex, plus a live
+// per-vertex "height" scalar (distance from center) that we sculpt.
+let clayGeo, posAttr, vertexCount, baseDir, heights, velocities, smoothedHeights;
+
+function buildClayArrays(detail){
+  clayGeo = new THREE.IcosahedronGeometry(CLAY_RADIUS, detail);
+  clayGeo.deleteAttribute("uv");
+  posAttr = clayGeo.getAttribute("position");
+  vertexCount = posAttr.count;
+  baseDir = new Float32Array(vertexCount * 3); // unit direction from center, fixed
+  heights = new Float32Array(vertexCount);      // current radius per vertex
+  velocities = new Float32Array(vertexCount);    // for gentle springy settle
+  for(let i=0;i<vertexCount;i++){
+    const x = posAttr.getX(i), y = posAttr.getY(i), z = posAttr.getZ(i);
+    const len = Math.sqrt(x*x+y*y+z*z) || 1;
+    baseDir[i*3+0] = x/len;
+    baseDir[i*3+1] = y/len;
+    baseDir[i*3+2] = z/len;
+    heights[i] = len;
+  }
+  smoothedHeights = new Float32Array(vertexCount);
+  smoothedHeights.set(heights);
+}
+buildClayArrays(CLAY_DETAIL);
+
+/* Resample a sculpted height field from one mesh resolution onto another.
+   The clay is a radial height field over the unit sphere, so we reconstruct
+   height-at-direction using an inverse-distance-weighted blend of nearby old
+   vertices, found via a small lat/long spatial hash (fast to build, no holes
+   even when going from a coarse mesh to a much finer one, or back down). */
+function resampleHeights(oldBaseDir, oldHeights, oldCount, newBaseDir, newCount){
+  const GRID = Math.max(8, Math.min(64, Math.round(Math.sqrt(oldCount) / 2)));
+  const cellIndex = (u, v) => {
+    let cu = Math.floor(u * GRID); if(cu < 0) cu = 0; if(cu >= GRID) cu = GRID - 1;
+    let cv = Math.floor(v * GRID); if(cv < 0) cv = 0; if(cv >= GRID) cv = GRID - 1;
+    return cv * GRID + cu;
+  };
+  const buckets = new Map();
+  for(let i=0;i<oldCount;i++){
+    const x = oldBaseDir[i*3], y = oldBaseDir[i*3+1], z = oldBaseDir[i*3+2];
+    const u = Math.atan2(z, x) / (Math.PI*2) + 0.5;
+    const v = Math.acos(Math.min(1, Math.max(-1, y))) / Math.PI;
+    const key = cellIndex(u, v);
+    let arr = buckets.get(key);
+    if(!arr){ arr = []; buckets.set(key, arr); }
+    arr.push(i);
+  }
+
+  const out = new Float32Array(newCount);
+  for(let n=0;n<newCount;n++){
+    const x = newBaseDir[n*3], y = newBaseDir[n*3+1], z = newBaseDir[n*3+2];
+    const u = Math.atan2(z, x) / (Math.PI*2) + 0.5;
+    const v = Math.acos(Math.min(1, Math.max(-1, y))) / Math.PI;
+    const cu0 = Math.min(GRID-1, Math.max(0, Math.floor(u*GRID)));
+    const cv0 = Math.min(GRID-1, Math.max(0, Math.floor(v*GRID)));
+
+    let candidates = [];
+    for(let ring=0; ring<GRID && candidates.length < 6; ring++){
+      candidates = [];
+      for(let dv=-ring; dv<=ring; dv++){
+        const cv = cv0+dv; if(cv<0 || cv>=GRID) continue;
+        for(let du=-ring; du<=ring; du++){
+          const cu = ((cu0+du) % GRID + GRID) % GRID; // wrap the seam at theta=+-pi
+          const arr = buckets.get(cv*GRID+cu);
+          if(arr) for(const idx of arr) candidates.push(idx);
+        }
+      }
+    }
+    if(candidates.length === 0){ out[n] = CLAY_RADIUS; continue; }
+    if(candidates.length > 12){
+      candidates.sort((a,b) => {
+        const da = (oldBaseDir[a*3]-x)**2 + (oldBaseDir[a*3+1]-y)**2 + (oldBaseDir[a*3+2]-z)**2;
+        const db = (oldBaseDir[b*3]-x)**2 + (oldBaseDir[b*3+1]-y)**2 + (oldBaseDir[b*3+2]-z)**2;
+        return da - db;
+      });
+      candidates = candidates.slice(0, 12);
+    }
+    let wSum = 0, hSum = 0;
+    for(const idx of candidates){
+      const dx = oldBaseDir[idx*3]-x, dy = oldBaseDir[idx*3+1]-y, dz = oldBaseDir[idx*3+2]-z;
+      const w = 1 / (dx*dx + dy*dy + dz*dz + 1e-6);
+      wSum += w; hSum += w * oldHeights[idx];
+    }
+    out[n] = wSum > 0 ? hSum / wSum : CLAY_RADIUS;
+  }
+  return out;
+}
+
+const clayMat = new THREE.MeshPhysicalMaterial({
+  color: 0xb5652e,
+  roughness: 0.88,
+  metalness: 0.0,
+  clearcoat: 0.06,
+  clearcoatRoughness: 0.8,
+  sheen: 0.35,
+  sheenColor: new THREE.Color(0xe8923f),
+});
+const clayMesh = new THREE.Mesh(clayGeo, clayMat);
+clayMesh.castShadow = true;
+clayMesh.receiveShadow = true;
+clayMesh.position.y = 0.1;
+clayGroup.add(clayMesh);
+
+function applyHeightsToGeometry(){
+  for(let i=0;i<vertexCount;i++){
+    const h = heights[i];
+    posAttr.setXYZ(i, baseDir[i*3+0]*h, baseDir[i*3+1]*h, baseDir[i*3+2]*h);
+  }
+  posAttr.needsUpdate = true;
+  clayGeo.computeVertexNormals();
+  clayGeo.computeBoundingSphere();
+}
+
+/* ---- brush point marker: shows exactly which point is being sculpted,
+   color-coded to match the current mode pill swatch ---- */
+const MODE_COLORS = {
+  pull: 0xe8923f,
+  push: 0x8aa0a0,
+  flatten: 0xede6da,
+  "precise-push": 0x8aa0a0,
+};
+const brushDot = new THREE.Mesh(
+  new THREE.SphereGeometry(0.032, 16, 16),
+  new THREE.MeshBasicMaterial({ color:0xe8923f, transparent:true, opacity:0.95, depthTest:false })
+);
+brushDot.renderOrder = 999;
+brushDot.visible = false;
+scene.add(brushDot);
+
+const brushRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.05, 0.066, 28),
+  new THREE.MeshBasicMaterial({ color:0xe8923f, transparent:true, opacity:0.55, side:THREE.DoubleSide, depthTest:false })
+);
+brushRing.renderOrder = 998;
+brushRing.visible = false;
+scene.add(brushRing);
+
+const UP_AXIS = new THREE.Vector3(0,0,1);
+// "Deformation feedback" — a quick punch-scale on the brush dot/ring each
+// time a stroke actually lands, so there's visible confirmation the gesture
+// affected the clay rather than just hovering over it.
+let brushPulse = 0;
+function triggerDeformationFeedback(){ brushPulse = 1; }
+function showBrushCursor(worldPoint, worldNormal, mode, preview = false){
+  const color = MODE_COLORS[mode] ?? 0xe8923f;
+  brushDot.material.color.setHex(color);
+  brushRing.material.color.setHex(color);
+  brushDot.material.opacity = preview ? 0.45 : 0.95;
+  brushRing.material.opacity = preview ? 0.28 : 0.55;
+  brushDot.position.copy(worldPoint);
+  brushDot.visible = true;
+  brushRing.position.copy(worldPoint).addScaledVector(worldNormal, 0.004);
+  brushRing.quaternion.setFromUnitVectors(UP_AXIS, worldNormal);
+  brushRing.visible = true;
+}
+function hideBrushCursor(){ brushDot.visible = false; brushRing.visible = false; }
+
+function resetClay(){
+  for(let i=0;i<vertexCount;i++){ heights[i] = CLAY_RADIUS; smoothedHeights[i] = CLAY_RADIUS; velocities[i] = 0; }
+  applyHeightsToGeometry();
+  toast("Fresh lump of clay on the stand.");
+}
+applyHeightsToGeometry();
+
+/* ---- subdivision control: rebuilds the clay mesh at a new resolution,
+   carrying the current sculpt over instead of resetting to a fresh sphere.
+   There's no artificial ceiling — you can type any level — but each step up
+   roughly 4x's the vertex count (10*4^detail+2), so very high levels can take
+   a while to build and will slow sculpting down. We defer the rebuild a
+   couple of frames so the "building…" toast actually gets a chance to paint
+   before the (possibly heavy, synchronous) work runs, and fall back to the
+   previous level if a browser can't allocate a mesh that large. */
+let subdivBuildToken = 0;
+function setSubdivision(detail){
+  detail = Math.max(1, Math.round(detail));
+  const prevDetail = CLAY_DETAIL;
+  const myToken = ++subdivBuildToken;
+  const approxVerts = 10 * Math.pow(4, detail) + 2;
+  toast(
+    approxVerts > 3_000_000
+      ? `Building ~${approxVerts.toLocaleString()} vertices — this may take a moment and get slow to sculpt…`
+      : `Building detail ${detail}…`,
+    5000
+  );
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if(myToken !== subdivBuildToken) return; // a newer request superseded this one
+    try{
+      CLAY_DETAIL = detail;
+      const prevBaseDir = baseDir, prevHeights = heights, prevCount = vertexCount;
+      const oldGeo = clayGeo;
+
+      buildClayArrays(CLAY_DETAIL); // rebuilds baseDir/heights/vertexCount/etc at the new resolution
+
+      if(prevCount){
+        const resampled = resampleHeights(prevBaseDir, prevHeights, prevCount, baseDir, vertexCount);
+        heights.set(resampled);
+        smoothedHeights.set(resampled);
+      }
+
+      clayMesh.geometry = clayGeo;
+      oldGeo.dispose();
+      applyHeightsToGeometry();
+      toast(`Mesh detail set to ${detail} (${vertexCount.toLocaleString()} vertices).`);
+    } catch(err){
+      console.error(err);
+      CLAY_DETAIL = prevDetail;
+      subdivInput.value = prevDetail;
+      toast("That level was too much for your browser to build — dropped back down.", 4200);
+    }
+  }));
+}
+const subdivInput = $("subdiv-input");
+$("subdiv-up").addEventListener("click", () => {
+  subdivInput.value = Math.max(1, (parseInt(subdivInput.value, 10) || CLAY_DETAIL) + 1);
+  setSubdivision(parseInt(subdivInput.value, 10));
+});
+$("subdiv-down").addEventListener("click", () => {
+  subdivInput.value = Math.max(1, (parseInt(subdivInput.value, 10) || CLAY_DETAIL) - 1);
+  setSubdivision(parseInt(subdivInput.value, 10));
+});
+subdivInput.addEventListener("change", () => {
+  const v = Math.max(1, parseInt(subdivInput.value, 10) || CLAY_DETAIL);
+  subdivInput.value = v;
+  setSubdivision(v);
+});
+
+/* ---- clay color swatch ---- */
+const clayColorInput = $("clay-color");
+clayColorInput.value = "#" + clayMat.color.getHexString();
+clayColorInput.addEventListener("input", () => {
+  clayMat.color.set(clayColorInput.value);
+});
+
+/* ---- sculpting brush: push/pull vertices near a hit point ---- */
+const BRUSH_RADIUS = 0.34;
+const MIN_H = CLAY_RADIUS * 0.42;
+const MAX_H = CLAY_RADIUS * 1.85;
+
+// worldPoint: THREE.Vector3 in clayMesh local space already
+function sculptAt(localPoint, strength /* + pull, - push */, radius = BRUSH_RADIUS){
+  const r2 = radius*radius;
+  const px = localPoint.x, py = localPoint.y, pz = localPoint.z;
+  for(let i=0;i<vertexCount;i++){
+    const dx0 = baseDir[i*3+0]*heights[i];
+    const dy0 = baseDir[i*3+1]*heights[i];
+    const dz0 = baseDir[i*3+2]*heights[i];
+    const dx = dx0-px, dy = dy0-py, dz = dz0-pz;
+    const d2 = dx*dx+dy*dy+dz*dz;
+    if(d2 > r2) continue;
+    const falloff = 1 - Math.sqrt(d2)/radius; // linear falloff, 0..1
+    const smooth = falloff*falloff*(3-2*falloff); // smoothstep
+    heights[i] += strength * smooth * 0.06;
+    heights[i] = Math.min(MAX_H, Math.max(MIN_H, heights[i]));
+  }
+}
+
+// Flatten: eases vertex heights within the brush toward the clay's resting
+// radius, like pressing a flat palm down over a patch — smooths bumps and
+// dips alike rather than pushing everything inward uniformly.
+function flattenAt(localPoint, radius, amount = 0.16){
+  const r2 = radius*radius;
+  const px = localPoint.x, py = localPoint.y, pz = localPoint.z;
+  for(let i=0;i<vertexCount;i++){
+    const dx0 = baseDir[i*3+0]*heights[i];
+    const dy0 = baseDir[i*3+1]*heights[i];
+    const dz0 = baseDir[i*3+2]*heights[i];
+    const dx = dx0-px, dy = dy0-py, dz = dz0-pz;
+    const d2 = dx*dx+dy*dy+dz*dz;
+    if(d2 > r2) continue;
+    const falloff = 1 - Math.sqrt(d2)/radius;
+    const smooth = falloff*falloff*(3-2*falloff);
+    heights[i] += (CLAY_RADIUS - heights[i]) * smooth * amount;
+    heights[i] = Math.min(MAX_H, Math.max(MIN_H, heights[i]));
+  }
+}
+
+/* gentle relaxation so the clay doesn't look like sharp spikes — pulls
+   each vertex height slightly toward the average of its "neighborhood"
+   band (approximated via easing toward a smoothed value each frame) */
+function relax(dt){
+  // very light exponential smoothing per-vertex toward itself over time
+  // (keeps performance O(n), no neighbor graph needed) — mostly this just
+  // damps any single-frame double application; real shaping comes from the brush.
+  for(let i=0;i<vertexCount;i++){
+    smoothedHeights[i] += (heights[i]-smoothedHeights[i]) * Math.min(1, dt*10);
+  }
+}
+
+/* =========================================================================
+   INPUT: unify mouse / touch / tracked-hand into one raycasting brush
+   ========================================================================= */
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let isPointerDown = false;
+let pointerPushMode = false;
+
+// mode: 'pull' | 'push' | 'flatten' | 'precise-push'
+function applySculptMode(local, mode, radius){
+  if(mode === "flatten"){
+    flattenAt(local, radius);
+  } else if(mode === "pull"){
+    sculptAt(local, +1.0, radius);
+  } else {
+    sculptAt(local, -1.0, radius);
+  }
+}
+
+function castBrush(ndcX, ndcY, mode, radius = BRUSH_RADIUS){
+  ndc.set(ndcX, ndcY);
+  raycaster.setFromCamera(ndc, camera);
+  const hits = raycaster.intersectObject(clayMesh, false);
+  if(hits.length === 0) return false;
+  const hit = hits[0];
+  const local = clayMesh.worldToLocal(hit.point.clone());
+  applySculptMode(local, mode, radius);
+  if(mirrorEnabled){
+    // Symmetric sculpting: apply the same stroke reflected across the
+    // clay's local X=0 plane, so both sides are shaped together.
+    const mirrored = local.clone();
+    mirrored.x = -mirrored.x;
+    applySculptMode(mirrored, mode, radius);
+  }
+  const worldNormal = hit.face.normal.clone().transformDirection(clayMesh.matrixWorld).normalize();
+  showBrushCursor(hit.point, worldNormal, mode);
+  setModePill(mode);
+  triggerDeformationFeedback(); // confirms the stroke actually landed
+  return true;
+}
+
+// "Contact highlight" / "clay area highlight" — a dim, non-sculpting preview
+// of where a hand would affect the clay, shown while a hand approaches or is
+// doing a non-sculpting gesture (rotate, move) so the region is communicated
+// before any deformation actually happens.
+function castPreviewHighlight(ndcX, ndcY, mode){
+  ndc.set(ndcX, ndcY);
+  raycaster.setFromCamera(ndc, camera);
+  const hits = raycaster.intersectObject(clayMesh, false);
+  if(hits.length === 0) return false;
+  const hit = hits[0];
+  const worldNormal = hit.face.normal.clone().transformDirection(clayMesh.matrixWorld).normalize();
+  showBrushCursor(hit.point, worldNormal, mode, true);
+  return true;
+}
+
+/* ---- mouse / touch fallback ---- */
+function pointerModeFor(e){
+  if(e.shiftKey) return "push";
+  if(e.ctrlKey || e.metaKey) return "flatten";
+  return "pull";
+}
+canvas.addEventListener("pointerdown", (e) => {
+  if(e.button !== 0) return; // left button only sculpts; right/middle reserved for orbit/zoom
+  isPointerDown = true;
+  pointerPushMode = e.shiftKey;
+});
+window.addEventListener("pointerup", () => { isPointerDown = false; setModePill(null); hideBrushCursor(); });
+window.addEventListener("pointermove", (e) => {
+  if(!isPointerDown) return;
+  const x = (e.clientX / window.innerWidth) * 2 - 1;
+  const y = -(e.clientY / window.innerHeight) * 2 + 1;
+  const mode = pointerModeFor(e);
+  const radius = mode === "flatten" ? BRUSH_RADIUS * 1.35 : BRUSH_RADIUS;
+  castBrush(x, y, mode, radius);
+});
+window.addEventListener("keydown", (e) => { if(e.key === "Shift" && isPointerDown) pointerPushMode = true; });
+
+/* =========================================================================
+   HAND TRACKING (MediaPipe Tasks Vision) — optional enhancement
+   ========================================================================= */
+const video = $("bg-video");
+const overlay = $("bg-skeleton");
+const overlayCtx = overlay.getContext("2d");
+const camDot = $("cam-dot");
+const camStatusText = $("cam-status-text");
+const btnCamera = $("btn-camera");
+
+// The video fills the screen with CSS object-fit:cover, which crops whichever
+// axis doesn't match the window's aspect ratio. To make the sculpting cursor
+// land exactly where your hand appears on screen (not just its raw 0..1
+// position in the uncropped camera frame), we need to account for that crop
+// — plus the horizontal mirror — when converting a landmark to NDC.
+function landmarkToNDC(nx, ny){
+  const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
+  const ww = window.innerWidth, wh = window.innerHeight;
+  const videoAspect = vw / vh, windowAspect = ww / wh;
+  let cropX = 0, cropY = 0;
+  if(videoAspect > windowAspect){
+    // video is relatively wider than the window -> left/right edges are cropped
+    const visibleWidthFrac = windowAspect / videoAspect;
+    cropX = (1 - visibleWidthFrac) / 2;
+  } else {
+    // video is relatively taller -> top/bottom edges are cropped
+    const visibleHeightFrac = videoAspect / windowAspect;
+    cropY = (1 - visibleHeightFrac) / 2;
+  }
+  const denomX = 1 - 2*cropX, denomY = 1 - 2*cropY;
+  let dispX = denomX > 0 ? (nx - cropX) / denomX : nx;
+  let dispY = denomY > 0 ? (ny - cropY) / denomY : ny;
+  dispX = 1 - dispX; // mirror, since the displayed video is CSS-flipped
+  return {
+    ndcX: dispX*2 - 1,
+    ndcY: -(dispY*2 - 1),
+    onScreen: dispX >= 0 && dispX <= 1 && dispY >= 0 && dispY <= 1,
+  };
+}
+
+let handLandmarker = null;
+let handTrackingActive = false;
+let lastVideoTime = -1;
+
+async function initHandTracking(){
+  const { HandLandmarker, FilesetResolver } = await import(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs"
+  );
+  const vision = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  );
+  handLandmarker = await HandLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: "../../vendor/shared-models/hand_landmarker.task",
+      delegate: "GPU",
+    },
+    runningMode: "VIDEO",
+    numHands: 2,
+  });
+}
+
+// "First-use gesture preview" — a one-time visual crash course in the
+// gestures, shown the first time the camera comes on in this session.
+const gesturePreviewEl = $("gesture-preview");
+let hasShownGesturePreview = false;
+function showGesturePreviewOnce(){
+  if(hasShownGesturePreview) return;
+  hasShownGesturePreview = true;
+  gesturePreviewEl.classList.add("show");
+  setTimeout(() => gesturePreviewEl.classList.remove("show"), 6000);
+  $("instructions").classList.add("flash");
+  setTimeout(() => $("instructions").classList.remove("flash"), 2400);
+}
+
+async function enableCamera(){
+  btnCamera.disabled = true;
+  btnCamera.textContent = "◎ Starting…";
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 480, height: 360, facingMode: "user" },
+      audio: false,
+    });
+    video.srcObject = stream;
+    await video.play();
+
+    if(!handLandmarker){ await initHandTracking(); }
+
+    handTrackingActive = true;
+    document.body.classList.add("cam-live");
+    camDot.classList.add("live");
+    camStatusText.textContent = "tracking";
+    btnCamera.textContent = "◎ Camera on";
+    toast("Camera's live behind the clay — pinch or open your hand to sculpt.");
+    showGesturePreviewOnce();
+    requestAnimationFrame(trackHands);
+  } catch(err){
+    console.error(err);
+    camStatusText.textContent = "denied / unavailable";
+    btnCamera.disabled = false;
+    btnCamera.textContent = "◎ Enable camera";
+    toast("Couldn't reach the camera — sculpting with mouse/touch still works fine.");
+  }
+}
+btnCamera.addEventListener("click", enableCamera);
+
+// Per-hand smoothing for jittery landmark coordinates — up to 2 tracked
+// hand "slots", each of which can independently rotate, move, or sculpt.
+const MAX_TRACKED_HANDS = 2;
+const handCursors = Array.from({length: MAX_TRACKED_HANDS}, () => ({ x:0.5, y:0.5, has:false }));
+const handRotateState = Array.from({length: MAX_TRACKED_HANDS}, () => ({ active:false, prevX:0.5, prevY:0.5 }));
+const handMoveState = Array.from({length: MAX_TRACKED_HANDS}, () => ({ active:false, prevX:0.5, prevY:0.5, axis:null }));
+// Tracks, per hand slot, what the "gesture state indicator" should show:
+// 'detecting' (hand seen, no recognized gesture yet), 'active' (a gesture is
+// currently driving an action), or briefly 'lost' right after a hand drops out.
+const handGestureState = Array.from({length: MAX_TRACKED_HANDS}, () => ({ state:"detecting", label:"", lostAt:0 }));
+const twoHandState = { active:false, prevDist:0, prevAngle:0 };
+const SMOOTH = 0.35;
+
+function dist2D(a, b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+function clamp(v, lo, hi){ return Math.min(hi, Math.max(lo, v)); }
+function clamp01(v){ return clamp(v, 0, 1); }
+function mapRange(v, a0, a1, b0, b1){
+  const t = clamp01((v-a0)/(a1-a0));
+  return b0 + t*(b1-b0);
+}
+
+/* ---- finger-extension detection ----
+   A non-thumb finger counts as "extended" when its tip sits noticeably
+   farther from the wrist than its own pip joint does — a simple, rotation-
+   tolerant stand-in for "the finger is straight and sticking out". The
+   thumb moves sideways instead of curling toward the wrist, so it's judged
+   against the base of the palm (the pinky knuckle) instead. */
+function fingerExtended(lm, tip, pip){
+  return dist2D(lm[tip], lm[0]) > dist2D(lm[pip], lm[0]) * 1.08;
+}
+function thumbExtended(lm){
+  const palmBase = lm[17]; // pinky mcp — roughly the far edge of the palm from the thumb
+  return dist2D(lm[4], palmBase) > dist2D(lm[2], palmBase) * 1.15;
+}
+function readHandShape(lm){
+  return {
+    thumb:  thumbExtended(lm),
+    index:  fingerExtended(lm, 8, 6),
+    middle: fingerExtended(lm, 12, 10),
+    ring:   fingerExtended(lm, 16, 14),
+    pinky:  fingerExtended(lm, 20, 18),
+    pinchDist: dist2D(lm[4], lm[8]),
+  };
+}
+
+/* Thumb orientation — used by the thumb-alone "move" gesture. Compares the
+   thumb's own tip-to-base vector (landmark 4 vs landmark 2) rather than its
+   position relative to the wrist, so it works no matter where the hand sits
+   on screen. A wide dead-zone ratio (1.25x) means an ambiguous, diagonal
+   thumb doesn't jitter between axes — it just doesn't act until it's clearly
+   one or the other. */
+function thumbOrientation(lm){
+  const dx = lm[4].x - lm[2].x, dy = lm[4].y - lm[2].y;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+  if(adx > ady * 1.25) return "horizontal";
+  if(ady > adx * 1.25) return "vertical";
+  return null;
+}
+
+// Pinch size range: how far apart thumb+index can be while still "pinching",
+// mapped to a brush radius — a tight pinch makes a small mark, a wide one a
+// broad grab.
+const PINCH_ENGAGE = 0.11;   // beyond this gap, it's not a pinch anymore
+const PINCH_MIN_D  = 0.018;
+const PINCH_RADIUS_MIN = 0.13;
+const PINCH_RADIUS_MAX = 0.62;
+const PRECISE_RADIUS = 0.15;
+
+// Rotation sensitivity for the 3-finger turn gesture — works from either
+// hand, and now drives two axes: sideways motion spins the clay (yaw),
+// up/down motion tilts it (pitch).
+const ROTATE_SENSITIVITY = 5.2;
+const ROTATE_PITCH_LIMIT = Math.PI * 0.42; // keep it from flipping upside down
+
+// Move sensitivity for the thumb-alone gesture — a horizontal thumb slides
+// the clay across the x/y plane, a vertical thumb pushes/pulls it along z.
+const MOVE_SENSITIVITY = 3.0;
+const MOVE_LIMIT_XY = 1.3;
+const MOVE_LIMIT_Z  = 2.0;
+
+function handleRotateGesture(lm, slot){
+  const state = handRotateState[slot];
+  const wristX = lm[0].x, wristY = lm[0].y;
+  if(!state.active){ state.active = true; state.prevX = wristX; state.prevY = wristY; }
+  const dx = wristX - state.prevX;
+  const dy = wristY - state.prevY;
+  state.prevX = wristX; state.prevY = wristY;
+  clayGroup.rotation.y -= dx * ROTATE_SENSITIVITY; // mirrored display, so subtract
+  clayGroup.rotation.x = clamp(clayGroup.rotation.x + dy * ROTATE_SENSITIVITY, -ROTATE_PITCH_LIMIT, ROTATE_PITCH_LIMIT);
+  setModePill("rotate");
+}
+
+function handleMoveGesture(lm, slot, axis){
+  const state = handMoveState[slot];
+  const wristX = lm[0].x, wristY = lm[0].y;
+  if(!state.active || state.axis !== axis){
+    state.active = true; state.axis = axis; state.prevX = wristX; state.prevY = wristY;
+  }
+  const dx = wristX - state.prevX;
+  const dy = wristY - state.prevY;
+  state.prevX = wristX; state.prevY = wristY;
+  if(axis === "horizontal"){
+    // Thumb pointing sideways: hand motion slides the whole clay across x/y.
+    clayGroup.position.x = clamp(clayGroup.position.x - dx*MOVE_SENSITIVITY, -MOVE_LIMIT_XY, MOVE_LIMIT_XY);
+    clayGroup.position.y = clamp(clayGroup.position.y - dy*MOVE_SENSITIVITY, -MOVE_LIMIT_XY, MOVE_LIMIT_XY);
+    setModePill("move-xy");
+  } else {
+    // Thumb pointing up/down: vertical hand motion pushes the clay along z,
+    // toward or away from the camera.
+    clayGroup.position.z = clamp(clayGroup.position.z + dy*MOVE_SENSITIVITY, -MOVE_LIMIT_Z, MOVE_LIMIT_Z);
+    setModePill("move-z");
+  }
+}
+
+// Two-hand pinch: both hands pinching at once takes over from individual
+// sculpting — moving the hands apart/together scales the clay, and swinging
+// them around each other (like turning a big dial) rotates it.
+const SCALE_MIN = 0.35, SCALE_MAX = 3.2;
+function handleTwoHandGesture(lmA, lmB){
+  const ax=(lmA[4].x+lmA[8].x)/2, ay=(lmA[4].y+lmA[8].y)/2;
+  const bx=(lmB[4].x+lmB[8].x)/2, by=(lmB[4].y+lmB[8].y)/2;
+  const dx = bx-ax, dy = by-ay;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  const angle = Math.atan2(dy, dx);
+
+  if(!twoHandState.active){
+    twoHandState.active = true;
+    twoHandState.prevDist = dist;
+    twoHandState.prevAngle = angle;
+  } else {
+    const scaleFactor = dist / Math.max(twoHandState.prevDist, 0.001);
+    clayGroup.scale.setScalar(clamp(clayGroup.scale.x * scaleFactor, SCALE_MIN, SCALE_MAX));
+    let angleDelta = angle - twoHandState.prevAngle;
+    if(angleDelta > Math.PI) angleDelta -= Math.PI*2;
+    if(angleDelta < -Math.PI) angleDelta += Math.PI*2;
+    clayGroup.rotation.y -= angleDelta;
+    twoHandState.prevDist = dist;
+    twoHandState.prevAngle = angle;
+  }
+  setModePill("scale-rotate");
+  return { ax, ay, bx, by };
+}
+
+function pickSculptGesture(lm, shape){
+  const thumbTip = lm[4], indexTip = lm[8], middleTip = lm[12], middleMcp = lm[9];
+  if(shape.pinchDist < PINCH_ENGAGE){
+    // Thumb + index pinch: pull, sized by the gap between the fingertips.
+    return {
+      mode: "pull",
+      radius: mapRange(shape.pinchDist, PINCH_MIN_D, PINCH_ENGAGE, PINCH_RADIUS_MIN, PINCH_RADIUS_MAX),
+      point: { x:(thumbTip.x+indexTip.x)/2, y:(thumbTip.y+indexTip.y)/2 },
+    };
+  }
+  if(shape.index && shape.middle && shape.ring && shape.pinky){
+    // Open, flat hand/palm: flatten the surface under the palm. (Thumb
+    // extension is the least reliable of the five to detect, so it isn't
+    // required — four straight fingers is enough to count as "open hand".)
+    return { mode:"flatten", radius: BRUSH_RADIUS * 1.35, point: { x: middleMcp.x, y: middleMcp.y } };
+  }
+  if(shape.index && shape.middle && !shape.ring && !shape.pinky){
+    // Two-finger press (index+middle) extended together: push.
+    return { mode:"push", radius: BRUSH_RADIUS, point: { x:(indexTip.x+middleTip.x)/2, y:(indexTip.y+middleTip.y)/2 } };
+  }
+  if(shape.index && !shape.middle && !shape.ring && !shape.pinky && !shape.thumb){
+    // Index finger alone: a small, precise push.
+    return { mode:"precise-push", radius: PRECISE_RADIUS, point: { x: indexTip.x, y: indexTip.y } };
+  }
+  return null;
+}
+
+function trackHands(){
+  if(!handTrackingActive) return;
+  requestAnimationFrame(trackHands);
+
+  if(video.readyState < 2) return;
+  if(video.currentTime === lastVideoTime) return;
+  lastVideoTime = video.currentTime;
+
+  const now = performance.now();
+  const result = handLandmarker.detectForVideo(video, now);
+
+  overlay.width = video.videoWidth || 480;
+  overlay.height = video.videoHeight || 360;
+  overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+
+  const seenCount = result.landmarks ? result.landmarks.length : 0;
+
+  if(seenCount === 0){
+    for(const c of handCursors) c.has = false;
+    for(const r of handRotateState) r.active = false;
+    for(const m of handMoveState) m.active = false;
+    twoHandState.active = false;
+    // "Gesture state indicator" — fade any hand's ring/label out for a short
+    // grace period as 'lost' rather than snapping straight to nothing.
+    const nowT = performance.now();
+    for(let slot=0; slot<MAX_TRACKED_HANDS; slot++){
+      const gs = handGestureState[slot];
+      if(gs.state === "none") continue;
+      if(gs.state !== "lost"){ gs.state = "lost"; gs.lostAt = nowT; }
+      const elapsed = nowT - gs.lostAt;
+      if(elapsed > 500){ gs.state = "none"; continue; }
+      drawHandStateFade(handCursors[slot], overlay.width, overlay.height, 1 - elapsed/500);
+    }
+    setModePill(null);
+    hideBrushCursor();
+    return;
+  }
+
+  // First pass: read every currently-seen hand's landmarks + finger shape
+  // without acting on them yet, so we can tell whether this is a two-hand
+  // gesture before committing either hand to something else.
+  const seen = [];
+  for(let slot=0; slot<MAX_TRACKED_HANDS; slot++){
+    if(slot >= seenCount){
+      handCursors[slot].has = false;
+      handRotateState[slot].active = false;
+      handMoveState[slot].active = false;
+      handGestureState[slot].state = "none";
+      seen.push(null);
+      continue;
+    }
+    const lm = result.landmarks[slot];
+    drawSkeleton(lm, overlay.width, overlay.height);
+    seen.push({ lm, shape: readHandShape(lm) });
+  }
+
+  let anyMode = null;
+  let anyHit = false;
+
+  const bothPinching = seenCount >= 2 && seen[0] && seen[1] &&
+    seen[0].shape.pinchDist < PINCH_ENGAGE && seen[1].shape.pinchDist < PINCH_ENGAGE;
+
+  if(bothPinching){
+    // Two-hand pinch takes priority over individual sculpting for both hands.
+    handCursors[0].has = false; handCursors[1].has = false;
+    handRotateState[0].active = false; handRotateState[1].active = false;
+    handMoveState[0].active = false; handMoveState[1].active = false;
+    const pts = handleTwoHandGesture(seen[0].lm, seen[1].lm);
+    handGestureState[0].state = "active"; handGestureState[0].label = "Scale/rotate";
+    handGestureState[1].state = "active"; handGestureState[1].label = "Scale/rotate";
+    drawHandCursorAndLabel(pts.ax, pts.ay, overlay.width, overlay.height, "scale-rotate", "Scale/rotate");
+    drawHandCursorAndLabel(pts.bx, pts.by, overlay.width, overlay.height, "scale-rotate", "Scale/rotate");
+    drawTwoHandConnection(pts.ax, pts.ay, pts.bx, pts.by, overlay.width, overlay.height);
+    anyMode = "scale-rotate";
+    anyHit = true;
+  } else {
+    twoHandState.active = false;
+
+    for(let slot=0; slot<MAX_TRACKED_HANDS; slot++){
+      const hand = seen[slot];
+      if(!hand){ continue; }
+      const { lm, shape } = hand;
+      const w = overlay.width, h = overlay.height;
+      const threeFingers = shape.index && shape.middle && shape.ring && !shape.pinky && !shape.thumb;
+      const thumbOnly = shape.thumb && !shape.index && !shape.middle && !shape.ring && !shape.pinky;
+
+      if(threeFingers){
+        handCursors[slot].has = false;
+        handMoveState[slot].active = false;
+        handleRotateGesture(lm, slot);
+        handGestureState[slot].state = "active"; handGestureState[slot].label = "Rotate";
+        drawHandCursorAndLabel(lm[0].x, lm[0].y, w, h, "rotate", "Rotate / manipulate");
+        { const ndc = landmarkToNDC(lm[9].x, lm[9].y); castPreviewHighlight(ndc.ndcX, ndc.ndcY, "rotate"); }
+        anyMode = anyMode || "rotate";
+        continue;
+      }
+      handRotateState[slot].active = false;
+
+      if(thumbOnly){
+        const axis = thumbOrientation(lm);
+        handCursors[slot].has = false;
+        if(axis){
+          handleMoveGesture(lm, slot, axis);
+          const mode = axis === "horizontal" ? "move-xy" : "move-z";
+          const label = axis === "horizontal" ? "Move x/y" : "Move z";
+          const arrow = axis === "horizontal" ? "\u2194" : "\u2195"; // ↔ / ↕
+          handGestureState[slot].state = "active"; handGestureState[slot].label = label;
+          drawHandCursorAndLabel(lm[4].x, lm[4].y, w, h, mode, label, arrow);
+          const ndc = landmarkToNDC(lm[4].x, lm[4].y);
+          castPreviewHighlight(ndc.ndcX, ndc.ndcY, mode);
+          anyMode = anyMode || mode;
+        } else {
+          // Thumb detected but not clearly horizontal/vertical yet — "gesture
+          // detected but not yet activated": show the directional hint for
+          // both possible axes so the user knows which way to commit.
+          handMoveState[slot].active = false;
+          handGestureState[slot].state = "detecting"; handGestureState[slot].label = "";
+          drawHandCursorAndLabel(lm[4].x, lm[4].y, w, h, null, null, "\u2194 / \u2195");
+        }
+        continue;
+      }
+      handMoveState[slot].active = false;
+
+      const gesture = pickSculptGesture(lm, shape);
+      if(!gesture){
+        handCursors[slot].has = false;
+        handGestureState[slot].state = "detecting"; handGestureState[slot].label = "";
+        drawHandCursorAndLabel(lm[0].x, lm[0].y, w, h, null, null);
+        continue;
+      }
+
+      const cursor = handCursors[slot];
+      if(!cursor.has){
+        cursor.x = gesture.point.x; cursor.y = gesture.point.y; cursor.has = true;
+      } else {
+        cursor.x += (gesture.point.x - cursor.x) * SMOOTH;
+        cursor.y += (gesture.point.y - cursor.y) * SMOOTH;
+      }
+
+      const { ndcX, ndcY } = landmarkToNDC(cursor.x, cursor.y);
+      const hit = castBrush(ndcX, ndcY, gesture.mode, gesture.radius);
+      const label = MODE_LABELS[gesture.mode] ? MODE_LABELS[gesture.mode][0].toUpperCase()+MODE_LABELS[gesture.mode].slice(1) : gesture.mode;
+      handGestureState[slot].state = hit ? "active" : "detecting";
+      handGestureState[slot].label = hit ? label : "";
+      drawHandCursorAndLabel(cursor.x, cursor.y, w, h, hit ? gesture.mode : null, hit ? label : null);
+      if(hit){ anyMode = gesture.mode; anyHit = true; } // sculpt modes take display priority over rotate/move
+    }
+  }
+
+  if(!anyHit) hideBrushCursor();
+  setModePill(anyMode);
+}
+
+/* ---------- 2D overlay signifiers (drawn on #bg-skeleton, which is CSS-
+   mirrored to match the video — so any text needs an inner un-mirror or it
+   would read backwards) ---------- */
+function drawMirroredLabel(x, y, text, color){
+  overlayCtx.save();
+  overlayCtx.translate(x, y);
+  overlayCtx.scale(-1, 1); // undo the canvas element's CSS scaleX(-1)
+  overlayCtx.font = "700 13px 'Inter', sans-serif";
+  overlayCtx.fillStyle = color || "#ede6da";
+  overlayCtx.textAlign = "center";
+  overlayCtx.textBaseline = "bottom";
+  overlayCtx.shadowColor = "rgba(0,0,0,0.55)";
+  overlayCtx.shadowBlur = 4;
+  overlayCtx.fillText(text, 0, 0);
+  overlayCtx.restore();
+}
+
+const HAND_MODE_COLORS = {
+  pull: "#e8923f", push: "#8aa0a0", flatten: "#ede6da", "precise-push": "#8aa0a0",
+  rotate: "#7fb2c9", "move-xy": "#c9a37f", "move-z": "#a37fc9", "scale-rotate": "#e85fa3",
+};
+
+// "Hand cursor" + "Gesture state indicator" + "Gesture label" + optional
+// "Directional arrow", all anchored to one hand's tracked point.
+function drawHandCursorAndLabel(nx, ny, w, h, mode, label, arrow){
+  const x = nx*w, y = ny*h;
+  const color = mode ? (HAND_MODE_COLORS[mode] || "#e8923f") : "rgba(237,230,218,0.55)";
+
+  overlayCtx.beginPath();
+  overlayCtx.arc(x, y, 6, 0, Math.PI*2);
+  overlayCtx.fillStyle = mode ? color : "rgba(237,230,218,0.35)";
+  overlayCtx.fill();
+
+  // Gesture-state ring: solid + bright while a gesture is actively driving
+  // an action, dashed + dim while a hand is merely detected.
+  overlayCtx.beginPath();
+  overlayCtx.setLineDash(mode ? [] : [3, 4]);
+  overlayCtx.arc(x, y, 12, 0, Math.PI*2);
+  overlayCtx.strokeStyle = color;
+  overlayCtx.lineWidth = 2;
+  overlayCtx.stroke();
+  overlayCtx.setLineDash([]);
+
+  if(label) drawMirroredLabel(x, y-20, label, color);
+  if(arrow) drawMirroredLabel(x, y+30, arrow, "rgba(237,230,218,0.85)");
+}
+
+// Fading "lost" ring shown briefly at a hand's last known position right
+// after it drops out of frame.
+function drawHandStateFade(cursor, w, h, alpha){
+  if(!cursor || !cursor.has) return;
+  const x = cursor.x*w, y = cursor.y*h;
+  overlayCtx.beginPath();
+  overlayCtx.arc(x, y, 12, 0, Math.PI*2);
+  overlayCtx.strokeStyle = `rgba(181,69,58,${0.7*alpha})`;
+  overlayCtx.lineWidth = 2;
+  overlayCtx.stroke();
+  drawMirroredLabel(x, y-20, "lost", `rgba(237,230,218,${alpha})`);
+}
+
+// "Two-hand connection line" + combined "Rotation indicator" / "Scale
+// indicator" while both hands are pinching together.
+function drawTwoHandConnection(ax, ay, bx, by, w, h){
+  const x1=ax*w, y1=ay*h, x2=bx*w, y2=by*h;
+  overlayCtx.beginPath();
+  overlayCtx.moveTo(x1, y1);
+  overlayCtx.lineTo(x2, y2);
+  overlayCtx.strokeStyle = "rgba(232,95,163,0.75)";
+  overlayCtx.lineWidth = 2;
+  overlayCtx.setLineDash([6, 5]);
+  overlayCtx.stroke();
+  overlayCtx.setLineDash([]);
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  drawMirroredLabel(mx, my-14, "\u2194 scale  \u27F2 rotate", "#e85fa3");
+}
+
+function drawSkeleton(lm, w, h){
+  const CONNECTIONS = [
+    [0,1],[1,2],[2,3],[3,4],
+    [0,5],[5,6],[6,7],[7,8],
+    [5,9],[9,10],[10,11],[11,12],
+    [9,13],[13,14],[14,15],[15,16],
+    [13,17],[17,18],[18,19],[19,20],
+    [0,17]
+  ];
+  overlayCtx.strokeStyle = "rgba(232,146,63,0.75)";
+  overlayCtx.lineWidth = 2;
+  overlayCtx.beginPath();
+  for(const [a,b] of CONNECTIONS){
+    overlayCtx.moveTo(lm[a].x*w, lm[a].y*h);
+    overlayCtx.lineTo(lm[b].x*w, lm[b].y*h);
+  }
+  overlayCtx.stroke();
+
+  overlayCtx.fillStyle = "#ede6da";
+  for(const p of lm){
+    overlayCtx.beginPath();
+    overlayCtx.arc(p.x*w, p.y*h, 2.6, 0, Math.PI*2);
+    overlayCtx.fill();
+  }
+  const thumbTip = lm[4], indexTip = lm[8];
+  overlayCtx.strokeStyle = "rgba(237,230,218,0.9)";
+  overlayCtx.beginPath();
+  overlayCtx.moveTo(thumbTip.x*w, thumbTip.y*h);
+  overlayCtx.lineTo(indexTip.x*w, indexTip.y*h);
+  overlayCtx.stroke();
+}
+
+/* =========================================================================
+   RESET + DOWNLOAD + RESIZE
+   ========================================================================= */
+$("btn-reset").addEventListener("click", resetClay);
+
+const stlExporter = new STLExporter();
+$("btn-download").addEventListener("click", () => {
+  scene.updateMatrixWorld(true);
+  const stlString = stlExporter.parse(clayMesh, { binary:false });
+  const blob = new Blob([stlString], { type:"model/stl" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "throw-and-pinch-clay.stl";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Downloaded your sculpt as an STL.");
+});
+
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* =========================================================================
+   RENDER LOOP
+   ========================================================================= */
+const clock = new THREE.Clock();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  applyHeightsToGeometry();
+  relax(dt);
+
+  // The clay stays put unless you turn it — a 3-finger right-hand swipe
+  // (see trackHands) or the Detail-slider rebuild are the only things that
+  // rotate clayGroup now; there's no automatic idle spin.
+
+  rim.intensity = 5.6 + Math.sin(clock.elapsedTime*1.6)*0.4;
+
+  // Deformation-feedback pulse: punch the brush dot/ring outward briefly
+  // whenever a stroke lands, then ease back to normal size.
+  if(brushPulse > 0.001){
+    const s = 1 + brushPulse*0.7;
+    brushDot.scale.setScalar(s);
+    brushRing.scale.setScalar(s);
+    brushPulse *= Math.max(0, 1 - dt*9);
+  } else if(brushDot.scale.x !== 1){
+    brushDot.scale.setScalar(1);
+    brushRing.scale.setScalar(1);
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+toast("Fresh clay's on the stand. Try dragging it, or enable your camera.", 4200);
+</script>
+</body>
+</html>

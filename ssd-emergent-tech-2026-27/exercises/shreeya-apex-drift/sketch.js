@@ -1,0 +1,14 @@
+let shipX=350,shipY=400,shipAngle=0,targetAngle=0,shipVX=0,score=0,integrity=100,crashed=false,paused=false;
+const gates=Array.from({length:3},()=>({})),trackSpeed=3;
+function setup(){createCanvas(700,500).parent('canvas-host');rectMode(CENTER);resetGates()}
+function draw(){background(8,8,15);if(paused)return pauseScreen();stroke(25,25,45);strokeWeight(2);for(let y=frameCount*trackSpeed%50;y<height;y+=50)line(0,y,width,y);noStroke();if(crashed)return crashScreen();targetAngle=0;if(keyIsDown(65)||keyIsDown(LEFT_ARROW)){targetAngle=-.45;shipVX-=.45}if(keyIsDown(68)||keyIsDown(RIGHT_ARROW)){targetAngle=.45;shipVX+=.45}shipAngle+=(targetAngle-shipAngle)*.12;shipVX*=.92;shipX=constrain(shipX+shipVX,40,width-40);gates.forEach((g,i)=>{g.y+=trackSpeed;if(g.blue){fill(0,150,255,70);rect(g.x,g.y,g.w,12);fill(0,200,255);rect(g.x,g.y,g.w,4,2);if(g.y>=shipY-10&&g.y<=shipY+10){if(abs(shipX-g.x)<g.w/2+10)damage(g);else score+=25}}else{fill(255,0,100,40);rect(g.x,g.y,g.w,15);fill(255,50,120);rect(g.x-g.w/2,g.y,12,30,3);rect(g.x+g.w/2,g.y,12,30,3);if(g.y>=shipY-10&&g.y<=shipY+10){if(abs(shipX-g.x)>g.w/2-10)damage(g);else score+=50}}if(g.y>height+30)resetGate(i,-50)});ship();hud()}
+function damage(g){integrity-=34;g.y=-50;if(integrity<=0)crashed=true}
+function ship(){push();translate(shipX,shipY);rotate(shipAngle);fill(0,255,200,40);ellipse(0,25,45,20);fill(30,35,45);triangle(-20,15,0,-25,20,15);fill(0,255,220);rect(-18,8,8,22,2);rect(18,8,8,22,2);fill(255);ellipse(0,-2,8,16);pop()}
+function hud(){fill(0,0,0,180);rect(width/2,30,width,60);fill(255);textSize(16);textAlign(LEFT,CENTER);text(`SCORE: ${score}`,40,30);textAlign(RIGHT,CENTER);text('INTEGRITY:',width-140,30);fill(60,20,20);rect(width-75,30,100,15,3);fill(0,255,150);rect(width-75-(100-integrity)/2,30,max(0,integrity),15,3)}
+function resetGate(i,y){let g=gates[i];g.y=y;g.blue=random()<.5;if(g.blue){g.w=random(200,300);g.x=random()<.5?random(120,250):random(450,580)}else{g.x=random(150,width-150);g.w=random(120,170)}}
+function resetGates(){gates.forEach((g,i)=>resetGate(i,-200-i*200))}
+function restart(){score=0;integrity=100;crashed=paused=false;shipX=width/2;shipVX=shipAngle=0;resetGates()}
+function pauseScreen(){fill(5,5,15,150);rect(width/2,height/2,width,height);textAlign(CENTER,CENTER);fill(0,200,255);textSize(38);text('SIMULATION PAUSED',width/2,height/2-20);fill(150);textSize(16);text("Press 'ESC' again to return to track vectors",width/2,height/2+25)}
+function crashScreen(){textAlign(CENTER,CENTER);fill(255,50,50);textSize(36);text('CRITICAL SYSTEMS BREAKDOWN',width/2,height/2-20);fill(180);textSize(18);text(`Final Race Score: ${score} Points`,width/2,height/2+25);textSize(14);fill(0,255,200);text("Press SPACEBAR or click to reboot",width/2,height/2+80)}
+function keyPressed(){if(keyCode===ESCAPE){if(!crashed)paused=!paused;return false}if(crashed&&key===' ')restart();return false}
+function mousePressed(){if(crashed)restart()}

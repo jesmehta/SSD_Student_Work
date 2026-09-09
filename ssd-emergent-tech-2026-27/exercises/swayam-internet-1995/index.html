@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>1995 Time-Travel Web Simulator</title>
+
+    <link rel="stylesheet" href="css/os_theme.css">
+    <link rel="stylesheet" href="css/ui/custom-ui.css">
+    <link rel="stylesheet" href="css/netscape.css">
+    <link rel="stylesheet" href="css/web_pages/netspace-home.css">
+</head>
+
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:99999;top:4px;right:4px;padding:3px 8px;background:#c0c0c0;color:#000;border:2px outset #fff;text-decoration:none;font:12px Arial">← Exhibition</a>
+
+    <!-- =====================================================
+         PHYSICAL CRT MONITOR
+         ===================================================== -->
+
+    <div id="monitor">
+
+        <div id="monitor-screen">
+
+            <!-- =================================================
+                 FIXED 640 × 480 COMPUTER DISPLAY
+                 ================================================= -->
+
+            <div id="computer">
+
+                <!-- ================= DESKTOP ================= -->
+
+                <main id="desktop">
+
+                    <!-- Desktop icons -->
+
+                    <div class="desktop-icons">
+
+                        <button
+                            class="desktop-icon"
+                            id="myComputerIcon"
+                        >
+
+<img
+    class="pixel-icon"
+    src="assets/images/windows 95 kit/Icons/Large/My Computer.png"
+    alt="My Computer"
+>
+
+                            <span class="icon-label">
+                                My Computer
+                            </span>
+                        </button>
+
+
+                        <button class="desktop-icon">
+
+<img
+    class="pixel-icon"
+    src="assets/images/windows 95 kit/Icons/Large/Network Neighborhood.png"
+    alt="Network Neighborhood"
+>
+
+                            <span class="icon-label">
+                                Network Neighborhood
+                            </span>
+
+                        </button>
+
+<button
+    class="desktop-icon"
+    id="netscapeIcon"
+>
+
+    <img
+        class="pixel-icon"
+        src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Netscape.webp"
+        alt="Netscape"
+    >
+
+    <span class="icon-label">
+        Netscape
+    </span>
+
+</button>
+
+                        <button
+                            class="desktop-icon"
+                            id="timeMachineIcon"
+                        >
+
+                            <span class="pixel-icon clock-icon">
+                                <span class="clock-hand clock-hour"></span>
+                                <span class="clock-hand clock-minute"></span>
+                            </span>
+
+                            <span class="icon-label">
+                                Time Machine
+                            </span>
+
+                        </button>
+
+
+                        <button class="desktop-icon">
+
+<img
+    class="pixel-icon"
+    src="assets/images/windows 95 kit/Icons/Large/Recycle Bin Empty.png"
+    alt="Recycle Bin"
+>
+
+                            <span class="icon-label">
+                                Recycle Bin
+                            </span>
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- ================= WINDOWS ================= -->
+
+                    <section id="windowLayer">
+
+                    <!-- =====================================================
+                         NOTEPAD WINDOW
+                         ===================================================== -->
+
+<div
+    class="win95-window"
+    id="notepadWindow"
+    style="
+        left: 220px;
+        top: 130px;
+        width: 360px;
+        display: none;
+    "
+>
+
+    <div
+        class="window-titlebar"
+        data-window="notepadWindow"
+    >
+
+        <span class="window-title">
+            Untitled - Notepad
+        </span>
+
+        <div class="window-controls">
+
+            <button
+                class="window-button minimize-button"
+                aria-label="Minimize"
+            >
+                _
+            </button>
+
+            <button
+                class="window-button maximize-button"
+                aria-label="Maximize"
+            >
+                □
+            </button>
+
+            <button
+                class="window-button close-button"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="window-content notepad-content">
+
+        <textarea
+            id="notepadText"
+            class="notepad-textarea"
+            spellcheck="false"
+        ></textarea>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     NETSCAPE NAVIGATOR 1.1 — 1995
+     ===================================================== -->
+
+<div
+    class="win95-window netscape-window"
+    id="netscapeWindow"
+    style="
+        left: 90px;
+        top: 60px;
+        width: 650px;
+        display: none;
+    "
+>
+
+    <!-- =================================================
+         TITLE BAR
+         ================================================= -->
+
+    <div
+        class="window-titlebar"
+        data-window="netscapeWindow"
+    >
+
+        <span class="window-title">
+            Netscape Navigator
+        </span>
+
+        <div class="window-controls">
+
+            <button
+                class="window-button minimize-button"
+                aria-label="Minimize"
+            >
+                _
+            </button>
+
+            <button
+                class="window-button maximize-button"
+                aria-label="Maximize"
+            >
+                □
+            </button>
+
+            <button
+                class="window-button close-button"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         NETSCAPE 1.1 MENU BAR
+         ================================================= -->
+
+    <div class="netscape-menu-11">
+
+        <span>File</span>
+        <span>Edit</span>
+        <span>View</span>
+        <span>Go</span>
+        <span>Bookmarks</span>
+        <span>Options</span>
+        <span>Directory</span>
+        <span>Help</span>
+
+    </div>
+
+<!-- =========================================================
+     NETSCAPE NAVIGATOR TOOLBAR
+     ========================================================= -->
+
+<div class="netscape-toolbar-11">
+
+    <button class="netscape-button-11" title="Back">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp "
+             alt="">
+        <span class="netscape-button-label">Back</span>
+    </button>
+
+    <button class="netscape-button-11" title="Forward">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Forward</span>
+    </button>
+
+    <button class="netscape-button-11" title="Home">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Home</span>
+    </button>
+
+    <button class="netscape-button-11" title="Reload">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Reload</span>
+    </button>
+
+    <button class="netscape-button-11" title="Images">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Images</span>
+    </button>
+
+    <button class="netscape-button-11" title="Open">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Open</span>
+    </button>
+
+    <button class="netscape-button-11" title="Print">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Print</span>
+    </button>
+
+    <button class="netscape-button-11" title="Find">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Find</span>
+    </button>
+
+    <button class="netscape-button-11" title="Stop">
+        <img class="netscape-button-image"
+             src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Blank button.webp"
+             alt="">
+        <span class="netscape-button-label">Stop</span>
+    </button>
+
+</div>
+
+<!-- =========================================================
+     NETSCAPE LOCATION BAR
+     ========================================================= -->
+
+<div class="netscape-location-11">
+
+    <span class="location-label-11">
+        Netsite:
+    </span>
+
+    <input
+        id="netscapeLocation"
+        type="text"
+        value="http://www.netscape.com/"
+        autocomplete="off"
+        spellcheck="false"
+    >
+
+    <div class="netscape-location-logo-11">
+        <img
+            src="assets/images/windows 95 kit/Web/Netscape/Toolbar/Netscape.webp"
+            alt=""
+        >
+    </div>
+
+</div>
+
+<!-- =================================================
+     DIRECTORY BUTTONS
+     ================================================= -->
+
+<div class="netscape-directory-11">
+
+    <button type="button" class="netscape-directory-button">
+        What's New!
+    </button>
+
+    <button type="button" class="netscape-directory-button">
+        What's Cool!
+    </button>
+
+    <button type="button" class="netscape-directory-button">
+        Upgrades
+    </button>
+
+    <button type="button" class="netscape-directory-button">
+        Net Search
+    </button>
+
+    <button type="button" class="netscape-directory-button">
+        Net Directory
+    </button>
+
+    <button type="button" class="netscape-directory-button">
+        Newsgroups
+    </button>
+
+</div>
+
+<!-- =================================================
+     WEB PAGE
+     ================================================= -->
+
+<div
+    id="netscapePage"
+    class="netscape-page-11"
+>
+
+    <div class="netscape-page-inner-11">
+
+        <div class="netscape-home-1995">
+
+            <!-- Netscape 1995 homepage content goes here -->
+
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- =================================================
+         STATUS BAR
+         ================================================= -->
+
+    <div class="netscape-status-11">
+
+        <span>
+            Document: Done
+        </span>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     PAINT WINDOW
+     ===================================================== -->
+
+<div
+    class="win95-window"
+    id="paintWindow"
+    style="
+        left: 240px;
+        top: 120px;
+        width: 470px;
+        display: none;
+    "
+>
+
+    <!-- TITLE BAR -->
+    <div
+        class="window-titlebar"
+        data-window="paintWindow"
+    >
+
+        <span class="window-title">
+            Untitled - Paint
+        </span>
+
+        <div class="window-controls">
+
+            <button
+                class="window-button minimize-button"
+                aria-label="Minimize"
+            >
+                _
+            </button>
+
+            <button
+                class="window-button maximize-button"
+                aria-label="Maximize"
+            >
+                □
+            </button>
+
+            <button
+                class="window-button close-button"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- PAINT CONTENT -->
+    <div class="window-content paint-content">
+
+
+        <!-- MENU BAR -->
+        <div class="paint-menubar">
+
+            <span class="paint-menu-item">File</span>
+            <span class="paint-menu-item">Edit</span>
+            <span class="paint-menu-item">View</span>
+            <span class="paint-menu-item">Image</span>
+            <span class="paint-menu-item">Colors</span>
+            <span class="paint-menu-item">Help</span>
+
+        </div>
+
+
+        <!-- TOOLBOX + CANVAS -->
+        <div class="paint-workspace">
+
+
+            <!-- TOOLBOX -->
+            <div class="paint-toolbox">
+
+                <button class="paint-tool" title="Free-Form Select">
+                    ✂
+                </button>
+
+                <button class="paint-tool" title="Select">
+                    ▣
+                </button>
+
+                <button class="paint-tool" title="Eraser">
+                    ▱
+                </button>
+
+                <button class="paint-tool" title="Fill">
+                    ▾
+                </button>
+
+                <button class="paint-tool" title="Pick Color">
+                    ◉
+                </button>
+
+                <button class="paint-tool" title="Magnifier">
+                    🔍
+                </button>
+
+                <button class="paint-tool" title="Pencil">
+                    ✎
+                </button>
+
+                <button class="paint-tool" title="Brush">
+                    ▰
+                </button>
+
+                <button class="paint-tool" title="Airbrush">
+                    ░
+                </button>
+
+                <button class="paint-tool" title="Text">
+                    A
+                </button>
+
+                <button class="paint-tool" title="Line">
+                    ╱
+                </button>
+
+                <button class="paint-tool" title="Curve">
+                    ⌒
+                </button>
+
+                <button class="paint-tool" title="Rectangle">
+                    □
+                </button>
+
+                <button class="paint-tool" title="Polygon">
+                    ◇
+                </button>
+
+                <button class="paint-tool" title="Ellipse">
+                    ○
+                </button>
+
+                <button class="paint-tool" title="Rounded Rectangle">
+                    ▢
+                </button>
+
+            </div>
+
+
+            <!-- CANVAS -->
+            <div class="paint-canvas-area">
+
+                <canvas
+                    id="paintCanvas"
+                    width="380"
+                    height="260"
+                ></canvas>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- COLOUR PALETTE -->
+        <div class="paint-palette">
+
+            <button
+                class="paint-color"
+                data-color="#000000"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#808080"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#800000"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#808000"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#008000"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#008080"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#000080"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#800080"
+            ></button>
+
+
+            <button
+                class="paint-color"
+                data-color="#ffffff"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#c0c0c0"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#ff0000"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#ffff00"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#00ff00"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#00ffff"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#0000ff"
+            ></button>
+
+            <button
+                class="paint-color"
+                data-color="#ff00ff"
+            ></button>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+                        <div
+                            class="win95-window"
+                            id="welcomeWindow"
+                            style="
+                                left: 175px;
+                                top: 105px;
+                                width: 290px;
+                            "
+                        >
+
+                            <div
+                                class="window-titlebar"
+                                data-window="welcomeWindow"
+                            >
+
+                                <span class="window-title">
+                                    1995 Time-Travel Web Simulator
+                                </span>
+
+                                <div class="window-controls">
+
+                                    <button
+                                        class="window-button minimize-button"
+                                        aria-label="Minimize"
+                                    >
+                                        _
+                                    </button>
+
+                                    <button
+                                        class="window-button maximize-button"
+                                        aria-label="Maximize"
+                                    >
+                                        □
+                                    </button>
+
+                                    <button
+                                        class="window-button close-button"
+                                        aria-label="Close"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="window-menu-bar">
+
+                                <span>File</span>
+                                <span>Edit</span>
+                                <span>View</span>
+                                <span>Help</span>
+
+                            </div>
+
+
+                            <div class="window-content">
+
+                                <div class="welcome-heading">
+                                    Welcome
+                                </div>
+
+                                <p>
+                                    Welcome to the 1995
+                                    Time-Travel Web Simulator.
+                                </p>
+
+                                <p>
+                                    Use the Time Machine to travel
+                                    through the Internet of 1995.
+                                </p>
+
+                                <div class="inset-panel">
+
+                                    <div>
+                                        Computer:
+                                        <strong>486DX2</strong>
+                                    </div>
+
+                                    <div>
+                                        Memory:
+                                        <strong>8 MB RAM</strong>
+                                    </div>
+
+                                    <div>
+                                        Connection:
+                                        <strong>14.4k Modem</strong>
+                                    </div>
+
+                                    <div>
+                                        Browser:
+                                        <strong>Netscape</strong>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="dialog-buttons">
+
+                                    <button
+                                        class="win95-button default-button"
+                                        id="welcomeOkButton"
+                                    >
+                                        OK
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="window-status-bar">
+
+                                Ready
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- ================= START MENU ================= -->
+
+                    <div
+                        id="startMenu"
+                        class="hidden"
+                    >
+
+<!-- ================= START MENU BANNER ================= -->
+
+<div class="start-menu-banner">
+    <img
+        src="assets/images/windows 95 kit/Icons/Small/Windows 95.png"
+        alt="Windows 95"
+    >
+</div>
+
+
+                        <div class="start-menu-items">
+
+                            <button class="start-menu-item">
+
+                                
+
+<span class="menu-icon programs-icon">
+    <img
+        src="assets/images/windows 95 kit/Icons/Large/Program S.png"
+        alt=""
+    >
+</span>
+
+                                <span class="menu-text">
+                                    Programs
+                                </span>
+
+                                <span class="submenu-arrow">
+                                    ▶
+                                </span>
+
+                            </button>
+
+
+                            <!-- =====================================================
+                                 PROGRAMS SUBMENU
+                                 ===================================================== -->
+
+                            <div id="programsSubmenu" class="programs-submenu">
+
+                                <div class="programs-submenu-item">
+
+                                    <span class="submenu-icon">
+                                        <img
+                                            src="assets/images/windows 95 kit/Icons/Small/Program S.png"
+                                            alt=""
+                                        >
+                                    </span>
+
+                                    <span class="submenu-text">
+                                        Accessories
+                                    </span>
+
+                                    <span class="submenu-arrow">
+                                        ▶
+                                    </span>
+
+                                </div>
+
+
+                                <div class="programs-submenu-item">
+
+                                    <span class="submenu-icon">
+                                        <img
+                                            src="assets/images/windows 95 kit/Icons/Small/Program S.png"
+                                            alt=""
+                                        >
+                                    </span>
+
+                                    <span class="submenu-text">
+                                        StartUp
+                                    </span>
+
+                                    <span class="submenu-arrow">
+                                        ▶
+                                    </span>
+
+                                </div>
+
+
+                                <div class="programs-submenu-item">
+
+                                    <span class="submenu-icon">
+                                        <img
+                                            src="assets/images/windows 95 kit/Icons/Small/MS-DOS Prompt.png"
+                                            alt=""
+                                        >
+                                    </span>
+
+                                    <span class="submenu-text">
+                                        MS-DOS Prompt
+                                    </span>
+
+                                </div>
+
+
+                                <div class="programs-submenu-item">
+
+                                    <span class="submenu-icon">
+                                        <img
+                                            src="assets/images/windows 95 kit/Icons/Small/Windows Explorer.webp"
+                                            alt=""
+                                        >
+                                    </span>
+
+                                    <span class="submenu-text">
+                                        Windows Explorer
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <button class="start-menu-item">
+
+    <span class="menu-icon">
+        <img
+            src="assets/images/windows 95 kit/Icons/Large/Documents.png"
+            alt=""
+        >
+    </span>
+
+    <span class="menu-text">
+        Documents
+    </span>
+
+    <span class="submenu-arrow">
+        ▶
+    </span>
+
+</button>
+
+<!-- DOCUMENTS SUBMENU -->
+
+<div id="documentsSubmenu" class="documents-submenu">
+
+    <div class="documents-submenu-item">
+
+        <span class="submenu-icon">
+            <img
+                src="assets/images/windows 95 kit/Icons/Small/Documents.png"
+                alt=""
+            >
+        </span>
+
+        <span class="submenu-text">
+            My Documents
+        </span>
+
+    </div>
+
+</div>
+
+
+<button class="start-menu-item">
+
+    <span class="menu-icon">
+        <img
+            src="assets/images/windows 95 kit/Icons/Large/Settings.png"
+            alt=""
+        >
+    </span>
+
+    <span class="menu-text">
+        Settings
+    </span>
+
+    <span class="submenu-arrow">
+        ▶
+    </span>
+
+</button>
+
+<!-- SETTINGS SUBMENU -->
+
+<div id="settingsSubmenu" class="settings-submenu">
+
+    <div class="settings-submenu-item">
+
+        <span class="submenu-icon">
+            <img
+                src="assets/images/windows 95 kit/Icons/Small/Control Panel.png"
+                alt=""
+            >
+        </span>
+
+        <span class="submenu-text">
+            Control Panel
+        </span>
+
+    </div>
+
+
+    <div class="settings-submenu-item">
+
+        <span class="submenu-icon">
+            <img
+                src="assets/images/windows 95 kit/Icons/Small/Printers.png"
+                alt=""
+            >
+        </span>
+
+        <span class="submenu-text">
+            Printers
+        </span>
+
+    </div>
+
+
+    <div class="settings-submenu-item">
+
+        <span class="submenu-icon">
+            <img
+                src="assets/images/windows 95 kit/Icons/Small/Taskbar & Start Menu.png"
+                alt=""
+            >
+        </span>
+
+        <span class="submenu-text">
+            Taskbar & Start Menu
+        </span>
+
+    </div>
+    
+</div>
+
+
+                            <button class="start-menu-item">
+
+<span class="menu-icon">
+    <img
+        src="assets/images/windows 95 kit/Icons/Large/Search in Sheet.png"
+        alt=""
+    >
+</span>
+
+                                <span class="menu-text">
+                                    Find
+                                </span>
+
+                                <span class="submenu-arrow">
+                                    ▶
+                                </span>
+
+                            </button>
+
+
+                            <!-- FIND SUBMENU -->
+
+                            <div id="findSubmenu" class="find-submenu">
+
+                                <div class="find-submenu-item">
+
+                                    <span class="submenu-icon">
+                                        <img
+                                            src="assets/images/windows 95 kit/Icons/Small/Windows Explorer.webp"
+                                            alt=""
+                                        >
+                                    </span>
+
+                                    <span class="submenu-text">
+                                        Files or Folders...
+                                    </span>
+
+                                </div>
+
+
+                                <div class="find-submenu-item">
+
+                                    <span class="submenu-icon">
+                                        <img
+                                            src="assets/images/windows 95 kit/Icons/Small/Windows Explorer.webp"
+                                            alt=""
+                                        >
+                                    </span>
+
+                                    <span class="submenu-text">
+                                        Computer...
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <button class="start-menu-item">
+
+<span class="menu-icon">
+    <img
+        src="assets/images/windows 95 kit/Icons/Large/Help.png"
+        alt=""
+    >
+</span>
+
+                                <span class="menu-text">
+                                    Help
+                                </span>
+
+                            </button>
+
+
+<button class="start-menu-item" data-run="true">
+
+    <span class="menu-icon">
+        <img
+            src="assets/images/windows 95 kit/Icons/Large/Run Program.png"
+            alt=""
+        >
+    </span>
+
+    <span class="menu-text">
+        Run...
+    </span>
+
+</button>
+
+
+                            <div class="start-menu-separator"></div>
+
+
+                            <button class="start-menu-item">
+
+<span class="menu-icon shutdown-icon">
+    <img
+        src="assets/images/windows 95 kit/Icons/Large/Shutdown.webp"
+        alt=""
+    >
+</span>
+
+                                <span class="menu-text">
+                                    Shut Down...
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- =====================================================
+     RUN DIALOG
+     ===================================================== -->
+
+<div id="runDialog" class="run-dialog">
+
+    <div class="run-dialog-titlebar">
+
+        <span class="run-dialog-title">
+            Run
+        </span>
+
+        <button
+            id="runCloseButton"
+            class="run-dialog-close"
+            type="button"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div class="run-dialog-content">
+
+        <div class="run-dialog-icon">
+
+            <img
+                src="assets/images/windows 95 kit/Icons/Large/Run Program.png"
+                alt=""
+            >
+
+        </div>
+
+
+        <div class="run-dialog-message">
+
+            <div>
+                Type the name of a program, folder,
+            </div>
+
+            <div>
+                document, or Internet resource, and Windows
+            </div>
+
+            <div>
+                will open it for you.
+            </div>
+
+        </div>
+
+
+        <label
+            class="run-dialog-label"
+            for="runCommand"
+        >
+            Open:
+        </label>
+
+
+        <input
+            id="runCommand"
+            class="run-dialog-input"
+            type="text"
+            autocomplete="off"
+        >
+
+
+        <div class="run-dialog-buttons">
+
+            <button
+                id="runOkButton"
+                type="button"
+            >
+                OK
+            </button>
+
+            <button
+                id="runCancelButton"
+                type="button"
+            >
+                Cancel
+            </button>
+
+            <button
+                id="runBrowseButton"
+                type="button"
+            >
+                Browse...
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+                    <!-- ================= TASKBAR ================= -->
+
+                    <footer id="taskbar">
+
+                        <button id="startButton">
+
+<img
+    class="start-logo"
+    src="assets/images/windows 95 kit/Logos/Large/Start.png"
+    alt=""
+>
+
+                            <span class="start-text">
+                                Start
+                            </span>
+
+                        </button>
+
+
+                        <div
+                            id="taskbarWindows"
+                            class="taskbar-windows"
+                        ></div>
+
+
+                        <div class="taskbar-divider"></div>
+
+
+                        <div id="systemTray">
+
+                            <span
+                                class="tray-icon speaker-icon"
+                                title="Volume"
+                            >
+                                🔊
+                            </span>
+
+                            <span
+                                id="connectionStatus"
+                                title="Modem speed"
+                            >
+                                14.4k
+                            </span>
+
+                            <span id="systemClock">
+                                12:00 AM
+                            </span>
+
+                        </div>
+
+                    </footer>
+
+                </main>
+
+            </div>
+
+        </div>
+
+        <!-- CRT glass reflection -->
+
+        <div id="crt-glass"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script src="js/time_engine.js"></script>
+    <script src="js/modem.js"></script>
+    <script src="js/browser.js"></script>
+    <script src="js/os_engine.js"></script>
+
+</body>
+</html>

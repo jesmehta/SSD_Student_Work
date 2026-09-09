@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sleepwalker — v2 prototype</title>
+<style>
+  :root{
+    --void:#0a0a1f;
+    --void-deep:#050512;
+    --hand:#b9a6ff;
+    --hand-glow:rgba(185,166,255,0.55);
+    --wall:#ff8fb1;
+    --wall-glow:rgba(255,143,177,0.5);
+    --dreamer:#ffd98e;
+    --dreamer-glow:rgba(255,217,142,0.65);
+    --ink:#e8e4ff;
+    --ink-dim:#8f8ab0;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;height:100%;
+    background:var(--void-deep);
+    font-family:'Courier New', ui-monospace, monospace;
+    color:var(--ink);
+    overflow:hidden;
+  }
+  #stage{
+    position:relative;
+    width:100vw;height:100vh;
+    display:flex;align-items:center;justify-content:center;
+  }
+  canvas{
+    background:radial-gradient(120% 140% at 50% 20%, #14123a 0%, var(--void) 55%, var(--void-deep) 100%);
+    border-radius:4px;
+    box-shadow:0 0 0 1px rgba(185,166,255,0.15), 0 30px 80px rgba(0,0,0,0.6);
+    max-width:96vw;max-height:82vh;
+  }
+  video{ display:none; }
+  #hud{
+    position:absolute; top:18px; left:18px;
+    font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--ink-dim);
+    display:flex; flex-direction:column; gap:6px;
+    pointer-events:none;
+  }
+  #hud .row{display:flex; gap:8px; align-items:center;}
+  .dot{width:7px;height:7px;border-radius:50%; background:#555; box-shadow:none; transition:all .2s;}
+  .dot.on{background:var(--hand); box-shadow:0 0 8px var(--hand-glow);}
+  .dot.wall{background:var(--wall); box-shadow:0 0 8px var(--wall-glow);}
+  #startOverlay{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:16px;
+    background:rgba(5,5,18,0.88);
+    text-align:center; padding:24px;
+  }
+  #startOverlay h1{
+    font-family:'Georgia', serif; font-weight:400; font-style:italic;
+    font-size:26px; color:var(--ink); margin:0; letter-spacing:0.02em;
+  }
+  #startOverlay p{
+    max-width:420px; font-size:12.5px; line-height:1.7; color:var(--ink-dim);
+    letter-spacing:0.02em;
+  }
+  #startBtn{
+    margin-top:6px; padding:10px 26px; border-radius:999px; border:1px solid var(--hand);
+    background:transparent; color:var(--hand); font-family:inherit; font-size:12px;
+    letter-spacing:0.14em; text-transform:uppercase; cursor:pointer;
+    transition:all .2s;
+  }
+  #startBtn:hover{background:var(--hand); color:var(--void-deep);}
+  #hint{
+    position:absolute; bottom:16px; left:0; right:0; text-align:center;
+    font-size:11px; letter-spacing:0.08em; color:var(--ink-dim); text-transform:uppercase;
+    pointer-events:none;
+  }
+  #err{
+    position:absolute; top:18px; right:18px; max-width:260px;
+    font-size:11px; line-height:1.6; color:var(--wall); display:none;
+  }
+</style>
+</head>
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:100;top:12px;left:12px;color:#e8e4ff;font:12px monospace;text-decoration:none">← exhibition</a>
+<div id="stage">
+  <canvas id="c" width="960" height="540"></canvas>
+  <video id="video" playsinline></video>
+
+  <div id="hud">
+    <div class="row"><span class="dot" id="dotHand"></span><span id="handState">no hand detected</span></div>
+    <div class="row"><span id="fallCount">falls: 0</span></div>
+    <div class="row"><span id="zapCount">zaps: 0</span></div>
+    <div class="row"><span id="distance">distance: 0m</span></div>
+  </div>
+
+  <div id="hint">gaps: bridge them · lasers: lift above them · high ground: gated — get up before the edge</div>
+  <div id="err"></div>
+
+  <div id="startOverlay">
+    <h1>the sleepwalker is already walking</h1>
+    <p>They won't stop, and they can't see. Hold your hand up to the camera, palm flat and level, and slide it under them like a bridge. Tilt it to guide them up or down. Turn your hand on its edge to raise a wall and hold them back.</p>
+    <button id="startBtn">wake the camera</button>
+  </div>
+</div>
+
+<script src="../../vendor/mediapipe-hands-0.4.1675469240/hands.js"></script>
+<script src="../../vendor/mediapipe-camera_utils-0.3.1675466862.min.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const videoEl = document.getElementById('video');
+const dotHand = document.getElementById('dotHand');
+const handStateEl = document.getElementById('handState');
+const fallCountEl = document.getElementById('fallCount');
+const zapCountEl = document.getElementById('zapCount');
+const distanceEl = document.getElementById('distance');
+const errEl = document.getElementById('err');
+const W = canvas.width, H = canvas.height;
+
+// ---------- world state ----------
+const CHAR_ANCHOR_X = 300; // character stays roughly here on screen; the world scrolls past it
+const FLOOR_Y = 500;       // default ground level — roughly the street level in the skyline art
+const character = { x: CHAR_ANCHOR_X, y: 60, vy: 0, r: 14, onSurface: false, onHand: false };
+const GRAVITY = 900;       // px/s^2
+const WALK_SPEED = 95;     // px/s — drives world scroll speed, and the character's creep along a bridge
+let falls = 0;
+let zaps = 0;
+let distance = 0; // meters "walked" — just bgOffset scaled, for the HUD
+let lastT = performance.now();
+
+// ---------- obstacles: gaps in the floor, laid out in world-space ----------
+// the world scrolls under the (mostly stationary) character, so this pattern
+// repeats endlessly and gaps arrive as the character "walks" further.
+const LEVEL_PATTERN = [
+  { type: 'solid', len: 700 },  // long flat opening stretch to get used to the controls
+  { type: 'gap',   len: 90  },
+  { type: 'solid', len: 220 },
+  { type: 'laser', len: 160 },
+  { type: 'solid', len: 200 },
+  { type: 'high',  len: 200 },
+  { type: 'solid', len: 180 },
+  { type: 'gap',   len: 120 },
+  { type: 'solid', len: 260 },
+  { type: 'laser', len: 130 },
+  { type: 'solid', len: 240 },
+  { type: 'high',  len: 220 },
+  { type: 'solid', len: 200 },
+  { type: 'gap',   len: 70  },
+  { type: 'solid', len: 380 },
+  { type: 'laser', len: 150 },
+  { type: 'solid', len: 200 },
+  { type: 'gap',   len: 150 },
+  { type: 'solid', len: 240 },
+  { type: 'gap',   len: 100 }
+];
+const LEVEL_PERIOD = LEVEL_PATTERN.reduce((s, seg) => s + seg.len, 0);
+const LASER_Y = FLOOR_Y - 20;      // sits just above the ground — must be cleared by getting elevated
+const HIGH_FLOOR_Y = FLOOR_Y - 150; // an elevated platform, well above ground level
+const SNAP_MARGIN = 46; // how close the character must be to a surface (hand or platform) to actually land on it
+const GATE_HALF_WIDTH = 12; // half-width (world px) of each vertical laser gate at a platform's edges
+
+function getHighPlatformGates(){
+  // one gate at the entrance and one at the exit of every visible elevated platform —
+  // stepping through either one while still at ground height is a hit
+  const gates = [];
+  for (const seg of getVisibleFloorSegments()){
+    if (seg.type !== 'high') continue;
+    gates.push({ worldX: seg.worldX1, screenX: seg.x1 });
+    gates.push({ worldX: seg.worldX2, screenX: seg.x2 });
+  }
+  return gates;
+}
+
+function segmentAtWorldX(worldX){
+  let x = ((worldX % LEVEL_PERIOD) + LEVEL_PERIOD) % LEVEL_PERIOD;
+  for (const seg of LEVEL_PATTERN){
+    if (x < seg.len) return seg.type;
+    x -= seg.len;
+  }
+  return 'solid';
+}
+
+
+function getVisibleFloorSegments(){
+  const worldStart = bgOffset;
+  const worldEnd = bgOffset + W;
+  const segments = [];
+  let cursor = Math.floor(worldStart / LEVEL_PERIOD) * LEVEL_PERIOD;
+  let guard = 0;
+  while (cursor < worldEnd && guard < 400){
+    for (const seg of LEVEL_PATTERN){
+      const segStart = cursor, segEnd = cursor + seg.len;
+      if (segEnd > worldStart && segStart < worldEnd){
+        segments.push({ type: seg.type, x1: segStart - bgOffset, x2: segEnd - bgOffset, worldX1: segStart, worldX2: segEnd });
+      }
+      cursor = segEnd;
+      guard++;
+      if (cursor >= worldEnd) break;
+    }
+  }
+  return segments;
+}
+
+// hand-derived surfaces — one entry per detected hand, keyed by "Left"/"Right"
+// so smoothing and mode-debouncing stay stable per physical hand
+let handStates = {};
+let activeHands = []; // resolved this-frame list: {mode:'platform'|'wall', p1,p2,deltaX,box}
+
+// ---------- character sprite (4-frame walk cycle) ----------
+const FRAME_FILES = ['../../vendor/shared-assets/sleepwalker/walk_01.webp', '../../vendor/shared-assets/sleepwalker/walk_02.webp', '../../vendor/shared-assets/sleepwalker/walk_03.webp', '../../vendor/shared-assets/sleepwalker/walk_02.webp'];
+const walkFrames = FRAME_FILES.map(fn => { const img = new Image(); img.src = fn; return img; });
+let framesReady = false;
+Promise.all(walkFrames.map(img => new Promise(res => {
+  if (img.complete) res(); else { img.onload = res; img.onerror = res; }
+}))).then(() => { framesReady = walkFrames.every(img => img.naturalWidth > 0); });
+
+let animFrameIndex = 0;
+let animTimer = 0;
+const FRAME_DURATION = 0.12; // seconds per animation frame
+let facing = 1; // 1 = facing right, -1 = facing left
+
+function resetCharacter(){
+  character.x = CHAR_ANCHOR_X;
+  character.y = 60;
+  character.vy = 0;
+  character.onSurface = false;
+  character.onHand = false;
+}
+
+function restartGame(){
+  bgOffset = 0;
+  distance = 0;
+  distanceEl.textContent = 'distance: 0m';
+  resetCharacter();
+}
+
+// ---------- background (city skyline, mirror-tiled so it loops with no seam) ----------
+let bgOffset = 0;        // how far the world has scrolled, in px
+let bgTileWidth = 0;     // width of a single (unmirrored) tile once scaled to canvas height
+let bgReady = false;
+const bgImage = new Image();
+bgImage.onload = () => {
+  bgTileWidth = bgImage.naturalWidth * (H / bgImage.naturalHeight);
+  bgReady = true;
+};
+bgImage.src = "../../vendor/shared-assets/sleepwalker/cityscape.webp";
+
+// ---------- mediapipe hands ----------
+const hands = new Hands({ locateFile: (f) => `../../vendor/mediapipe-hands-0.4.1675469240/${f}` });
+hands.setOptions({
+  maxNumHands: 2,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.6,
+  minTrackingConfidence: 0.6
+});
+hands.onResults(onHandResults);
+
+function mapPoint(lm){
+  // mirror x so hand movement feels natural (like a mirror, not a camera feed)
+  const mx = (1 - lm.x) * W;
+  const my = lm.y * H;
+  return { x: mx, y: my };
+}
+
+const SMOOTH_ALPHA = 0.35;       // lower = smoother/laggier, higher = snappier/jitterier
+const MODE_SWITCH_FRAMES = 6;    // consecutive frames needed before a mode change sticks
+
+function freshHandState(){
+  return { smoothed: null, candidateMode: 'platform', candidateStreak: 0, stableMode: 'platform', prevPlatformCenterX: null };
+}
+
+function onHandResults(results){
+  const list = results.multiHandLandmarks || [];
+  if (list.length === 0){
+    handStates = {};
+    activeHands = [];
+    dotHand.className = 'dot';
+    handStateEl.textContent = 'no hand detected';
+    return;
+  }
+
+  const seenLabels = [];
+  const resolved = [];
+
+  list.forEach((lm, i) => {
+    const label = (results.multiHandedness && results.multiHandedness[i] && results.multiHandedness[i].label) || ('hand' + i);
+    seenLabels.push(label);
+    if (!handStates[label]) handStates[label] = freshHandState();
+    const st = handStates[label];
+
+    const raw = lm.map(mapPoint);
+    if (!st.smoothed){
+      st.smoothed = raw;
+    } else {
+      for (let j = 0; j < raw.length; j++){
+        st.smoothed[j].x += (raw[j].x - st.smoothed[j].x) * SMOOTH_ALPHA;
+        st.smoothed[j].y += (raw[j].y - st.smoothed[j].y) * SMOOTH_ALPHA;
+      }
+    }
+
+    // classify by bounding-box aspect ratio (robust to camera angle), with hysteresis + debounce
+    const xs = st.smoothed.map(p => p.x);
+    const ys = st.smoothed.map(p => p.y);
+    const xmin = Math.min(...xs), xmax = Math.max(...xs);
+    const ymin = Math.min(...ys), ymax = Math.max(...ys);
+    const width = Math.max(xmax - xmin, 1);
+    const height = Math.max(ymax - ymin, 1);
+    const aspect = height / width;
+    const wantsWall = st.stableMode === 'wall' ? aspect > 1.35 : aspect > 1.8;
+
+    if (wantsWall === (st.candidateMode === 'wall')){
+      st.candidateStreak++;
+    } else {
+      st.candidateMode = wantsWall ? 'wall' : 'platform';
+      st.candidateStreak = 1;
+    }
+    if (st.candidateStreak >= MODE_SWITCH_FRAMES){
+      st.stableMode = st.candidateMode;
+    }
+
+    if (st.stableMode === 'wall'){
+      st.prevPlatformCenterX = null;
+      resolved.push({ mode: 'wall', box: { xmin, xmax, ymin, ymax } });
+    } else {
+      const indexMCP = st.smoothed[5];
+      const pinkyMCP = st.smoothed[17];
+      const centerX = (indexMCP.x + pinkyMCP.x) / 2;
+      const deltaX = (st.prevPlatformCenterX === null) ? 0 : centerX - st.prevPlatformCenterX;
+      st.prevPlatformCenterX = centerX;
+      resolved.push({ mode: 'platform', p1: indexMCP, p2: pinkyMCP, deltaX });
+    }
+  });
+
+  // drop state for hands that disappeared, so a returning hand doesn't jump
+  Object.keys(handStates).forEach(label => { if (!seenLabels.includes(label)) delete handStates[label]; });
+
+  activeHands = resolved;
+  const wallCount = resolved.filter(h => h.mode === 'wall').length;
+  const platformCount = resolved.length - wallCount;
+  const parts = [];
+  if (platformCount) parts.push(platformCount + ' bridge' + (platformCount > 1 ? 's' : ''));
+  if (wallCount) parts.push(wallCount + ' wall' + (wallCount > 1 ? 's' : ''));
+  handStateEl.textContent = parts.join(' + ');
+  dotHand.className = wallCount ? 'dot wall' : 'dot on';
+}
+
+let cameraStarted = false;
+document.getElementById('startBtn').addEventListener('click', async () => {
+  document.getElementById('startOverlay').style.display = 'none';
+  if (cameraStarted) return;
+  try {
+    const camera = new Camera(videoEl, {
+      onFrame: async () => { await hands.send({ image: videoEl }); },
+      width: 640, height: 480
+    });
+    await camera.start();
+    cameraStarted = true;
+  } catch (e){
+    errEl.style.display = 'block';
+    errEl.textContent = 'Camera unavailable (' + e.message + '). This needs a secure context (https or localhost) and camera permission.';
+  }
+});
+
+// ---------- physics ----------
+function bestPlatformContact(x, refY, r){
+  // among every hand currently acting as a bridge, find the one the character
+  // is actually close enough to be resting on (not just any bridge on screen)
+  let best = null;
+  let bestDist = Infinity;
+  for (const h of activeHands){
+    if (h.mode !== 'platform') continue;
+    const { p1, p2 } = h;
+    const xmin = Math.min(p1.x, p2.x), xmax = Math.max(p1.x, p2.x);
+    const margin = 18;
+    if (x < xmin - margin || x > xmax + margin) continue;
+    const y = (Math.abs(p2.x - p1.x) < 1) ? (p1.y + p2.y) / 2 : p1.y + ((x - p1.x) / (p2.x - p1.x)) * (p2.y - p1.y);
+    const dist = Math.abs((refY + r) - y);
+    if (dist < SNAP_MARGIN && dist < bestDist){
+      bestDist = dist;
+      best = { y, handRef: h };
+    }
+  }
+  return best; // null, or {y, handRef}
+}
+
+function wallBlocksAt(x, y, r){
+  for (const h of activeHands){
+    if (h.mode !== 'wall') continue;
+    const b = h.box;
+    if (x + r > b.xmin && x - r < b.xmax && y + r > b.ymin && y - r < b.ymax){
+      return h;
+    }
+  }
+  return null;
+}
+
+function step(dt){
+  const wallHit = wallBlocksAt(character.x, character.y, character.r);
+
+  // the world only stops if a wall is actually in the character's way,
+  // not just because a wall exists somewhere on screen
+  if (!wallHit){
+    bgOffset += WALK_SPEED * dt;
+    distance += WALK_SPEED * dt;
+    distanceEl.textContent = 'distance: ' + Math.floor(distance / 10) + 'm';
+  } else {
+    character.x = wallHit.box.xmin - character.r - 1;
+  }
+
+  // gravity
+  character.vy += GRAVITY * dt;
+  character.y += character.vy * dt;
+
+  const worldX = bgOffset + character.x;
+  const segType = segmentAtWorldX(worldX);
+  const contact = bestPlatformContact(character.x, character.y, character.r);
+
+  // resolve which surface (if any) the character can land on this frame:
+  // a hand you're actually touching, an elevated static platform you've
+  // climbed up to, or plain ground — a gap (or a 'high' stretch you haven't
+  // reached yet) leaves this null and gravity just keeps pulling you down.
+  let surfaceY = null;
+  let viaHand = false;
+  if (contact){
+    surfaceY = contact.y;
+    viaHand = true;
+  } else if (segType === 'high'){
+    const distToPlatform = (character.y + character.r) - HIGH_FLOOR_Y;
+    if (distToPlatform >= 0 && distToPlatform < SNAP_MARGIN) surfaceY = HIGH_FLOOR_Y;
+  } else if (segType === 'solid' || segType === 'laser'){
+    surfaceY = FLOOR_Y;
+  }
+  // segType === 'gap' (or an unreached 'high' stretch) => surfaceY stays null
+
+  if (surfaceY !== null && character.y + character.r >= surfaceY && character.vy >= 0){
+    character.y = surfaceY - character.r;
+    character.vy = 0;
+    character.onSurface = true;
+    character.onHand = viaHand;
+  } else {
+    character.onSurface = false;
+    character.onHand = false;
+  }
+
+  // only the hand you're actually resting on can carry or nudge you forward —
+  // a bridge shape floating elsewhere on screen has no effect
+  if (character.onHand && contact){
+    const dx = (contact.handRef.deltaX || 0) + WALK_SPEED * dt * 0.6;
+    character.x += dx;
+    contact.handRef.deltaX = 0; // consume it so it isn't re-applied every render frame
+    if (Math.abs(dx) > 0.15) facing = dx < 0 ? -1 : 1;
+  }
+
+  // never let the sleepwalker leave the frame horizontally, or fly above the top —
+  // but don't clamp the bottom, or falling through a gap would get silently cancelled
+  character.x = Math.max(character.r, Math.min(W - character.r, character.x));
+  character.y = Math.max(character.r, character.y);
+
+  // laser hazard: sits low near the ground — you have to be lifted above it
+  if (segType === 'laser' && (character.y - character.r) < LASER_Y && (character.y + character.r) > LASER_Y){
+    zaps += 1;
+    zapCountEl.textContent = 'zaps: ' + zaps;
+    restartGame();
+    return;
+  }
+
+  // vertical laser gates at the entrance/exit of elevated platforms — you can't
+  // just walk underneath a floating platform, you have to actually be up on it
+  const elevatedEnough = (character.y + character.r) <= HIGH_FLOOR_Y + SNAP_MARGIN;
+  if (!elevatedEnough){
+    for (const gate of getHighPlatformGates()){
+      if (Math.abs(worldX - gate.worldX) < GATE_HALF_WIDTH){
+        zaps += 1;
+        zapCountEl.textContent = 'zaps: ' + zaps;
+        restartGame();
+        return;
+      }
+    }
+  }
+
+  if (character.y - character.r > H + 80){
+    falls += 1;
+    fallCountEl.textContent = 'falls: ' + falls;
+    restartGame();
+    return;
+  }
+
+  animTimer += dt;
+  if (animTimer >= FRAME_DURATION){
+    animTimer -= FRAME_DURATION;
+    animFrameIndex = (animFrameIndex + 1) % walkFrames.length;
+  }
+}
+
+// ---------- render ----------
+function drawBackground(){
+  if (!bgReady || bgTileWidth <= 0) return;
+  // ping-pong / mirror tiling: every tile boundary reflects, so no seam is
+  // ever visible even though the source image itself doesn't tile on its own.
+  const worldX0 = bgOffset;
+  let tileIndex = Math.floor(worldX0 / bgTileWidth);
+  let screenX = tileIndex * bgTileWidth - worldX0;
+  while (screenX < W){
+    const mirrored = (((tileIndex % 2) + 2) % 2) === 1;
+    ctx.save();
+    if (mirrored){
+      ctx.translate(screenX + bgTileWidth, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(bgImage, 0, 0, bgTileWidth, H);
+    } else {
+      ctx.drawImage(bgImage, screenX, 0, bgTileWidth, H);
+    }
+    ctx.restore();
+    screenX += bgTileWidth;
+    tileIndex += 1;
+  }
+  // slight veil so the character and hand-drawn surfaces still pop against the skyline
+  ctx.save();
+  ctx.fillStyle = 'rgba(5,5,18,0.28)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+function drawFloor(){
+  const lineY = FLOOR_Y + character.r;
+  const segments = getVisibleFloorSegments();
+  for (const seg of segments){
+    const x1 = Math.max(seg.x1, 0), x2 = Math.min(seg.x2, W);
+    if (x2 <= x1) continue;
+    if (seg.type === 'gap' || seg.type === 'high'){
+      // open space at ground level — a pit for 'gap', or the drop below an elevated platform for 'high'
+      ctx.save();
+      ctx.strokeStyle = getCSS('--wall');
+      ctx.shadowColor = getCSS('--wall-glow');
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 2;
+      if (seg.x1 >= 0){ ctx.beginPath(); ctx.moveTo(seg.x1, lineY - 16); ctx.lineTo(seg.x1, lineY + 4); ctx.stroke(); }
+      if (seg.x2 <= W){ ctx.beginPath(); ctx.moveTo(seg.x2, lineY - 16); ctx.lineTo(seg.x2, lineY + 4); ctx.stroke(); }
+      ctx.restore();
+    } else {
+      // solid ground (laser segments still stand on solid ground)
+      ctx.save();
+      ctx.fillStyle = 'rgba(10,10,25,0.88)';
+      ctx.fillRect(x1, lineY, x2 - x1, H - lineY);
+      ctx.strokeStyle = 'rgba(185,166,255,0.35)';
+      ctx.shadowColor = 'rgba(185,166,255,0.35)';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x1, lineY);
+      ctx.lineTo(x2, lineY);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+function drawHighPlatforms(t){
+  const slabY = HIGH_FLOOR_Y + character.r;
+  const groundLineY = FLOOR_Y + character.r;
+  const segments = getVisibleFloorSegments().filter(s => s.type === 'high');
+  const pulse = 0.6 + 0.4 * Math.sin(t / 140);
+  for (const seg of segments){
+    const x1 = Math.max(seg.x1, 0), x2 = Math.min(seg.x2, W);
+    if (x2 <= x1) continue;
+
+    // support struts down to ground level
+    ctx.save();
+    ctx.strokeStyle = 'rgba(185,166,255,0.22)';
+    ctx.lineWidth = 3;
+    for (let sx = x1 + 14; sx < x2; sx += 34){
+      ctx.beginPath();
+      ctx.moveTo(sx, slabY);
+      ctx.lineTo(sx, groundLineY);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // the slab itself
+    ctx.save();
+    ctx.fillStyle = 'rgba(15,14,40,0.92)';
+    ctx.fillRect(x1, slabY, x2 - x1, 12);
+    ctx.strokeStyle = 'rgba(185,166,255,0.5)';
+    ctx.shadowColor = 'rgba(185,166,255,0.45)';
+    ctx.shadowBlur = 10;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x1, slabY);
+    ctx.lineTo(x2, slabY);
+    ctx.stroke();
+    ctx.restore();
+
+    // vertical laser gates at each edge — a wall of light from the ground up to the platform
+    ctx.save();
+    ctx.strokeStyle = '#ff3b5c';
+    ctx.shadowColor = 'rgba(255,59,92,0.9)';
+    ctx.shadowBlur = 14 + 8 * pulse;
+    ctx.lineWidth = 4;
+    ctx.globalAlpha = 0.75 + 0.25 * pulse;
+    if (seg.x1 >= 0 && seg.x1 <= W){
+      ctx.beginPath(); ctx.moveTo(seg.x1, slabY); ctx.lineTo(seg.x1, groundLineY); ctx.stroke();
+    }
+    if (seg.x2 >= 0 && seg.x2 <= W){
+      ctx.beginPath(); ctx.moveTo(seg.x2, slabY); ctx.lineTo(seg.x2, groundLineY); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function drawLasers(t){
+  const lineY = FLOOR_Y + character.r;
+  const segments = getVisibleFloorSegments().filter(s => s.type === 'laser');
+  const pulse = 0.6 + 0.4 * Math.sin(t / 140);
+  for (const seg of segments){
+    const x1 = Math.max(seg.x1, 0), x2 = Math.min(seg.x2, W);
+    if (x2 <= x1) continue;
+    ctx.save();
+    ctx.strokeStyle = '#ff3b5c';
+    ctx.shadowColor = 'rgba(255,59,92,0.9)';
+    ctx.shadowBlur = 16 + 10 * pulse;
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.75 + 0.25 * pulse;
+    ctx.beginPath();
+    ctx.moveTo(x1, LASER_Y);
+    ctx.lineTo(x2, LASER_Y);
+    ctx.stroke();
+    ctx.restore();
+
+    // emitter posts at each visible edge
+    ctx.save();
+    ctx.fillStyle = '#ff3b5c';
+    ctx.shadowColor = 'rgba(255,59,92,0.9)';
+    ctx.shadowBlur = 10;
+    if (seg.x1 >= 0) ctx.fillRect(seg.x1 - 3, LASER_Y - 10, 6, 20);
+    if (seg.x2 <= W) ctx.fillRect(seg.x2 - 3, LASER_Y - 10, 6, 20);
+    ctx.restore();
+  }
+}
+
+function drawStars(){
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  for (let i=0;i<40;i++){
+    const sx = (i * 97) % W;
+    const sy = (i * 53) % H;
+    ctx.fillStyle = '#3a3768';
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+  ctx.restore();
+}
+
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  drawBackground();
+  drawStars();
+  drawFloor();
+  drawHighPlatforms(t);
+  drawLasers(t);
+
+  // hand surfaces
+  for (const h of activeHands){
+    if (h.mode === 'platform'){
+      const { p1, p2 } = h;
+      ctx.save();
+      ctx.strokeStyle = getCSS('--hand');
+      ctx.shadowColor = getCSS('--hand-glow');
+      ctx.shadowBlur = 18;
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+      ctx.restore();
+    } else if (h.mode === 'wall'){
+      const b = h.box;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,143,177,0.18)';
+      ctx.strokeStyle = getCSS('--wall');
+      ctx.shadowColor = getCSS('--wall-glow');
+      ctx.shadowBlur = 20;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(b.xmin, b.ymin, b.xmax-b.xmin, b.ymax-b.ymin, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // character (sleepwalker)
+  if (framesReady){
+    const spriteH = 64;
+    const SPRITE_FOOT_OFFSET = 14; // the art has empty padding below the feet; nudge down to sit on the floor line
+    const img = walkFrames[animFrameIndex];
+    const spriteW = spriteH * (img.naturalWidth / img.naturalHeight);
+    const feetY = character.y + character.r + SPRITE_FOOT_OFFSET;
+    ctx.save();
+    ctx.shadowColor = getCSS('--dreamer-glow');
+    ctx.shadowBlur = character.onSurface ? 16 : 6;
+    // reference art faces left, so mirror it when facing right (the default/forward direction)
+    if (facing > 0){
+      ctx.translate(character.x, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, -spriteW / 2, feetY - spriteH, spriteW, spriteH);
+    } else {
+      ctx.drawImage(img, character.x - spriteW / 2, feetY - spriteH, spriteW, spriteH);
+    }
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.fillStyle = getCSS('--dreamer');
+    ctx.shadowColor = getCSS('--dreamer-glow');
+    ctx.shadowBlur = character.onSurface ? 22 : 10;
+    ctx.beginPath();
+    ctx.arc(character.x, character.y, character.r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    // trailing wisp (placeholder-only touch, drops away once the sprite is ready)
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = getCSS('--dreamer');
+    ctx.beginPath();
+    ctx.arc(character.x - 16 * facing, character.y - 4, character.r*0.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function getCSS(varName){
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+
+function loop(t){
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+  step(dt);
+  draw(t);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

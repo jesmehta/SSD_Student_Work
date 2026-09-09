@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT NEWS NETWORK — Live from the Feline Republic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#161616;
+    --paper:#f4f1e6;
+    --paper-dim:#e9e4d4;
+    --orange:#ff5a1f;
+    --orange-deep:#d6440f;
+    --blue:#2748d6;
+    --blue-deep:#16299e;
+    --yellow:#ffce3d;
+    --white:#ffffff;
+    --shadow: 6px 6px 0 var(--ink);
+    --shadow-sm: 3px 3px 0 var(--ink);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Anton',sans-serif;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    margin:0;
+  }
+  .label-font{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;}
+
+  /* ============ BOOT / SPLASH ============ */
+  #splash{
+    position:fixed;inset:0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,90,31,0.35), transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(39,72,214,0.35), transparent 45%),
+      var(--ink);
+    z-index:999;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:20px;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+  .static-noise{
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    animation:flicker 6s infinite;
+  }
+  @keyframes flicker{0%,100%{opacity:1;}50%{opacity:.6;}}
+  .cnn-logo{
+    font-size:clamp(48px,11vw,120px);
+    color:var(--white);
+    line-height:0.95;
+    -webkit-text-stroke:2px var(--orange);
+    text-shadow:6px 6px 0 var(--orange), 12px 12px 0 var(--blue);
+    animation:pop-in .7s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  @keyframes pop-in{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .cnn-sub{
+    margin-top:18px;
+    color:var(--yellow);
+    font-family:'Oswald',sans-serif;
+    letter-spacing:6px;
+    font-size:clamp(12px,2.4vw,20px);
+  }
+  .live-badge{
+    margin-top:34px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--orange);
+    color:var(--white);
+    padding:10px 22px;
+    border-radius:40px;
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    letter-spacing:2px;
+    box-shadow:var(--shadow);
+    border:2px solid var(--ink);
+  }
+  .dot{width:11px;height:11px;background:var(--white);border-radius:50%;animation:blink 1.1s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.15;}}
+  #enter-btn{
+    margin-top:46px;
+    background:var(--yellow);
+    color:var(--ink);
+    border:3px solid var(--ink);
+    padding:16px 38px;
+    font-family:'Anton',sans-serif;
+    font-size:20px;
+    letter-spacing:1px;
+    box-shadow:var(--shadow);
+    transition:transform .15s ease;
+  }
+  #enter-btn:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--orange);}
+  #enter-btn:active{transform:translate(0,0);box-shadow:2px 2px 0 var(--orange);}
+  .paw-hint{margin-top:14px;color:#cfcfcf;font-size:13px;font-family:'Oswald',sans-serif;letter-spacing:1px;}
+
+  /* ============ TOP NAV ============ */
+  header#site-header{
+    position:sticky;top:0;z-index:200;
+    background:var(--ink);
+    border-bottom:4px solid var(--orange);
+  }
+  .masthead{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 20px;
+    max-width:1400px;margin:0 auto;
+  }
+  .masthead .brand{
+    color:var(--white);
+    font-size:clamp(20px,3vw,30px);
+    display:flex;align-items:center;gap:10px;
+  }
+  .masthead .brand span.dot-live{
+    width:10px;height:10px;background:var(--orange);border-radius:50%;animation:blink 1.1s infinite;
+  }
+  .clock{
+    color:var(--yellow);
+    font-family:'Oswald',sans-serif;
+    font-size:13px;
+    letter-spacing:1px;
+  }
+  nav#cat-nav{
+    background:var(--orange);
+    overflow-x:auto;
+    white-space:nowrap;
+    scrollbar-width:none;
+  }
+  nav#cat-nav::-webkit-scrollbar{display:none;}
+  nav#cat-nav .nav-inner{
+    display:flex;
+    max-width:1400px;margin:0 auto;
+  }
+  nav#cat-nav button{
+    background:transparent;border:none;
+    color:var(--ink);
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    letter-spacing:1px;
+    font-size:13px;
+    padding:12px 16px;
+    border-right:2px solid rgba(0,0,0,0.15);
+    transition:background .15s;
+    flex-shrink:0;
+  }
+  nav#cat-nav button:hover, nav#cat-nav button.active{
+    background:var(--ink);color:var(--yellow);
+  }
+
+  /* ============ TICKER ============ */
+  .ticker-wrap{
+    background:var(--blue);
+    border-top:3px solid var(--ink);
+    border-bottom:3px solid var(--ink);
+    overflow:hidden;
+    position:relative;
+  }
+  .ticker-wrap .tag{
+    position:absolute;left:0;top:0;bottom:0;
+    background:var(--yellow);
+    color:var(--ink);
+    font-family:'Anton',sans-serif;
+    font-size:13px;
+    display:flex;align-items:center;
+    padding:0 14px;
+    z-index:2;
+    border-right:3px solid var(--ink);
+  }
+  .ticker-track{
+    display:flex;
+    white-space:nowrap;
+    animation:scroll-left 38s linear infinite;
+    padding-left:120px;
+  }
+  @keyframes scroll-left{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .ticker-track span{
+    color:var(--white);
+    font-family:'Oswald',sans-serif;
+    font-size:14px;
+    letter-spacing:0.5px;
+    padding:9px 30px;
+    border-right:1px solid rgba(255,255,255,0.35);
+  }
+
+  /* ============ CITY ============ */
+  #city-intro{
+    text-align:center;
+    padding:40px 20px 10px;
+  }
+  #city-intro h2{font-size:clamp(26px,4vw,42px);}
+  #city-intro p{
+    font-family:'Oswald',sans-serif;
+    letter-spacing:1px;
+    color:#555;
+    max-width:560px;margin:8px auto 0;
+    font-size:14px;
+  }
+
+  .district{
+    position:relative;
+    margin:34px auto;
+    max-width:1300px;
+    border:4px solid var(--ink);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    scroll-margin-top:110px;
+  }
+  .district-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 22px;
+    color:var(--white);
+  }
+  .district-header h3{font-size:clamp(18px,2.6vw,26px);}
+  .district-header .sub{
+    font-family:'Oswald',sans-serif;
+    font-size:12px;letter-spacing:1.5px;
+    opacity:.85;
+  }
+  .district-scene{
+    position:relative;
+    height:300px;
+    background:linear-gradient(180deg, var(--scene-top,#cbd8ff) 0%, var(--scene-bot,#eef1ff) 100%);
+    overflow:hidden;
+  }
+  .district-scene .skyline{
+    position:absolute;bottom:0;left:0;right:0;height:60%;
+    display:flex;align-items:flex-end;gap:6px;
+    padding:0 10px;
+  }
+  .bldg{
+    background:var(--ink);
+    opacity:0.85;
+    border-top:4px solid var(--bldg-accent, var(--orange));
+    flex-shrink:0;
+  }
+  .district-scene .ground{
+    position:absolute;bottom:0;left:0;right:0;height:14%;
+    background:var(--ink);
+  }
+  .char{
+    position:absolute;
+    background:none;border:none;
+    font-size:38px;
+    filter:drop-shadow(2px 3px 0 rgba(0,0,0,0.25));
+    transition:transform .18s ease;
+    line-height:1;
+    z-index:5;
+  }
+  .char:hover{transform:scale(1.22) translateY(-4px);}
+  .char .char-tag{
+    position:absolute;
+    bottom:100%;left:50%;transform:translateX(-50%);
+    background:var(--white);
+    border:2px solid var(--ink);
+    color:var(--ink);
+    font-family:'Oswald',sans-serif;
+    font-size:10px;
+    letter-spacing:0.5px;
+    padding:3px 7px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s;
+    margin-bottom:6px;
+    border-radius:3px;
+  }
+  .char:hover .char-tag{opacity:1;}
+  .char.breaking::after{
+    content:'';
+    position:absolute;top:-6px;right:-8px;
+    width:12px;height:12px;background:var(--orange);
+    border:2px solid var(--white);
+    border-radius:50%;
+    animation:blink 1s infinite;
+  }
+
+  /* ============ NEWS GRID ============ */
+  #news-section{
+    max-width:1300px;margin:50px auto;padding:0 20px;
+  }
+  #news-section .section-title{
+    display:flex;align-items:center;gap:14px;
+    margin-bottom:22px;
+  }
+  #news-section .section-title h2{font-size:clamp(24px,3.4vw,36px);}
+  #news-section .section-title .bar{flex:1;height:5px;background:var(--ink);}
+  .news-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:22px;
+  }
+  .news-card{
+    background:var(--white);
+    border:3px solid var(--ink);
+    box-shadow:var(--shadow-sm);
+    padding:18px;
+    display:flex;flex-direction:column;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .news-card:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--orange);}
+  .news-card .tag-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .news-card .cat-tag{
+    font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;
+    background:var(--yellow);border:2px solid var(--ink);padding:3px 9px;
+  }
+  .news-card.breaking .cat-tag{background:var(--orange);color:var(--white);}
+  .news-card h3{font-size:19px;line-height:1.15;margin-bottom:10px;}
+  .news-card p{font-size:14px;line-height:1.5;color:#333;margin:0;flex:1;}
+  .news-card .byline{
+    margin-top:12px;font-family:'Oswald',sans-serif;font-size:11px;color:#888;letter-spacing:.5px;
+  }
+  .breaking-flag{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--orange-deep);font-family:'Anton',sans-serif;font-size:12px;margin-bottom:6px;
+  }
+
+  /* ============ LIVE DESK ============ */
+  #live-desk{
+    max-width:1300px;margin:60px auto;padding:0 20px;
+  }
+  .desk-frame{
+    background:var(--ink);
+    border:4px solid var(--ink);
+    box-shadow:var(--shadow);
+    padding:26px;
+    display:grid;
+    grid-template-columns:1fr 1.2fr;
+    gap:24px;
+    color:var(--white);
+  }
+  @media (max-width:760px){.desk-frame{grid-template-columns:1fr;}}
+  .anchor-box{
+    background:linear-gradient(180deg,var(--blue) 0%, var(--blue-deep) 100%);
+    border:3px solid var(--white);
+    padding:22px;
+    text-align:center;
+    position:relative;
+  }
+  .on-air{
+    position:absolute;top:10px;left:10px;
+    background:var(--orange);
+    padding:4px 10px;
+    font-family:'Anton',sans-serif;
+    font-size:11px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .anchor-emoji{font-size:80px;margin-top:20px;}
+  .anchor-name{font-family:'Oswald',sans-serif;letter-spacing:2px;margin-top:8px;font-size:14px;color:var(--yellow);}
+  .speech-bubble{
+    background:var(--white);color:var(--ink);
+    border:3px solid var(--ink);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-top:16px;
+    text-align:left;
+    font-size:14px;
+    line-height:1.5;
+    position:relative;
+  }
+  .desk-screen{
+    background:repeating-linear-gradient(45deg, #222 0 10px, #1a1a1a 10px 20px);
+    border:3px solid var(--yellow);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    padding:20px;
+  }
+  .desk-screen .screen-label{
+    font-family:'Oswald',sans-serif;color:var(--orange);font-size:11px;letter-spacing:2px;margin-bottom:10px;
+  }
+  .desk-screen .screen-emoji{font-size:64px;margin-bottom:10px;}
+  .desk-screen h4{color:var(--white);font-size:18px;}
+  .desk-screen p{color:#ccc;font-size:13px;margin-top:8px;}
+  #next-story-btn{
+    margin-top:16px;
+    background:var(--yellow);border:2px solid var(--ink);
+    padding:10px 18px;
+    font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;font-size:12px;
+  }
+
+  /* ============ MODAL ============ */
+  #modal-overlay{
+    position:fixed;inset:0;background:rgba(15,15,15,0.72);
+    display:none;align-items:center;justify-content:center;
+    z-index:500;padding:20px;
+  }
+  #modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--paper);
+    border:4px solid var(--ink);
+    box-shadow:10px 10px 0 var(--orange);
+    max-width:480px;width:100%;
+    max-height:88vh;overflow-y:auto;
+    padding:0;
+    position:relative;
+  }
+  .modal-head{
+    background:var(--ink);color:var(--white);
+    padding:16px 20px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .modal-head .tag{
+    font-family:'Anton',sans-serif;color:var(--orange);font-size:13px;letter-spacing:1px;
+  }
+  .modal-close{
+    background:var(--orange);color:var(--white);border:2px solid var(--white);
+    width:30px;height:30px;border-radius:50%;font-size:16px;line-height:1;
+  }
+  .modal-body{padding:22px;}
+  .modal-emoji{font-size:56px;text-align:center;}
+  .modal-body h2{text-align:center;font-size:24px;margin-top:8px;}
+  .stat-row{
+    display:flex;justify-content:space-between;
+    font-family:'Oswald',sans-serif;font-size:13px;
+    border-bottom:1px dashed #999;
+    padding:7px 0;
+  }
+  .stat-row b{letter-spacing:1px;}
+  .modal-story{
+    margin-top:14px;font-size:14px;line-height:1.6;background:var(--white);
+    border:2px solid var(--ink);padding:14px;border-radius:4px;
+  }
+  .modal-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .modal-actions button{
+    flex:1;min-width:140px;
+    border:2px solid var(--ink);
+    padding:11px 14px;
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:12px;letter-spacing:1px;
+    background:var(--yellow);
+  }
+  .modal-actions button.follow{background:var(--blue);color:var(--white);}
+  .modal-actions button.interview{background:var(--orange);color:var(--white);}
+  .modal-actions button:hover{filter:brightness(1.08);}
+
+  .qa{margin-top:10px;}
+  .qa .q, .qa .a{
+    padding:10px 14px;border-radius:10px;margin-bottom:8px;font-size:14px;line-height:1.4;
+  }
+  .qa .q{background:var(--blue);color:var(--white);border:2px solid var(--ink);}
+  .qa .a{background:var(--white);border:2px solid var(--ink);margin-left:18px;}
+  .qa .who{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;opacity:.8;display:block;margin-bottom:3px;}
+
+  footer{
+    text-align:center;padding:40px 20px 60px;
+    font-family:'Oswald',sans-serif;
+    color:#777;font-size:12px;letter-spacing:1px;
+  }
+  footer b{color:var(--ink);}
+
+  ::selection{background:var(--yellow);}
+
+  .jump-strip{
+    max-width:1300px;margin:40px auto 0;padding:0 20px;
+    display:flex;flex-wrap:wrap;gap:10px;
+  }
+  .jump-strip a{
+    background:var(--ink);color:var(--white);
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;font-weight:600;
+    padding:9px 16px;border:2px solid var(--ink);text-decoration:none;
+    transition:background .15s;
+  }
+  .jump-strip a:hover{background:var(--orange);}
+
+  /* ============ WIDGET ROW: WEATHER + ECONOMY ============ */
+  .widget-row{
+    max-width:1300px;margin:50px auto;padding:0 20px;
+    display:grid;grid-template-columns:1fr 1fr;gap:22px;
+  }
+  @media (max-width:760px){.widget-row{grid-template-columns:1fr;}}
+  .widget-card{
+    background:var(--white);
+    border:3px solid var(--ink);
+    box-shadow:var(--shadow-sm);
+    padding:20px;
+  }
+  .widget-title{font-family:'Anton',sans-serif;font-size:17px;margin-bottom:14px;}
+  .weather-stat{margin-bottom:12px;}
+  .weather-stat .ws-label{
+    display:flex;justify-content:space-between;
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;margin-bottom:5px;
+  }
+  .ws-track{background:var(--paper-dim);border:2px solid var(--ink);height:14px;border-radius:8px;overflow:hidden;}
+  .ws-fill{height:100%;background:var(--orange);}
+  .weather-reco{
+    margin-top:14px;background:var(--yellow);border:2px solid var(--ink);
+    padding:9px 12px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;
+  }
+  .stock-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 0;border-bottom:1px dashed #ccc;
+    font-family:'Oswald',sans-serif;font-size:13px;
+  }
+  .stock-row:last-child{border-bottom:none;}
+  .stock-change{font-weight:700;padding:2px 8px;border-radius:4px;border:2px solid var(--ink);}
+  .stock-change.up{background:var(--orange);color:var(--white);}
+  .stock-change.down{background:var(--blue);color:var(--white);}
+  .economy-note{
+    margin-top:14px;color:#777;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.5px;
+  }
+
+  /* ============ MYSTERY TIMELINE ============ */
+  #mystery-section, #meowter-section, #spotted-section, #notimportant-section{
+    max-width:1300px;margin:60px auto;padding:0 20px;
+  }
+  .mystery-intro{font-size:12px;color:#888;margin:-8px 0 22px;}
+  .mystery-timeline{position:relative;}
+  .m-step{
+    position:relative;
+    background:var(--white);
+    border:3px solid var(--ink);
+    box-shadow:var(--shadow-sm);
+    padding:18px 20px;
+    margin-bottom:18px;
+    display:flex;gap:16px;align-items:flex-start;
+    animation:step-in .4s ease both;
+  }
+  @keyframes step-in{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  .m-step .m-emoji{font-size:34px;flex-shrink:0;}
+  .m-step .m-tag{
+    font-family:'Anton',sans-serif;font-size:11px;color:var(--orange-deep);letter-spacing:1px;
+  }
+  .m-step h4{font-size:17px;margin:4px 0 8px;}
+  .m-step p{font-size:14px;line-height:1.5;color:#333;margin:0;}
+  .m-step .m-link{margin-top:10px;}
+  .m-step .m-link button{
+    background:var(--blue);color:var(--white);border:2px solid var(--ink);
+    padding:7px 12px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;
+  }
+  .m-continue{
+    display:block;margin:0 auto;
+    background:var(--yellow);border:3px solid var(--ink);
+    padding:13px 26px;font-family:'Anton',sans-serif;font-size:14px;
+    box-shadow:var(--shadow-sm);
+  }
+  .m-continue:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--orange);}
+  .m-locked{
+    text-align:center;font-family:'Oswald',sans-serif;font-size:12px;
+    color:#999;letter-spacing:1px;margin-bottom:18px;
+  }
+  .poll-box{
+    margin-top:26px;
+    background:var(--ink);color:var(--white);
+    border:3px solid var(--ink);
+    padding:22px;
+  }
+  .poll-box h4{color:var(--yellow);font-size:16px;margin-bottom:14px;}
+  .poll-option{
+    display:flex;align-items:center;gap:12px;margin-bottom:12px;
+    background:transparent;border:2px solid rgba(255,255,255,0.3);
+    width:100%;padding:10px 14px;color:var(--white);
+    font-family:'Oswald',sans-serif;font-size:13px;
+    position:relative;overflow:hidden;text-align:left;
+  }
+  .poll-option .po-fill{
+    position:absolute;left:0;top:0;bottom:0;background:var(--orange);opacity:.35;z-index:0;
+  }
+  .poll-option .po-text{position:relative;z-index:1;flex:1;}
+  .poll-option .po-pct{position:relative;z-index:1;font-weight:700;}
+  .poll-result{
+    margin-top:10px;background:var(--blue);color:var(--white);
+    padding:9px 12px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;display:none;
+  }
+  .poll-result.show{display:block;}
+
+  /* ============ MEOWTER ============ */
+  .trend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;}
+  .trend-pill{
+    background:var(--blue);color:var(--white);
+    border:2px solid var(--ink);border-radius:30px;
+    padding:9px 16px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;font-weight:600;
+  }
+  .trend-pill.active{background:var(--orange);}
+  .post-card{
+    background:var(--ink);color:var(--white);
+    border:3px solid var(--ink);
+    padding:14px 16px;margin-bottom:12px;
+    font-size:14px;line-height:1.4;
+  }
+  .post-card .p-user{color:var(--yellow);font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;display:block;margin-bottom:4px;}
+
+  /* ============ PAPARAZZI ============ */
+  .papa-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;
+  }
+  .papa-card{
+    background:var(--white);border:3px solid var(--ink);box-shadow:var(--shadow-sm);
+    overflow:hidden;
+  }
+  .papa-photo{
+    background:repeating-linear-gradient(45deg,var(--paper-dim) 0 10px, var(--paper) 10px 20px);
+    height:130px;display:flex;align-items:center;justify-content:center;font-size:54px;
+    border-bottom:3px solid var(--ink);position:relative;
+  }
+  .papa-photo .flash-tag{
+    position:absolute;top:8px;left:8px;background:var(--yellow);border:2px solid var(--ink);
+    font-family:'Anton',sans-serif;font-size:10px;padding:2px 7px;
+  }
+  .papa-body{padding:14px 16px;}
+  .papa-body h4{font-size:14px;line-height:1.3;margin-bottom:6px;}
+  .papa-body p{font-size:12px;color:#555;margin:0;line-height:1.4;}
+
+  /* ============ NOT IMPORTANT ============ */
+  .ni-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;
+  }
+  .ni-item{
+    background:var(--paper-dim);border:2px dashed var(--ink);
+    padding:12px 14px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;
+    text-align:center;
+  }
+
+  /* ============ HIDDEN BLACK CAT EASTER EGG ============ */
+  .hidden-cat{
+    position:absolute;
+    background:none;border:none;
+    font-size:20px;
+    opacity:0.55;
+    filter:grayscale(1) brightness(0.4);
+    transition:transform .15s ease, opacity .15s ease;
+    z-index:4;
+  }
+  .hidden-cat:hover{opacity:1;transform:scale(1.3);}
+  .papa-photo .hidden-cat, .post-card .hidden-cat{
+    position:relative;display:inline-block;font-size:16px;margin-left:6px;
+  }
+  #sighting-toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--yellow);
+    border:2px solid var(--yellow);
+    padding:11px 20px;
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;
+    border-radius:30px;
+    opacity:0;pointer-events:none;
+    transition:opacity .3s ease, transform .3s ease;
+    z-index:600;
+  }
+  #sighting-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .classified-modal .modal-head{background:var(--ink);}
+  .classified-body{
+    background:#0a0a0a;color:var(--yellow);
+    font-family:'Oswald',sans-serif;
+    padding:20px;line-height:1.7;font-size:13px;
+    letter-spacing:.5px;
+  }
+  .classified-body .redacted{background:var(--yellow);color:var(--yellow);border-radius:2px;}
+  .classified-body .type-line{border-bottom:1px solid rgba(255,206,61,0.3);padding:6px 0;}
+</style>
+</head>
+<body>
+<a href="../../index.html" aria-label="Return to exhibition" style="position:fixed;z-index:99999;top:12px;left:12px;padding:8px 12px;background:#111e;color:#fff;border:1px solid #fff5;text-decoration:none;font:12px monospace">← exhibition</a>
+
+<!-- ============ SPLASH ============ -->
+<div id="splash">
+  <div class="static-noise"></div>
+  <div class="cnn-logo display">CAT NEWS<br>NETWORK</div>
+  <div class="cnn-sub">LIVE FROM THE FELINE REPUBLIC</div>
+  <div class="live-badge"><span class="dot"></span> LIVE — <span id="splash-clock">09:42 PM</span></div>
+  <button id="enter-btn">ENTER THE CITY →</button>
+  <div class="paw-hint">click a cat, anywhere, at any time. something is always happening.</div>
+</div>
+
+<!-- ============ HEADER / NAV ============ -->
+<header id="site-header">
+  <div class="masthead">
+    <div class="brand"><span class="dot-live"></span> CAT NEWS NETWORK</div>
+    <div class="clock">🔴 LIVE — <span id="header-clock">09:42 PM</span></div>
+  </div>
+  <nav id="cat-nav"><div class="nav-inner" id="nav-inner"></div></nav>
+</header>
+
+<div class="ticker-wrap">
+  <div class="tag">JUST IN</div>
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<!-- ============ CITY INTRO ============ -->
+<div id="city-intro">
+  <h2>Welcome to Meow City</h2>
+  <p>Eight districts. Zero regulations on napping. Click any cat you see — everyone in this city has somewhere to be and something to hide.</p>
+</div>
+
+<div id="city-root"></div>
+
+<!-- ============ NEWS FEED ============ -->
+<section id="news-section">
+  <div class="section-title">
+    <h2>The Feed</h2>
+    <div class="bar"></div>
+    <span class="label-font" id="filter-label" style="font-size:12px;color:#888;">showing: all mews</span>
+  </div>
+  <div class="news-grid" id="news-grid"></div>
+</section>
+
+<!-- ============ QUICK JUMP ============ -->
+<nav class="jump-strip" aria-label="More sections">
+  <a href="#mystery-section">🐾 Tuna Truck Mystery</a>
+  <a href="#meowter-section">🐾 Meowter</a>
+  <a href="#spotted-section">📸 Spotted!</a>
+  <a href="#notimportant-section">💀 Not Important At All</a>
+  <a href="#widget-row">☀️ Window Weather</a>
+</nav>
+
+<!-- ============ LIVE DESK ============ -->
+<section id="live-desk">
+  <div class="section-title">
+    <h2>Live News Desk</h2>
+    <div class="bar"></div>
+  </div>
+  <div class="desk-frame">
+    <div class="anchor-box">
+      <div class="on-air"><span class="dot"></span> ON AIR</div>
+      <div class="anchor-emoji">🐱‍💼</div>
+      <div class="anchor-name">MEOWGAN — ANCHORCAT, 9PM DESK</div>
+      <div class="speech-bubble" id="anchor-quote">“Good evening. Tonight's top story: a local human has once again opened a can of tuna without sharing.”</div>
+    </div>
+    <div class="desk-screen">
+      <div class="screen-label">— LIVE FEED —</div>
+      <div class="screen-emoji" id="screen-emoji">🐟</div>
+      <h4 id="screen-headline">TUNA OPENED. NOBODY SHARED.</h4>
+      <p id="screen-desc">Reporters are on the scene. Cats are furious. A human claims it was "only one can."</p>
+      <button id="next-story-btn">NEXT STORY →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WINDOW WEATHER + CAT ECONOMY ============ -->
+<section class="widget-row" id="widget-row">
+  <div class="widget-card weather-widget">
+    <div class="widget-title">☀️ Window Weather Report</div>
+    <div id="weather-bars"></div>
+    <div class="weather-reco">Recommended: find a rectangle of sunlight immediately.</div>
+  </div>
+  <div class="widget-card economy-widget">
+    <div class="widget-title">📈 Cat Economy</div>
+    <div id="stock-rows"></div>
+    <div class="economy-note">Economists blame one extremely hungry orange cat.</div>
+  </div>
+</section>
+
+<!-- ============ TUNA TRUCK MYSTERY ============ -->
+<section id="mystery-section">
+  <div class="section-title">
+    <h2>🐾 The Tuna Truck Mystery</h2>
+    <div class="bar"></div>
+  </div>
+  <p class="mystery-intro label-font">a story that keeps unfolding. follow the lead to see what happens next.</p>
+  <div id="mystery-timeline"></div>
+  <div id="mystery-poll-wrap"></div>
+</section>
+
+<!-- ============ MEOWTER ============ -->
+<section id="meowter-section">
+  <div class="section-title">
+    <h2>🐾 Meowter</h2>
+    <div class="bar"></div>
+  </div>
+  <p class="mystery-intro label-font">the cat world's social network. tap a trend to see what everyone's yowling about.</p>
+  <div id="meowter-trends"></div>
+  <div id="meowter-feed"></div>
+</section>
+
+<!-- ============ SPOTTED / PAPARAZZI ============ -->
+<section id="spotted-section">
+  <div class="section-title">
+    <h2>📸 Spotted!</h2>
+    <div class="bar"></div>
+  </div>
+  <div class="papa-grid" id="papa-grid"></div>
+</section>
+
+<!-- ============ NOT IMPORTANT AT ALL ============ -->
+<section id="notimportant-section">
+  <div class="section-title">
+    <h2>💀 News That Absolutely Did Not Need To Be Reported</h2>
+    <div class="bar"></div>
+  </div>
+  <p class="mystery-intro label-font">CNN considers all of this breaking news.</p>
+  <div class="ni-grid" id="ni-grid"></div>
+</section>
+
+<footer>
+  <p><b>CAT NEWS NETWORK</b> — "IF IT MEOWS, IT LEADS."</p>
+  <p>Broadcasting live from a windowsill in the Feline Republic. All 9 lives reserved.</p>
+</footer>
+
+<!-- Hidden sighting toast -->
+<div id="sighting-toast"></div>
+
+<!-- ============ MODAL ============ -->
+<div id="modal-overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const CATEGORIES = [
+  "ALL MEWS","BREAKING MEWS","POLITICS","CRIME & WHISKERS","FUR & FASHION",
+  "SPORTS","WEATHER","GOSSIP","BUSINESS","SCIENCE","TRANSPORT","LOST & FOUND"
+];
+
+const DISTRICTS = [
+  {id:"meow-city", emoji:"🏙️", name:"Meow City", tagline:"The main city. Everyone ends up here eventually.",
+    top:"#a9c1ff", bot:"#e8edff", accent:"var(--orange)",
+    buildings:[40,70,50,90,60,45,80,55]},
+  {id:"fish-market", emoji:"🐟", name:"Fish Market", tagline:"Food-related crimes happen hourly.",
+    top:"#8fd0ff", bot:"#eaf7ff", accent:"var(--blue)",
+    buildings:[35,50,30,65,45,55,40]},
+  {id:"cat-government", emoji:"🏛️", name:"Cat Government", tagline:"Politics and ridiculous laws.",
+    top:"#ffe08a", bot:"#fff6dd", accent:"var(--orange)",
+    buildings:[90,60,90,60,90,60,90]},
+  {id:"whisker-hospital", emoji:"🏥", name:"Whisker Hospital", tagline:"Medical news and mysterious conditions.",
+    top:"#ffc4c4", bot:"#fff0f0", accent:"var(--orange)",
+    buildings:[70,50,70,50,70]},
+  {id:"entertainment", emoji:"🎤", name:"Entertainment District", tagline:"Celebrity cats and their scandals.",
+    top:"#d3b8ff", bot:"#f2e9ff", accent:"var(--blue)",
+    buildings:[55,85,45,95,50,75,60]},
+  {id:"industrial", emoji:"🏭", name:"Industrial Zone", tagline:"Cat factories, working overtime (allegedly).",
+    top:"#c9c9c9", bot:"#eaeaea", accent:"var(--yellow)",
+    buildings:[80,40,90,35,85,45]},
+  {id:"cat-park", emoji:"🌳", name:"Cat Park", tagline:"Neighbourhood gossip grows here.",
+    top:"#b6e6c2", bot:"#eafaee", accent:"var(--blue)",
+    buildings:[20,30,25,35,20,28]},
+  {id:"night-district", emoji:"🌙", name:"Night District", tagline:"All the suspicious things cats do at 3AM.",
+    top:"#1c1c3a", bot:"#33335c", accent:"var(--yellow)",
+    buildings:[60,90,50,100,55,80,65], dark:true}
+];
+
+/* Characters placed inside districts, positions are % of the scene box */
+const CHARACTERS = [
+  {id:"whiskers", district:"fish-market", emoji:"🐈‍⬛", x:22, y:55, breaking:true,
+    name:"Mr. Whiskers", age:3, occupation:"Freelance Thief", activity:"Fleeing the scene",
+    story:"Witnesses report that Mr. Whiskers entered the market at approximately 8:32 PM and escaped with 3 chicken legs. Security footage shows him pausing halfway out the door to make eye contact with the camera.",
+    newsCat:"CRIME & WHISKERS", breakingHeadline:true,
+    interview:[
+      {q:"Why did you steal the chicken?", a:"It was already dead. I was just relocating it."},
+      {q:"Do you have any remorse?", a:"I have a full stomach. That's a kind of peace."}
+    ]},
+  {id:"pickles", district:"meow-city", emoji:"🐱", x:35, y:60, breaking:false,
+    name:"Mr. Pickles", age:6, occupation:"Accountant", activity:"Avoiding work at a café",
+    story:"Mr. Pickles has been staring at the same spreadsheet for two hours. He has opened it, closed it, and opened it again. Sources say he is actually waiting for someone.",
+    followUp:"whiskerina",
+    newsCat:"GOSSIP"},
+  {id:"whiskerina", district:"meow-city", emoji:"🐈", x:60, y:50, breaking:false,
+    name:"Whiskerina", age:5, occupation:"Unclear (possibly a spy)", activity:"Meeting Mr. Pickles in secret",
+    story:"Whiskerina arrived eleven minutes late and ordered nothing. Sources close to the saucer say this is the third \"accidental\" meeting this week between her and Mr. Pickles.",
+    newsCat:"GOSSIP",
+    interview:[
+      {q:"Are you and Mr. Pickles just friends?", a:"No comment."},
+      {q:"Why do you keep 'running into' him?", a:"Next question."}
+    ]},
+  {id:"mayor", district:"cat-government", emoji:"🐱‍👑", x:50, y:52, breaking:false,
+    name:"Mayor Fluffington III", age:9, occupation:"Mayor of Meow City", activity:"Announcing a bold new policy",
+    story:"Mayor Fluffington has promised every household a free cardboard box before the next election. The Opposition Party has called the proposal \"cardboard populism\" and demanded to know who is funding the boxes.",
+    newsCat:"POLITICS", breakingHeadline:true,
+    interview:[
+      {q:"Where is the funding for these boxes coming from?", a:"That is classified feline information."},
+      {q:"Is this just to win votes?", a:"I refuse to dignify that with a response. Next box, please."}
+    ]},
+  {id:"drclawson", district:"whisker-hospital", emoji:"🐱‍⚕️", x:45, y:55, breaking:false,
+    name:"Dr. Clawson", age:7, occupation:"Wall-Staring Specialist", activity:"Reviewing a confusing case",
+    story:"Dr. Clawson has confirmed the patient stared at a blank section of wall for 46 consecutive minutes. \"There was nothing there,\" he stated. \"We checked twice.\" The patient has since been discharged in stable, if unexplained, condition.",
+    newsCat:"SCIENCE"},
+  {id:"sirpawsalot", district:"entertainment", emoji:"😼", x:30, y:50, breaking:false,
+    name:"Sir Pawsalot", age:4, occupation:"Celebrity / Influencer Cat", activity:"Being photographed doing nothing",
+    story:"Sir Pawsalot was seen sitting in a sunbeam for the fourth time this week. His publicist calls it \"a deeply personal era.\" Fans are already recreating the pose.",
+    newsCat:"FUR & FASHION"},
+  {id:"leo", district:"entertainment", emoji:"🏆", x:68, y:58, breaking:false,
+    name:"Champion Leo", age:8, occupation:"Professional Napper", activity:"Celebrating a 17th consecutive title",
+    story:"Leo has won his 17th consecutive Nap Championship after a grueling 9-hour final. Judges praised his \"unbothered form\" and \"total commitment to stillness.\"",
+    newsCat:"SPORTS", breakingHeadline:true},
+  {id:"mittens", district:"industrial", emoji:"🐾", x:40, y:60, breaking:false,
+    name:"Mechanic Mittens", age:5, occupation:"Factory Floor Supervisor", activity:"Inspecting a suspicious box",
+    story:"Mittens has confirmed that Factory Line 3 is now producing exclusively empty boxes, per popular demand. \"We stopped making the toys,\" he admitted. \"Nobody wanted the toys.\"",
+    newsCat:"BUSINESS"},
+  {id:"oldtom", district:"cat-park", emoji:"🐈‍⬛", x:55, y:60, breaking:false,
+    name:"Old Tom", age:12, occupation:"Bench-Sitter & Rumor Broker", activity:"Watching everyone",
+    story:"Old Tom has not moved from his bench in six years but somehow knows everything happening in every district simultaneously. He declined to reveal his sources. He did not decline the free sardine.",
+    newsCat:"GOSSIP"},
+  {id:"shadow", district:"night-district", emoji:"🐈", x:35, y:58, breaking:true,
+    name:"Shadow", age:2, occupation:"Unemployed (by choice)", activity:"Knocking things off a table, allegedly",
+    story:"Shadow was reportedly seen near a glass of water at 3:07 AM. The glass is no longer on the table. Shadow has not commented, except to comment.",
+    newsCat:"CRIME & WHISKERS", breakingHeadline:true,
+    interview:[
+      {q:"Why did you push the glass off the table?", a:"No comment."},
+      {q:"Did you do it intentionally?", a:"Next question."},
+      {q:"Do you plan to do it again tomorrow?", a:"That information is need-to-know. You don't need to know."}
+    ]},
+  {id:"lostcat", district:"night-district", emoji:"🐱", x:70, y:62, breaking:false,
+    name:"Unnamed Cat", age:"Unknown", occupation:"Currently Lost", activity:"Wandering near the dumpsters",
+    story:"An unidentified cat has been spotted near the dumpsters for three nights running. He answers to several names, none of which anyone is sure of. If found, please do not approach with tuna — he already has some.",
+    newsCat:"LOST & FOUND"}
+];
+
+/* News feed items (separate from character stories, plus flags to include character-linked ones) */
+const NEWS = [
+  {cat:"BREAKING MEWS", breaking:true, h:"LOCAL CAT CAUGHT STEALING CHICKEN FROM MARKET",
+    b:"Witnesses report that Mr. Whiskers entered the market at approximately 8:32 PM and escaped with 3 chicken legs.", by:"Fish Market Desk", charLink:"whiskers"},
+  {cat:"BREAKING MEWS", breaking:true, h:"CAT STARES AT WALL FOR 46 MINUTES",
+    b:"Experts remain confused. The wall itself could not be reached for comment.", by:"Whisker Hospital Desk", charLink:"drclawson"},
+  {cat:"POLITICS", breaking:false, h:"MAYOR PROMISES EVERY HOUSEHOLD A FREE BOX",
+    b:"Opposition calls the proposal \"cardboard populism\" and is demanding a full audit of the box budget.", by:"Cat Government Desk", charLink:"mayor"},
+  {cat:"BUSINESS", breaking:false, h:"TUNA PRICES RISE 300%",
+    b:"Economists blame supply chain problems and one extremely hungry Labrador.", by:"Business Desk"},
+  {cat:"WEATHER", breaking:false, h:"HEAVY SUNLIGHT EXPECTED NEAR WINDOW",
+    b:"Cats advised to occupy the area immediately. A second sunbeam is expected by 2 PM, pending clouds.", by:"Weather Desk"},
+  {cat:"SPORTS", breaking:false, h:"LOCAL CAT WINS 17TH CONSECUTIVE NAP CHAMPIONSHIP",
+    b:"Competition lasted 9 hours. Judges praised his commitment to absolute stillness.", by:"Sports Desk", charLink:"leo"},
+  {cat:"CRIME & WHISKERS", breaking:true, h:"GLASS FOUND SHATTERED NEAR MIDNIGHT TABLE",
+    b:"A suspect was seen fleeing the scene at 3:07 AM. He has offered \"no comment\" on multiple occasions.", by:"Night Desk", charLink:"shadow"},
+  {cat:"GOSSIP", breaking:false, h:"ACCOUNTANT CAT SEEN MEETING MYSTERY FEMALE AT CAFÉ",
+    b:"Sources say this is the third \"coincidental\" meeting this week. Neither party ordered anything.", by:"Meow City Desk", charLink:"pickles"},
+  {cat:"FUR & FASHION", breaking:false, h:"CELEBRITY CAT PHOTOGRAPHED IN SUNBEAM, AGAIN",
+    b:"Publicist calls it \"a deeply personal era.\" Fans have already recreated the pose 4,000 times.", by:"Entertainment Desk", charLink:"sirpawsalot"},
+  {cat:"SCIENCE", breaking:false, h:"STUDY CONFIRMS CATS CAN HEAR THE FRIDGE OPEN FROM ANY ROOM",
+    b:"Researchers describe the phenomenon as \"instantaneous and unexplainable.\" Further funding has been requested.", by:"Science Desk"},
+  {cat:"LOST & FOUND", breaking:false, h:"UNIDENTIFIED CAT SPOTTED NEAR DUMPSTERS THIRD NIGHT RUNNING",
+    b:"He answers to several names. If found, do not approach with tuna — he already has some.", by:"Night Desk", charLink:"lostcat"},
+  {cat:"BUSINESS", breaking:false, h:"FACTORY LINE 3 NOW PRODUCES ONLY EMPTY BOXES",
+    b:"\"We stopped making the toys,\" admitted a supervisor. \"Nobody wanted the toys.\"", by:"Industrial Desk", charLink:"mittens"},
+  {cat:"WEATHER", breaking:false, h:"UNEXPLAINED DRAFT REPORTED UNDER DOOR",
+    b:"Residents describe the sensation as \"deeply personal\" and \"someone's fault.\"", by:"Weather Desk"},
+  {cat:"GOSSIP", breaking:false, h:"BENCH-SITTING ELDER KNOWS EVERYTHING, REVEALS NOTHING",
+    b:"Old Tom has not moved from his bench in six years yet is somehow always first to know.", by:"Cat Park Desk", charLink:"oldtom"},
+  {cat:"POLITICS", breaking:false, h:"NEW LAW BANS VACUUMS BETWEEN THE HOURS OF SUNRISE AND SUNSET",
+    b:"Council cites \"unprovoked acts of terror against household cats\" as grounds for the ban.", by:"Cat Government Desk"},
+  {cat:"CRIME & WHISKERS", breaking:false, h:"KNOWN THIEF SPOTTED CASING FISH MARKET AGAIN",
+    b:"Market owners have installed a second lock. Sources say it will not help.", by:"Fish Market Desk", charLink:"whiskers"},
+  {cat:"BREAKING MEWS", breaking:true, h:"CAT HAS ENTERED A ROOM AND FORGOTTEN WHY",
+    b:"The 4-year-old tabby reportedly stood in the doorway for 17 minutes before leaving without explanation. Status: investigation ongoing.", by:"Meow City Desk"},
+  {cat:"CRIME & WHISKERS", breaking:false, h:"LOCAL CAT ACCUSED OF SECOND-DEGREE PLANT MURDER",
+    b:"Evidence includes: a broken pot, paw prints, missing soil, and a cat sitting suspiciously nearby. Suspect's full statement: \"Meow.\"", by:"Cat Park Desk"},
+  {cat:"POLITICS", breaking:false, h:"MAYOR BANS CLOSED DOORS ACROSS THE CITY",
+    b:"New law states no door shall remain closed for longer than 4 seconds if a cat is standing outside it. The Opposition Party calls the decision \"completely reasonable.\"", by:"Cat Government Desk", charLink:"mayor"},
+  {cat:"BUSINESS", breaking:false, h:"TUNA PRICES HIT ALL-TIME HIGH",
+    b:"Economists blame \"one extremely hungry orange cat.\" See today's Cat Economy ticker below for market impact.", by:"Business Desk"},
+  {cat:"SCIENCE", breaking:false, h:"STUDY CONFIRMS CATS CAN HEAR A FOOD PACKET OPEN FROM 4.7KM AWAY",
+    b:"Researchers attempted to reproduce the experiment. They failed. The cats refused to cooperate.", by:"Science Desk"},
+  {cat:"TRANSPORT", breaking:false, h:"7:42 PM METRO DELAYED AFTER CAT REFUSES TO LEAVE TRACKS",
+    b:"Passengers reportedly waited 23 minutes. The cat eventually moved. \"I got bored,\" it said.", by:"Transport Desk"},
+  {cat:"GOSSIP", breaking:false, h:"LOCAL CAT GOES VIRAL AFTER STARING INTO CAMERA FOR 11 SECONDS",
+    b:"12 million views. No explanation. No dialogue. Just two unblinking eyes.", by:"Entertainment Desk"},
+  {cat:"FUR & FASHION", breaking:false, h:"MYSTERY CAT SPOTTED WEARING TINY SUNGLASSES",
+    b:"Nobody knows where they came from, or who he is. The internet has named him Mr. Cool. He has since been seen everywhere and confirmed by no one.", by:"Fashion Desk"},
+  {cat:"SPORTS", breaking:false, h:"WORLD NAP CHAMPIONSHIP ENDS AFTER 14 HOURS",
+    b:"Winner: Sir Snoozington, final score 14h 27m. The runner-up was eliminated after waking up to eat.", by:"Sports Desk"},
+];
+
+/* Live desk rotating stories */
+const DESK_STORIES = [
+  {emoji:"🐟", h:"TUNA OPENED. NOBODY SHARED.", d:"Reporters are on the scene. Cats are furious. A human claims it was \"only one can.\""},
+  {emoji:"📦", h:"MAYOR'S FREE BOX PLAN SPARKS DEBATE", d:"Opposition demands to know where the cardboard is coming from."},
+  {emoji:"😾", h:"GLASS INCIDENT: SUSPECT STILL AT LARGE", d:"Shadow remains the primary suspect. He has offered \"no comment,\" twice."},
+  {emoji:"🏆", h:"NAP CHAMPIONSHIP ENDS AFTER 9 HOURS", d:"Leo takes his 17th consecutive title. Runner-up is reportedly \"still asleep.\""},
+  {emoji:"☀️", h:"HEAVY SUNLIGHT WARNING NEAR WINDOW", d:"All available cats have been dispatched to the scene."}
+];
+
+/* Window weather report */
+const WINDOW_WEATHER = [
+  {label:"Sunlight availability", value:87},
+  {label:"Bird activity", value:96, text:"EXTREME"},
+  {label:"Nap conditions", value:100, text:"PERFECT"},
+  {label:"Human interruption probability", value:12}
+];
+
+/* Cat Economy stock ticker */
+const STOCKS = [
+  {ticker:"🐟 TUNACORP", change:"+34%", up:true},
+  {ticker:"📦 CARDBOARD INC.", change:"+12%", up:true},
+  {ticker:"🧶 YARN INDUSTRIES", change:"-8%", up:false},
+  {ticker:"🐕 DOG INSURANCE", change:"-91%", up:false}
+];
+
+/* The Tuna Truck Mystery — connected story arc */
+const MYSTERY_STEPS = [
+  {tag:"STORY 1", emoji:"🚨", h:"TUNA TRUCK DISAPPEARS",
+    b:"A fully loaded tuna delivery truck vanished from outside the Fish Market sometime after midnight. No alarms were triggered. No footprints — paw or otherwise — were found at the scene."},
+  {tag:"STORY 2", emoji:"🕵️", h:"POLICE QUESTION THREE CATS",
+    b:"Three cats were brought in for questioning. All three gave the exact same alibi, word for word, which investigators say is \"somehow more suspicious than having no alibi at all.\""},
+  {tag:"STORY 3", emoji:"📹", h:"CCTV SHOWS SUSPICIOUS ORANGE CAT",
+    b:"Grainy footage from a nearby bakery shows a large orange cat walking upright-ish near the loading dock at 12:47 AM, glancing at the camera before calmly walking away."},
+  {tag:"STORY 4", emoji:"🏦", h:"BANK REPORTS UNUSUAL DEPOSIT OF 847 TUNA CANS",
+    b:"First Meow Bank confirmed an overnight deposit of 847 individual tuna cans into a single account. The account holder's name has been redacted \"for his own safety.\""},
+  {tag:"STORY 5", emoji:"🚨", h:"ORANGE CAT ESCAPES CUSTODY",
+    b:"The orange cat, briefly detained for questioning, reportedly slipped out through a gap in the bars \"that should not have been physically possible\" and has not been seen since."},
+  {tag:"STORY 6", emoji:"👑", h:"MYSTERY CAT ELECTED MAYOR",
+    b:"In a stunning turn of events, an orange-adjacent candidate with no prior political record has won the mayoral election by a landslide, running on a single-issue platform of free cardboard boxes for every household. Sound familiar?"}
+];
+
+let mysteryVotes = {"Tuna money laundering":87, "Buying snacks":8, "Lost":5};
+let mysteryVoted = false;
+
+/* MEOWTER — cat social media */
+const MEOWTER_TRENDS = ["#WhereIsTheTuna","#JusticeForMittens","#OrangeCatAgain","#WhoOpenedTheWindow"];
+const MEOWTER_POSTS = {
+  "#WhereIsTheTuna":[
+    {user:"@mittens_2004", text:"WHY IS THE FRIDGE CLOSED AGAIN???"},
+    {user:"@fishmarket_official", text:"We would like to clarify that we still do not know where the truck is."},
+    {user:"@old_tom_park_bench", text:"I know where it is. I am not saying."}
+  ],
+  "#JusticeForMittens":[
+    {user:"@mittens_2004", text:"they questioned ME for the tuna truck thing. I was AT WORK."},
+    {user:"@factory_line3", text:"can confirm, he was here, he was watching a box for 6 hours"}
+  ],
+  "#OrangeCatAgain":[
+    {user:"@CEOofTuna", text:"We have no comment regarding the tuna shortage."},
+    {user:"@bakery_cam_guy", text:"my camera caught him again. he waved this time."},
+    {user:"@mayor_office", text:"The Mayor has no connection to any orange cats, named or otherwise."}
+  ],
+  "#WhoOpenedTheWindow":[
+    {user:"@sirpawsalot", text:"it wasn't me and you cannot prove it was me"},
+    {user:"@whiskerina_", text:"someone tell Pickles the café closes at 9"}
+  ]
+};
+
+/* SPOTTED — paparazzi */
+const PAPARAZZI = [
+  {emoji:"🪑", h:"LOCAL CAT SEEN SITTING ON A DIFFERENT CHAIR", c:"Sources say this is the first time Mr. Whiskers has acknowledged the existence of this chair."},
+  {emoji:"🕶️", h:"MYSTERY CAT SPOTTED WEARING TINY SUNGLASSES", c:"Nobody knows where they came from. The internet has named him Mr. Cool.", mystery:true},
+  {emoji:"☕", h:"ACCOUNTANT CAT ORDERS THE SAME DRINK FOR THIRD DAY RUNNING", c:"Baristas describe the order as \"an excuse to sit here for two hours.\""},
+  {emoji:"📦", h:"MAYOR PHOTOGRAPHED NEAR SUSPICIOUSLY LARGE PILE OF BOXES", c:"His office says the boxes are \"unrelated to everything.\""}
+];
+
+/* News that absolutely did not need to be reported */
+const NOT_IMPORTANT = [
+  "CAT SNEEZES TWICE","HUMAN MOVES SOFA 4 CM","CAT DISCOVERS MIRROR","SAME CAT RETURNS TO SAME WINDOW",
+  "PIGEON DOES NOTHING FOR 6 HOURS","CAT CHANGES SLEEPING POSITION","HUMAN OPENS FRIDGE. CAT FOLLOWS.",
+  "CAT BLINKS SLOWLY AT NOTHING","BOX ARRIVES. CAT CLAIMS BOX.","CAT WALKS OVER KEYBOARD, ADDS NOTHING USEFUL"
+];
+
+let currentFilter = "ALL MEWS";
+let deskIndex = 0;
+let mysteryUnlocked = 1;
+let blackCatSightings = 0;
+const BLACK_CAT_THRESHOLD = 5;
+
+/* Hidden black-cat easter egg spots (must be defined before the city is built below) */
+const HIDDEN_CAT_SPOTS = {
+  "meow-city": {x:85, y:35},
+  "fish-market": {x:78, y:30},
+  "cat-government": {x:12, y:32},
+  "night-district": {x:82, y:28}
+};
+
+function makeHiddenCat(x, y){
+  const btn = document.createElement("button");
+  btn.className = "hidden-cat";
+  btn.style.left = x + "%";
+  btn.style.top = y + "%";
+  btn.textContent = "🐈‍⬛";
+  btn.title = "...";
+  btn.addEventListener("click", (e)=>{ e.stopPropagation(); sightBlackCat(); });
+  return btn;
+}
+
+/* ============================================================
+   BUILD NAV
+   ============================================================ */
+const navInner = document.getElementById("nav-inner");
+CATEGORIES.forEach(cat=>{
+  const b = document.createElement("button");
+  b.textContent = cat;
+  b.dataset.cat = cat;
+  if(cat==="ALL MEWS") b.classList.add("active");
+  b.addEventListener("click", ()=> setFilter(cat));
+  navInner.appendChild(b);
+});
+
+function setFilter(cat){
+  currentFilter = cat;
+  document.querySelectorAll("#cat-nav button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.cat === cat);
+  });
+  document.getElementById("filter-label").textContent = "showing: " + cat.toLowerCase();
+  renderNews();
+  document.getElementById("news-section").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* ============================================================
+   BUILD TICKER
+   ============================================================ */
+const tickerTrack = document.getElementById("ticker-track");
+const tickerItems = NEWS.map(n => n.h);
+[...tickerItems, ...tickerItems].forEach(t=>{
+  const s = document.createElement("span");
+  s.textContent = t;
+  tickerTrack.appendChild(s);
+});
+
+/* ============================================================
+   BUILD CITY
+   ============================================================ */
+const cityRoot = document.getElementById("city-root");
+DISTRICTS.forEach(d=>{
+  const section = document.createElement("div");
+  section.className = "district";
+  section.id = "district-" + d.id;
+
+  const header = document.createElement("div");
+  header.className = "district-header";
+  header.style.background = d.dark ? "linear-gradient(90deg,#1c1c3a,#33335c)" : d.accent;
+  header.innerHTML = `<div><h3>${d.emoji} ${d.name}</h3><div class="sub">${d.tagline}</div></div>`;
+  section.appendChild(header);
+
+  const scene = document.createElement("div");
+  scene.className = "district-scene";
+  scene.style.setProperty("--scene-top", d.top);
+  scene.style.setProperty("--scene-bot", d.bot);
+
+  const skyline = document.createElement("div");
+  skyline.className = "skyline";
+  d.buildings.forEach(h=>{
+    const bl = document.createElement("div");
+    bl.className = "bldg";
+    bl.style.height = h + "%";
+    bl.style.width = (100/d.buildings.length) + "%";
+    bl.style.setProperty("--bldg-accent", d.accent);
+    skyline.appendChild(bl);
+  });
+  scene.appendChild(skyline);
+
+  const ground = document.createElement("div");
+  ground.className = "ground";
+  scene.appendChild(ground);
+
+  CHARACTERS.filter(c=>c.district === d.id).forEach(c=>{
+    const btn = document.createElement("button");
+    btn.className = "char" + (c.breaking ? " breaking" : "");
+    btn.style.left = c.x + "%";
+    btn.style.top = c.y + "%";
+    btn.innerHTML = `${c.emoji}<span class="char-tag">${c.name}</span>`;
+    btn.addEventListener("click", ()=> openCharacter(c.id));
+    scene.appendChild(btn);
+  });
+
+  const hiddenSpot = HIDDEN_CAT_SPOTS[d.id];
+  if(hiddenSpot){
+    scene.appendChild(makeHiddenCat(hiddenSpot.x, hiddenSpot.y));
+  }
+
+  section.appendChild(scene);
+  cityRoot.appendChild(section);
+});
+
+/* ============================================================
+   BUILD NEWS GRID
+   ============================================================ */
+function renderNews(){
+  const grid = document.getElementById("news-grid");
+  grid.innerHTML = "";
+  const list = NEWS.filter(n => currentFilter === "ALL MEWS" || n.cat === currentFilter || (currentFilter==="BREAKING MEWS" && n.breaking));
+  if(list.length === 0){
+    grid.innerHTML = `<p class="label-font" style="color:#999;">no mews here yet. check another desk.</p>`;
+    return;
+  }
+  list.forEach(n=>{
+    const card = document.createElement("div");
+    card.className = "news-card" + (n.breaking ? " breaking" : "");
+    card.innerHTML = `
+      ${n.breaking ? '<div class="breaking-flag">🚨 BREAKING NEWS</div>' : ''}
+      <div class="tag-row"><span class="cat-tag">${n.cat}</span></div>
+      <h3>${n.h}</h3>
+      <p>${n.b}</p>
+      <div class="byline">${n.by}${n.charLink ? " · click to meet the cat →" : ""}</div>
+    `;
+    if(n.charLink){
+      card.style.cursor = "pointer";
+      card.addEventListener("click", ()=> openCharacter(n.charLink));
+    }
+    grid.appendChild(card);
+  });
+}
+renderNews();
+
+/* ============================================================
+   MODAL / CHARACTER STORIES
+   ============================================================ */
+const overlay = document.getElementById("modal-overlay");
+const modalEl = document.getElementById("modal");
+
+function findChar(id){ return CHARACTERS.find(c=>c.id===id); }
+
+function openCharacter(id){
+  const c = findChar(id);
+  if(!c) return;
+  modalEl.innerHTML = `
+    <div class="modal-head">
+      <span class="tag">${c.breaking ? "🚨 BREAKING NEWS" : "CAT FILE"}</span>
+      <button class="modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-emoji">${c.emoji}</div>
+      <h2>${c.name}</h2>
+      <div class="stat-row"><b>AGE</b><span>${c.age}</span></div>
+      <div class="stat-row"><b>OCCUPATION</b><span>${c.occupation}</span></div>
+      <div class="stat-row"><b>CURRENT ACTIVITY</b><span>${c.activity}</span></div>
+      <div class="modal-story">${c.story}</div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  `;
+  const actions = modalEl.querySelector("#modal-actions");
+  if(c.followUp){
+    const b = document.createElement("button");
+    b.className = "follow";
+    b.textContent = "Follow story →";
+    b.addEventListener("click", ()=> openCharacter(c.followUp));
+    actions.appendChild(b);
+  }
+  if(c.interview){
+    const b = document.createElement("button");
+    b.className = "interview";
+    b.textContent = "🎙️ Exclusive interview";
+    b.addEventListener("click", ()=> openInterview(c.id));
+    actions.appendChild(b);
+  }
+  const goDistrict = document.createElement("button");
+  goDistrict.textContent = "📍 View district";
+  goDistrict.addEventListener("click", ()=>{
+    closeModal();
+    document.getElementById("district-"+c.district).scrollIntoView({behavior:"smooth", block:"center"});
+  });
+  actions.appendChild(goDistrict);
+
+  showModal();
+}
+
+function openInterview(id){
+  const c = findChar(id);
+  if(!c || !c.interview) return;
+  let qaHtml = "";
+  c.interview.forEach(pair=>{
+    qaHtml += `
+      <div class="q"><span class="who">REPORTER</span>${pair.q}</div>
+      <div class="a"><span class="who">${c.name.toUpperCase()}</span>${pair.a}</div>
+    `;
+  });
+  modalEl.innerHTML = `
+    <div class="modal-head">
+      <span class="tag">🎙️ EXCLUSIVE INTERVIEW</span>
+      <button class="modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-emoji">${c.emoji}</div>
+      <h2>${c.name}</h2>
+      <div class="qa">${qaHtml}</div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  `;
+  const actions = modalEl.querySelector("#modal-actions");
+  const back = document.createElement("button");
+  back.textContent = "← Back to file";
+  back.addEventListener("click", ()=> openCharacter(id));
+  actions.appendChild(back);
+  showModal();
+}
+
+function showModal(){
+  overlay.classList.add("show");
+  modalEl.querySelector(".modal-close").addEventListener("click", closeModal);
+}
+function closeModal(){ overlay.classList.remove("show"); }
+overlay.addEventListener("click", (e)=>{ if(e.target === overlay) closeModal(); });
+document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeModal(); });
+
+/* ============================================================
+   LIVE DESK ROTATION
+   ============================================================ */
+function renderDesk(){
+  const s = DESK_STORIES[deskIndex];
+  document.getElementById("screen-emoji").textContent = s.emoji;
+  document.getElementById("screen-headline").textContent = s.h;
+  document.getElementById("screen-desc").textContent = s.d;
+  document.getElementById("anchor-quote").textContent = `“Good evening. Tonight's top story: ${s.h.toLowerCase()}.”`;
+}
+document.getElementById("next-story-btn").addEventListener("click", ()=>{
+  deskIndex = (deskIndex + 1) % DESK_STORIES.length;
+  renderDesk();
+});
+
+/* ============================================================
+   WINDOW WEATHER + CAT ECONOMY
+   ============================================================ */
+function renderWeather(){
+  const wrap = document.getElementById("weather-bars");
+  wrap.innerHTML = WINDOW_WEATHER.map(w => `
+    <div class="weather-stat">
+      <div class="ws-label"><span>${w.label}</span><span>${w.text || w.value + "%"}</span></div>
+      <div class="ws-track"><div class="ws-fill" style="width:${w.value}%"></div></div>
+    </div>
+  `).join("");
+}
+renderWeather();
+
+function renderStocks(){
+  const wrap = document.getElementById("stock-rows");
+  wrap.innerHTML = STOCKS.map(s => `
+    <div class="stock-row">
+      <span>${s.ticker}</span>
+      <span class="stock-change ${s.up ? "up" : "down"}">${s.up ? "▲" : "▼"} ${s.change}</span>
+    </div>
+  `).join("");
+}
+renderStocks();
+
+/* ============================================================
+   TUNA TRUCK MYSTERY
+   ============================================================ */
+function renderMystery(){
+  const wrap = document.getElementById("mystery-timeline");
+  let html = "";
+  for(let i=0; i<mysteryUnlocked; i++){
+    const s = MYSTERY_STEPS[i];
+    const isLast = i === mysteryUnlocked - 1;
+    html += `
+      <div class="m-step">
+        <div class="m-emoji">${s.emoji}</div>
+        <div>
+          <div class="m-tag">${s.tag}</div>
+          <h4>${s.h}</h4>
+          <p>${s.b}</p>
+          ${(s.tag==="STORY 6") ? `<div class="m-link"><button id="mayor-reveal-btn">📁 View the Mayor's file →</button></div>` : ""}
+        </div>
+      </div>
+    `;
+  }
+  wrap.innerHTML = html;
+
+  const btn = document.getElementById("mayor-reveal-btn");
+  if(btn) btn.addEventListener("click", ()=> openCharacter("mayor"));
+
+  const pollWrap = document.getElementById("mystery-poll-wrap");
+  if(mysteryUnlocked < MYSTERY_STEPS.length){
+    pollWrap.innerHTML = `<button class="m-continue" id="mystery-continue-btn">Follow the lead →</button>`;
+    document.getElementById("mystery-continue-btn").addEventListener("click", ()=>{
+      mysteryUnlocked++;
+      renderMystery();
+    });
+  } else {
+    renderPoll();
+  }
+}
+renderMystery();
+
+function renderPoll(){
+  const pollWrap = document.getElementById("mystery-poll-wrap");
+  const total = Object.values(mysteryVotes).reduce((a,b)=>a+b,0);
+  const opts = Object.keys(mysteryVotes);
+  pollWrap.innerHTML = `
+    <div class="poll-box">
+      <h4>🔎 The Internet Has Questions: why was the cat at the bank?</h4>
+      ${opts.map(o=>{
+        const pct = Math.round((mysteryVotes[o]/total)*100);
+        return `<button class="poll-option" data-opt="${o}">
+                  <div class="po-fill" style="width:${pct}%"></div>
+                  <span class="po-text">${o}</span>
+                  <span class="po-pct">${pct}%</span>
+                </button>`;
+      }).join("")}
+      <div class="poll-result" id="poll-result">✅ YOUR THEORY HAS BEEN ADDED TO THE INVESTIGATION.</div>
+    </div>
+  `;
+  pollWrap.querySelectorAll(".poll-option").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(mysteryVoted) return;
+      mysteryVoted = true;
+      mysteryVotes[b.dataset.opt]++;
+      renderPoll();
+      document.getElementById("poll-result").classList.add("show");
+    });
+  });
+}
+
+/* ============================================================
+   MEOWTER
+   ============================================================ */
+let activeTrend = MEOWTER_TRENDS[0];
+function renderMeowterTrends(){
+  const wrap = document.getElementById("meowter-trends");
+  wrap.innerHTML = "";
+  const row = document.createElement("div");
+  row.className = "trend-row";
+  MEOWTER_TRENDS.forEach(t=>{
+    const p = document.createElement("button");
+    p.className = "trend-pill" + (t === activeTrend ? " active" : "");
+    p.textContent = t;
+    p.addEventListener("click", ()=>{ activeTrend = t; renderMeowterTrends(); renderMeowterFeed(); });
+    row.appendChild(p);
+  });
+  wrap.appendChild(row);
+}
+function renderMeowterFeed(){
+  const feed = document.getElementById("meowter-feed");
+  const posts = MEOWTER_POSTS[activeTrend] || [];
+  feed.innerHTML = posts.map((p,i)=>`
+    <div class="post-card">
+      <span class="p-user">${p.user}</span>${p.text}${(activeTrend==="#OrangeCatAgain" && i===1) ? ' <span class="hidden-cat" data-hc="1" title="...">🐈‍⬛</span>' : ""}
+    </div>
+  `).join("");
+  feed.querySelectorAll(".hidden-cat").forEach(el=> el.addEventListener("click", (e)=>{ e.stopPropagation(); sightBlackCat(); }));
+}
+renderMeowterTrends();
+renderMeowterFeed();
+
+/* ============================================================
+   SPOTTED / PAPARAZZI
+   ============================================================ */
+function renderPaparazzi(){
+  const grid = document.getElementById("papa-grid");
+  grid.innerHTML = "";
+  PAPARAZZI.forEach(p=>{
+    const card = document.createElement("div");
+    card.className = "papa-card";
+    card.innerHTML = `
+      <div class="papa-photo"><span class="flash-tag">SPOTTED!</span>${p.emoji}${p.mystery ? '<span class="hidden-cat" data-hc="2" title="...">🐈‍⬛</span>' : ""}</div>
+      <div class="papa-body"><h4>${p.h}</h4><p>${p.c}</p></div>
+    `;
+    const hc = card.querySelector(".hidden-cat");
+    if(hc) hc.addEventListener("click", (e)=>{ e.stopPropagation(); sightBlackCat(); });
+    grid.appendChild(card);
+  });
+}
+renderPaparazzi();
+
+/* ============================================================
+   NOT IMPORTANT AT ALL
+   ============================================================ */
+function renderNotImportant(){
+  const grid = document.getElementById("ni-grid");
+  grid.innerHTML = NOT_IMPORTANT.map(t => `<div class="ni-item">${t}</div>`).join("");
+}
+renderNotImportant();
+
+function sightBlackCat(){
+  blackCatSightings++;
+  showToast(`🐈‍⬛ sighting logged — ${Math.min(blackCatSightings, BLACK_CAT_THRESHOLD)}/${BLACK_CAT_THRESHOLD}`);
+  if(blackCatSightings >= BLACK_CAT_THRESHOLD){
+    setTimeout(openClassifiedFile, 900);
+  }
+}
+
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById("sighting-toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove("show"), 2400);
+}
+
+let classifiedShown = false;
+function openClassifiedFile(){
+  if(classifiedShown) return;
+  classifiedShown = true;
+  modalEl.className = "modal classified-modal";
+  modalEl.innerHTML = `
+    <div class="modal-head">
+      <span class="tag">⚠️ CLASSIFIED</span>
+      <button class="modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="classified-body">
+      <div class="type-line">ACCESSING CLASSIFIED FILE...</div>
+      <div class="type-line">CLEARANCE GRANTED.</div>
+      <div class="type-line" style="margin-top:14px;font-family:'Anton',sans-serif;font-size:20px;letter-spacing:2px;">THE PAW SOCIETY</div>
+      <div class="type-line" style="margin-top:10px;">SUBJECT: unidentified black cat.</div>
+      <div class="type-line">SEEN AT: the bank, the fish market, city hall, the train station, the crime scene.</div>
+      <div class="type-line">NEVER MENTIONED IN: a single article.</div>
+      <div class="type-line" style="margin-top:14px;">FILE NOTE: subject appears in the background of every major story this month. Analysts believe this is <span class="redacted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.</div>
+      <div class="type-line" style="margin-top:14px;">STATUS: investigation ongoing. You should not have seen this.</div>
+    </div>
+  `;
+  modalEl.querySelector(".modal-close").addEventListener("click", ()=>{
+    closeModal();
+    modalEl.className = "modal";
+  });
+  overlay.classList.add("show");
+}
+
+/* ============================================================
+   SPLASH / CLOCK
+   ============================================================ */
+function updateClock(){
+  const now = new Date();
+  let h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2,"0");
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12; if(h===0) h = 12;
+  const str = `${h}:${m} ${ampm}`;
+  document.getElementById("splash-clock").textContent = str;
+  document.getElementById("header-clock").textContent = str;
+}
+updateClock();
+setInterval(updateClock, 15000);
+
+document.getElementById("enter-btn").addEventListener("click", ()=>{
+  document.getElementById("splash").classList.add("hide");
+});
+</script>
+</body>
+</html>

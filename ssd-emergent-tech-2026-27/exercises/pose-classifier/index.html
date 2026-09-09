@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A webcam pose-classification experiment trained with four playful poses.">
+  <title>Pose Parade — Emergent Technology 2026–27</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="../../vendor/tf-1.7.4.min.js" defer></script>
+  <script src="../../vendor/posenet-2.2.2.min.js" defer></script>
+  <script src="../../vendor/teachablemachine-pose-0.8.6.min.js" defer></script>
+  <script src="sketch.js" defer></script>
+</head>
+<body>
+  <header>
+    <a href="../../index.html">← Exhibition</a>
+    <span>Pose + machine learning</span>
+  </header>
+
+  <main>
+    <section class="intro">
+      <p class="kicker">Gloria Mathew · Prachi · Damiyan</p>
+      <h1>Strike<br><span>a pose.</span></h1>
+      <p>Try Superman, Rabbit, Action Kamin or Patrick and see which pose the model recognises.</p>
+    </section>
+
+    <section class="stage" aria-label="Pose experiment">
+      <div class="camera-wrap">
+        <canvas id="canvas" width="560" height="560" aria-label="Mirrored webcam preview with detected pose"></canvas>
+        <p id="camera-state">Camera is off</p>
+      </div>
+      <aside>
+        <p class="section-label">The machine sees</p>
+        <h2 id="result">Ready?</h2>
+        <div id="predictions" aria-live="polite"></div>
+        <div class="controls">
+          <button id="start" type="button">Start camera</button>
+          <button id="stop" class="secondary" type="button" disabled>Stop</button>
+        </div>
+        <p class="privacy">Video stays in this browser tab and is not uploaded by this page. Your browser will ask permission before the camera starts.</p>
+        <p id="error" class="error" role="alert"></p>
+      </aside>
+    </section>
+  </main>
+
+  <footer>Emergent Technology 2026–27</footer>
+</body>
+</html>

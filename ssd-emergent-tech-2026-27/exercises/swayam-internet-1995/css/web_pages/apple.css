@@ -1,0 +1,743 @@
+/* =========================================================
+   APPLE COMPUTER HOME PAGE — 1995
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #ffffff;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+.apple-page {
+    width: 631px;
+    margin: 10px auto 40px auto;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    color: #000000;
+}
+
+
+/* =========================================================
+   MAIN APPLE FRAME
+   ========================================================= */
+
+.apple-header {
+    position: relative;
+
+    width: 631px;
+
+    /*
+       Original base.webp = 1408 × 1052
+
+       Keep exact aspect ratio.
+    */
+    aspect-ratio: 1408 / 1052;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    background: transparent;
+}
+
+
+/* =========================================================
+   BASE IMAGE
+   ========================================================= */
+
+.apple-base-image {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: fill;
+
+    z-index: 0;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   TOP APPLE LOGO
+   ========================================================= */
+
+.apple-logo-overlay {
+    position: absolute;
+
+    left: 14px;
+    top: 13px;
+
+    width: 105px;
+    height: 108px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 20;
+}
+
+.apple-logo-overlay img {
+    display: block;
+
+    width: 96px;
+    height: 96px;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: contain;
+}
+
+
+/* =========================================================
+   HEADER TITLE
+   ========================================================= */
+
+.apple-title-overlay {
+    position: absolute;
+
+    left: 125px;
+    top: 7px;
+
+    width: 500px;
+    height: 62px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: "Times New Roman", Times, serif;
+
+    font-size: 28px;
+    font-weight: normal;
+
+    line-height: 1;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    z-index: 20;
+}
+
+
+/* =========================================================
+   LEFT NAVIGATION
+   ========================================================= */
+
+.apple-side-navigation {
+    position: absolute;
+
+    left: 9px;
+    top: 128px;
+
+    width: 207px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    z-index: 20;
+}
+
+
+/* =========================================================
+   LEFT NAVIGATION ROW
+   ========================================================= */
+
+.apple-side-link {
+    width: 207px;
+    height: 38px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   LEFT BUTTON IMAGE
+   ========================================================= */
+
+.apple-side-link img {
+    display: block;
+
+    width: 29px;
+    height: 29px;
+
+    margin: 0 9px 0 0;
+    padding: 0;
+
+    flex: 0 0 29px;
+
+    object-fit: contain;
+}
+
+
+/* =========================================================
+   LEFT NAVIGATION TEXT
+   ========================================================= */
+
+.apple-side-link a {
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    font-family: "Times New Roman", Times, serif;
+
+    font-size: 16px;
+    font-weight: bold;
+    font-style: italic;
+
+    line-height: 1;
+
+    color: #0000ee;
+
+    white-space: nowrap;
+
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   MAIN CONTENT PANEL
+   ========================================================= */
+
+.apple-main-panel {
+    position: absolute;
+
+    left: 220px;
+    top: 73px;
+
+    width: 395px;
+    height: 341px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    z-index: 20;
+}
+
+
+/* =========================================================
+   WELCOME TO APPLE
+   ========================================================= */
+
+.apple-welcome-image {
+    position: absolute;
+
+    left: 1px;
+    top: 1px;
+
+    width: 393px;
+    height: 101px;
+
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: fill;
+}
+
+
+/* =========================================================
+   CONNECTION BAR
+   ========================================================= */
+
+.apple-connection {
+    position: absolute;
+
+    left: 1px;
+    top: 102px;
+
+    width: 393px;
+    height: 19px;
+
+    margin: 0;
+    padding: 2px 6px 0 6px;
+
+    box-sizing: border-box;
+
+    background: #c0c0c0;
+
+    border: 1px solid #999999;
+
+    font-family: "Courier New", monospace;
+
+    font-size: 9px;
+    font-weight: bold;
+
+    line-height: 13px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+}
+
+.connection-label {
+    color: #000000;
+}
+
+.connection-url {
+    color: #0000aa;
+}
+
+
+/* =========================================================
+   QUICKDRAW 3D IMAGE
+   ========================================================= */
+
+.apple-quickdraw-image {
+    position: absolute;
+
+    left: 1px;
+    top: 121px;
+
+    width: 196px;
+    height: 179px;
+
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: fill;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   REBATE IMAGE
+   ========================================================= */
+
+.apple-rebate-image {
+    position: absolute;
+
+    left: 197px;
+    top: 121px;
+
+    width: 196px;
+    height: 179px;
+
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: fill;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   PANEL FOOTER
+   ========================================================= */
+
+.apple-panel-footer {
+    position: absolute;
+
+    left: 1px;
+    top: 301px;
+
+    width: 393px;
+    height: 31px;
+
+    margin: 0;
+    padding: 6px 8px 0 8px;
+
+    box-sizing: border-box;
+
+    background: transparent;
+
+    font-family: "Courier New", monospace;
+
+    font-size: 10px;
+    font-weight: normal;
+
+    line-height: 14px;
+
+    color: #444444;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    z-index: 3;
+}
+
+/* =========================================================
+   BOTTOM NAVIGATION
+   MATCHED TO base.webp
+   ========================================================= */
+
+.apple-header-navigation {
+    position: absolute;
+
+    left: 0;
+    top: 420px;
+
+    width: 631px;
+    height: 51px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    display: grid;
+
+    /*
+       base.webp has:
+
+       Apple logo       = 72px
+       Servers          = 96px
+       What's New       = 96px
+       Index            = 95px
+       Feedback         = 96px
+       Help             = 96px
+       Right end        = 80px
+    */
+
+    grid-template-columns:
+        72px
+        96px
+        96px
+        95px
+        96px
+        96px
+        80px;
+
+    align-items: center;
+
+    background: transparent;
+
+    z-index: 30;
+}
+
+
+/* =========================================================
+   ALL NAVIGATION LINKS
+   ========================================================= */
+
+.apple-header-navigation > a {
+    width: 100%;
+    height: 43px;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: "Times New Roman", Times, serif;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    line-height: 1;
+
+    color: #0000ee;
+
+    white-space: nowrap;
+
+    text-decoration: underline;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   APPLE LOGO
+   ========================================================= */
+
+.apple-header-navigation .apple-nav-logo {
+    grid-column: 1;
+
+    width: 100%;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apple-nav-logo img {
+    display: block;
+
+    width: 39px;
+    height: 36px;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: contain;
+}
+
+
+/* =========================================================
+   APPLE INTERNET SERVERS
+   ========================================================= */
+
+.apple-header-navigation > a:nth-child(2) {
+    grid-column: 2;
+}
+
+
+/* =========================================================
+   WHAT'S NEW
+   ========================================================= */
+
+.apple-header-navigation > a:nth-child(3) {
+    grid-column: 3;
+}
+
+
+/* =========================================================
+   INDEX
+   ========================================================= */
+
+.apple-header-navigation > a:nth-child(4) {
+    grid-column: 4;
+}
+
+
+/* =========================================================
+   FEEDBACK
+   ========================================================= */
+
+.apple-header-navigation > a:nth-child(5) {
+    grid-column: 5;
+}
+
+
+/* =========================================================
+   HELP
+   ========================================================= */
+
+.apple-header-navigation .apple-nav-help {
+    grid-column: 6;
+
+    width: 100%;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apple-nav-help img {
+    display: block;
+
+    width: 31px;
+    height: 31px;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: contain;
+}
+
+/* =========================================================
+   CONTENT BELOW APPLE FRAME
+   ========================================================= */
+
+.apple-page > hr {
+    width: 100%;
+
+    height: 0;
+
+    margin: 29px 0 20px 0;
+    padding: 0;
+
+    border: 0;
+    border-top: 1px solid #999999;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FEATURES
+   ========================================================= */
+
+.apple-section {
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
+.apple-section h2 {
+    margin: 0 0 20px 0;
+    padding: 0;
+
+    font-size: 24px;
+    font-weight: bold;
+
+    line-height: 1;
+}
+
+.apple-feature {
+    margin: 0 0 3px 0;
+    padding: 0;
+}
+
+.apple-feature a {
+    font-size: 16px;
+    color: #0000ee;
+    text-decoration: underline;
+}
+
+.apple-feature p {
+    margin: 0 0 0 42px;
+    padding: 0;
+
+    font-size: 16px;
+
+    line-height: 1.25;
+}
+
+
+/* =========================================================
+   APPLE LINKS
+   ========================================================= */
+
+.apple-links {
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
+.apple-links > div {
+    margin: 0 0 3px 0;
+    padding: 0;
+}
+
+.apple-links a {
+    font-size: 16px;
+
+    color: #0000ee;
+
+    text-decoration: underline;
+}
+
+.apple-links p {
+    margin: 0 0 0 42px;
+    padding: 0;
+
+    font-size: 16px;
+
+    line-height: 1.25;
+}
+
+
+/* =========================================================
+   TEXT NAVIGATION
+   ========================================================= */
+
+.apple-text-navigation {
+    margin: 25px 0 0 0;
+    padding: 0;
+
+    font-size: 14px;
+}
+
+.apple-text-navigation a {
+    color: #0000ee;
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   ABOUT THIS SERVER
+   ========================================================= */
+
+.apple-about-server {
+    margin: 65px 0 0 0;
+    padding: 0;
+
+    font-size: 14px;
+}
+
+.apple-about-server a {
+    color: #0000ee;
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.apple-footer {
+    margin: 10px 0 0 0;
+    padding: 0;
+
+    font-size: 14px;
+
+    line-height: 1.25;
+}
+
+.apple-footer a {
+    color: #0000ee;
+    text-decoration: underline;
+}

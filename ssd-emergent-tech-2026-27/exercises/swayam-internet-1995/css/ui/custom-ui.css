@@ -1,0 +1,49 @@
+/* ========================================
+   WIN95 DESKTOP ICON ALIGNMENT
+======================================== */
+
+.desktop-icon {
+    width: 78px;
+    min-height: 57px;
+
+    padding: 2px 1px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    box-sizing: border-box;
+}
+
+.desktop-icon img.pixel-icon {
+    display: block;
+
+    width: 32px;
+    height: 32px;
+
+    margin: 0 auto;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+}
+
+.desktop-icon .icon-label {
+    display: block;
+
+    width: 76px;
+
+    margin-top: 3px;
+
+    text-align: center;
+
+    color: #fff;
+
+    font-size: 8px;
+    line-height: 10px;
+
+    text-shadow: 1px 1px #000;
+
+    word-wrap: break-word;
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A webcam image-classification experiment trained to recognise open and closed eyes.">
+  <title>Open Eyes / Closed Eyes — Emergent Technology 2026–27</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="../../vendor/tf-1.7.4.min.js" defer></script>
+  <script src="../../vendor/teachablemachine-image-0.8.5.min.js" defer></script>
+  <script src="sketch.js" defer></script>
+</head>
+<body>
+  <header>
+    <a href="../../index.html">← Exhibition</a>
+    <span>Camera + machine learning</span>
+  </header>
+
+  <main>
+    <section class="intro">
+      <p class="kicker">Gloria Mathew · Prachi · Damiyan</p>
+      <h1>Open eyes.<br><em>Closed eyes.</em></h1>
+      <p class="lede">A small machine-learning model watches for one simple change: whether your eyes appear open or closed.</p>
+    </section>
+
+    <section class="experiment" aria-labelledby="experiment-title">
+      <div class="camera-frame">
+        <div id="webcam" aria-label="Webcam preview"></div>
+        <div class="reticle" aria-hidden="true"></div>
+        <p id="camera-state" class="camera-state">Camera is off</p>
+      </div>
+
+      <div class="panel">
+        <p class="section-label">Live reading</p>
+        <h2 id="experiment-title">Ready when you are.</h2>
+        <div id="predictions" class="predictions" aria-live="polite"></div>
+        <div class="controls">
+          <button id="start" type="button">Start camera</button>
+          <button id="stop" class="secondary" type="button" disabled>Stop</button>
+        </div>
+        <p class="privacy">Video stays in this browser tab and is not uploaded by this page. Your browser will ask permission before the camera starts.</p>
+        <p id="error" class="error" role="alert"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>Emergent Technology 2026–27</footer>
+</body>
+</html>
