@@ -6,7 +6,7 @@
 - Moved Internet 1995 historical version snapshots and unused Finding India ocean variants out of the publishable site.
 - Converted 32 referenced PNG files to substantially smaller WebP files and retained their originals in `to_delete/`.
 - Centralized the identical hand-landmarker model used by Aadit and Swayam.
-- Centralized the identical artwork shared by all three Sleepwalker versions and removed the unused legacy lite hand model.
+- Centralized the identical artwork shared by the Sleepwalker versions and removed the unused legacy lite hand model.
 - Moved unreferenced Internet 1995 PNGs into `to_delete/` and precompiled the Anaya/Diti JSX so the 2.71 MB browser Babel compiler is no longer published.
 
 ## Project rules
@@ -208,9 +208,9 @@
 - Reviewed its dynamic HTML generation: visitor-authored titles, descriptions and choices are escaped before rendering.
 - The only remaining external requests are optional Google Fonts; the application itself has no remote data dependency.
 
-### Pratyush Girap — Sleepwalker versions 1–3
+### Pratyush Girap — Sleepwalker version 3
 
-- Retained all three materially different submitted iterations and their supplied cityscape and walking-frame artwork.
+- Retained version 3 for publication; versions 1 and 2 were moved to the ignored `to_delete` holding area.
 - Archived pinned MediaPipe Hands and Camera Utils packages, including hand landmark models and WebAssembly, so hand tracking no longer relies on jsDelivr.
 - Camera access still requires visitor permission and HTTPS, which GitHub Pages supplies.
 - Corrected version 3’s copied browser title from “v2 prototype” to “v3 prototype”; gameplay was not changed.

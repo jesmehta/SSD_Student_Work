@@ -15,8 +15,6 @@ const works = [
   ["Madhav Kansara", "Human Physics Playground", "Drag and collide human figures in a browser physics sandbox.", "web game", "exercises/madhav-human-physics/index.html"],
   ["Madhav Kansara", "Assaniation Game", "Clear 20 guarded floors, rescue hostages, gather loot and defeat escalating bosses.", "game", "exercises/madhav-assaniation-game/index.html"],
   ["Parikshitsingh Bisht", "Chain of Events", "Build and simulate branching interactive stories.", "web", "exercises/parikshit-chain-of-events/index.html"],
-  ["Pratyush Girap", "Sleepwalker — Version 1", "An early camera-guided sleepwalking game prototype.", "camera game", "exercises/pratyush-sleepwalker-v1/index.html"],
-  ["Pratyush Girap", "Sleepwalker — Version 2", "A refined hand-tracked sleepwalking experiment.", "camera game", "exercises/pratyush-sleepwalker-v2/index.html"],
   ["Pratyush Girap", "Sleepwalker — Version 3", "The latest supplied iteration of the hand-controlled game.", "camera game", "exercises/pratyush-sleepwalker-v3/index.html"],
   ["Radhika Mistry", "Neon Maze", "Collect food, avoid poison and move through a level-based game.", "physical game", "exercises/radhika-joystick-game/index.html"],
   ["Radhika Mistry", "Focus Tracker", "Choose a character in a surreal focus-themed interface.", "web", "exercises/radhika-focus-tracker/index.html"],
