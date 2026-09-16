@@ -58,14 +58,16 @@ needs a corresponding update, done in the Cabinet repo, not here:**
 - Update `cabinet-entries.tsv` row `students-creative-coding-2025-26`'s path
   from `teaching/ssd-creative-coding/` to
   `teaching/ssd-creative-coding-2025-26/` once the mount change ships, and
-  consider adding a row for `ssd-creative-coding-2024-25` and the other four
-  galleries when they're built.
+  add rows for `ssd-creative-coding-2024-25` and `ssd-creative-coding-2023-24`
+  (both now built, see `documentation/changelog.md`'s 2026-09-16 entry) plus
+  the other four galleries once they're built.
 
 ### Expected new public URLs, once Cabinet is updated
 
 - `<cabinet-domain>/teaching/` → new SSD Student Work landing page
 - `<cabinet-domain>/teaching/ssd-creative-coding-2025-26/` → the moved gallery
-- `<cabinet-domain>/teaching/ssd-creative-coding-2024-25/` → placeholder, once built
+- `<cabinet-domain>/teaching/ssd-creative-coding-2024-25/` → built, awaiting this mount fix
+- `<cabinet-domain>/teaching/ssd-creative-coding-2023-24/` → built, awaiting this mount fix
 - (the four other gallery slugs, once built)
 
 Until Cabinet's deploy.yml is updated, do not push this repo's `main` to

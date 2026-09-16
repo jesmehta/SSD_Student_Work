@@ -1,12 +1,18 @@
 # Content plan
 
-The six galleries currently planned for SSD Student Work:
+The seven galleries currently planned for SSD Student Work:
 
 ## Creative Coding
 
-Interactive galleries of student p5.js sketches, one folder per student.
+Interactive galleries of student p5.js sketches, one folder per student
+(a few students contribute more than one sketch where their assignment 2
+folder held clearly distinct, differently-named projects rather than
+versions of one thing — see content-decisions.md).
 
-- Creative Coding - SSD 2024-25 — not yet started.
+- Creative Coding - SSD 2023-24 — built (18 students, 20 sketches), sourced
+  from the raw "FY Creative Coding (2023-24)" submission archive.
+- Creative Coding - SSD 2024-25 — built (18 students, 25 sketches), sourced
+  from the raw "Creative Coding Submission 2024-25" archive.
 - Creative Coding - SSD 2025-26 — exists (14 students), moved here from the
   old single-purpose repo root.
 

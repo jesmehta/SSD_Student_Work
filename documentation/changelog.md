@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-16 — Built Creative Coding 2024-25, added 2023-24
+
+- Built out `ssd-creative-coding-2024-25/` (18 students, 25 sketches) from
+  the raw "Creative Coding Submission 2024-25" archive, replacing its
+  placeholder README.
+- Added `ssd-creative-coding-2023-24/` (18 students, 20 sketches) as a new
+  7th gallery — not in the original six-gallery plan — from the raw "FY
+  Creative Coding (2023-24)" archive. Linked from the root landing page;
+  `content-plan.md` and `gallery-status.md` updated accordingly.
+- Both follow the 2025-26 gallery's structure exactly (per-student folders,
+  gallery-local `_shared/libs/`, `script.js`-driven card grid). See
+  `documentation/content/content-decisions.md`'s 2026-09-16 entry for the
+  roster-selection rules (raw submissions had many candidate zips per
+  student, redo-vs-original handling, exclusions, etc.) and
+  `documentation/architecture.md`'s new section for structural notes.
+- Not done here: `documentation/deployment.md`'s Cabinet `deploy.yml`
+  mount-path fix (still pending from the 2026-09-04 reorg) and
+  `cabinet-entries.tsv` rows for these two galleries — both are Cabinet-repo
+  changes, out of scope here. **Per `deployment.md`, this repo's `main`
+  should not be pushed until that Cabinet-side fix ships.**
+
 ## 2026-09-04 — Reorganised into SSD Student Work
 
 Repository reframed from a single-purpose "SSD Creative Coding" site into a
