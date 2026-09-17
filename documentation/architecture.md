@@ -20,22 +20,23 @@ root landing page that links to them.
 ├── ssd-emergent-tech-2024-25/     — placeholder, not yet built
 ├── ssd-emergent-tech-2026-27/     — placeholder, not yet built
 │
-├── dragons-of-ssd/                — placeholder, not yet built
-├── ssd-papiermache/                — placeholder, not yet built
-│
 ├── shared/                        — reserved for genuinely cross-gallery resources (currently empty)
 │
 └── documentation/                 — this folder
 ```
 
-No intermediate category folders (`/creative-coding/`, `/emergent-tech/`,
-`/papiermache/`) — each gallery sits directly at repo root under its own
-year-specific slug, and the root landing page provides the conceptual
-grouping visually instead.
+No intermediate category folders (`/creative-coding/`, `/emergent-tech/`)
+for the interactive galleries above — each sits directly at repo root under
+its own year-specific slug, and the root landing page provides the
+conceptual grouping visually instead.
+
+Image/video curation galleries (Dragons of SSD, Playing with Pulp, and
+others) do **not** live in this repo — see "Why the image/video galleries
+moved to Cabinet" below.
 
 ## Why one universal gallery framework wasn't built
 
-The seven planned galleries have different content shapes:
+The galleries this repo hosts have different content shapes:
 
 - **Creative Coding** — interactive p5.js sketches, one folder per student,
   each with its own `index.html`/`sketch.js`/`style.css`, driven by a data
@@ -44,12 +45,26 @@ The seven planned galleries have different content shapes:
   interactive projects, descriptions, attribution. May end up reusing the
   Creative Coding interaction model, but that isn't assumed yet since no
   material exists to design against.
-- **Dragons of SSD** / **Playing with Pulp** — simpler image-led galleries,
-  no interactivity expected.
 
-Forcing all six into one framework now, before the latter four have any
+Forcing these into one framework now, before Emergent Technologies has any
 content, would be speculative design. Shared infrastructure belongs in
 `shared/` once a second gallery actually demonstrates the same requirement.
+
+## Why the image/video galleries moved to Cabinet
+
+Dragons of SSD, Playing with Pulp, and other planned image-led and showreel
+galleries are curated by the instructor (selected/curated photos and
+YouTube embeds), not student-authored code — they don't need this repo's
+per-student `index.html`/`sketch.js` hosting model at all, just markdown and
+images. Cabinet of Curiosities (`jesmehta/CabinetOfCuriosities`) already
+runs mkdocs with exactly this rendering pipeline (`attr_list` for sized
+images, e.g. `docs/makings/mini_loom.md`), so these galleries are authored
+directly there — `docs/teaching/galleries/` — instead of standing up a
+second, independent mkdocs pipeline in this repo for content that isn't
+really "student work hosting" to begin with. Playing with Pulp moved there
+2026-09-17 (was staged here as `ssd-papiermache/`, briefly, before any
+public link existed); Dragons of SSD and further galleries join the same
+way once curated.
 
 ## Creative Coding 2025-26 internals
 

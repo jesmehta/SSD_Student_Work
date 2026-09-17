@@ -10,5 +10,9 @@ Content readiness, not implementation status — a gallery can be "built" in
 | Creative Coding - SSD 2025-26        | `ssd-creative-coding-2025-26/`   | content present (14 student sketches, moved from repo root) |
 | Emergent Technologies - SSD 2024-25  | `ssd-emergent-tech-2024-25/`     | TBD — no material present |
 | Emergent Technologies - SSD 2026-27  | `ssd-emergent-tech-2026-27/`     | TBD — no material present |
-| Dragons of SSD                       | `dragons-of-ssd/`                | TBD — no material present |
-| Playing with Pulp                    | `ssd-papiermache/`               | TBD — no material present |
+
+Dragons of SSD and Playing with Pulp are no longer tracked here — they moved
+to Cabinet of Curiosities (`docs/teaching/galleries/`) as native mkdocs
+pages, 2026-09-17. See `documentation/architecture.md`'s "Why the
+image/video galleries moved to Cabinet." Playing with Pulp is built there;
+Dragons of SSD is still TBD (Cabinet's own status, not this repo's).
