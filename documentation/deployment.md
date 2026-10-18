@@ -73,3 +73,11 @@ needs a corresponding update, done in the Cabinet repo, not here:**
 Until Cabinet's deploy.yml is updated, do not push this repo's `main` to
 avoid breaking Cabinet's next deploy — see the repo's own
 `documentation/changelog.md` for when this move happened.
+
+**Status as of 2026-10-18: that guard no longer applies.** The reorg
+(`13e3f05`, 2026-09-04) and later commits are already on `origin/main`, so
+Cabinet's next deploy sees the new layout whether or not anything else is
+pushed. Pushing later commits that only change gallery content adds no new
+risk. Whether Cabinet's `deploy.yml` has had the mount fix above wasn't
+checked from this repo. If it hasn't, the next Cabinet deploy will fail its
+`script.js` validation, and the fix still belongs in the Cabinet repo.
