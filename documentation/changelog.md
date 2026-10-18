@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-18 — Removed Video Filters ("Magic Mirror") from Creative Coding 2025-26
+
+- `ssd-creative-coding-2025-26/Video_filters/` was never student work. It
+  was parked here as card 13 ("Magic Mirror") before it had a proper home.
+  It now lives in the `interactive-installations` repo at `video-filters/`,
+  with its history imported there.
+- Removed the folder, its `VideoFilter.png` thumbnail and its card entry in
+  the gallery's `script.js`. The 2025-26 student count in
+  `content/content-plan.md` and `content/gallery-status.md` went from 14 to
+  13 (the 14 had included this folder).
+
 ## 2026-09-16 — Built Creative Coding 2024-25, added 2023-24
 
 - Built out `ssd-creative-coding-2024-25/` (18 students, 25 sketches) from

@@ -13,7 +13,7 @@ versions of one thing — see content-decisions.md).
   from the raw "FY Creative Coding (2023-24)" submission archive.
 - Creative Coding - SSD 2024-25 — built (18 students, 25 sketches), sourced
   from the raw "Creative Coding Submission 2024-25" archive.
-- Creative Coding - SSD 2025-26 — exists (14 students), moved here from the
+- Creative Coding - SSD 2025-26 — exists (13 students), moved here from the
   old single-purpose repo root.
 
 ## Emergent Technologies
