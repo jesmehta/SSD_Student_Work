@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-27 — Fixed the blank Prachi Khobragade page (Creative Coding 2024-25)
+
+- The sketch loaded `Kawaii Ringtones #6.mp3`. Browsers read `#6.mp3` as a
+  URL fragment and requested `Kawaii Ringtones ` (404); the failed preload
+  stopped p5 from starting, so the page was blank on every host. Renamed the
+  file to `Kawaii Ringtones 6.mp3` and updated `sketch.js` (owner rule: rename
+  files rather than add special rules). It was the only tracked file with `#`
+  in its name.
+- Arpita Dhanawade and anaya raul stay hidden from the 2024-25 gallery:
+  reconfirmed by the owner as intentional (see `content/content-decisions.md`).
+
 ## 2026-10-18 — Removed Video Filters ("Magic Mirror") from Creative Coding 2025-26
 
 - `ssd-creative-coding-2025-26/Video_filters/` was never student work. It

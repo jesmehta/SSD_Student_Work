@@ -5,7 +5,7 @@ let bump; // for sound
 function preload() 
 {
   soundFormats("mp3");
-  bump = loadSound("Kawaii Ringtones #6.mp3"); // to load the sound that runs when mousePressed with every spiral
+  bump = loadSound("Kawaii Ringtones 6.mp3"); // to load the sound that runs when mousePressed with every spiral
 }
 
 function setup() {

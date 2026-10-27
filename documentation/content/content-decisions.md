@@ -84,7 +84,9 @@ everywhere else a student has only one card.
 Also hidden (code and thumbnail kept on disk, just removed from the
 `projects` array so no card shows): **anaya raul** and **Arpita
 Dhanawade** — both recovered from non-standard folder names per above;
-Jesal wants to hold off surfacing these two for now.
+Jesal wants to hold off surfacing these two for now. *Reconfirmed
+2026-10-27: still hidden on purpose; Cabinet does not publish their folders
+either (its allowlist lists only what the gallery loads).*
 
 **2023-24 post-review pruning**: Jesal removed four students outright
 (folder, thumbnail, and `projects` entry all deleted, not just hidden) —
